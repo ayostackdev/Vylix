@@ -1,0 +1,248 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                     String     @id @default(uuid())
+    fullName               String
+    matricNumber           String     @unique
+    entryYear              Int
+    currentLevel           String?
+    expectedGraduationYear Int?
+    status                 UserStatus @default(STUDENT)
+    graduatedAt            DateTime?
+    collegeId              String
+    departmentId           String
+    bio                    String?
+    avatarUrl              String?
+    contributionScore      Int        @default(0) // Gamification score
+    createdAt              DateTime   @default(now())
+    updatedAt              DateTime   @updatedAt
+
+    college       College      @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+    department    Department   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+    vaultItems    VaultItem[]
+    topicsCreated Topic[]      @relation("TopicAuthor")
+    materials     Material[]
+    lessonsHosted Lesson[]     @relation("LessonHost")
+    rsvps         RSVP[]
+    emails        UserEmail[]
+    privacy       UserPrivacy?
+    badges        UserBadge[]
+    profile       UserProfile?
+
+    @@index([departmentId])
+    @@index([collegeId])
+}
+
+model UserPrivacy {
+    id                String   @id @default(uuid())
+    userId            String   @unique
+    isStealthMode     Boolean  @default(false) // Anonymous posts in Public Pulse
+    showContributions Boolean  @default(true) // Show badges and score on profile
+    showEmail         Boolean  @default(false) // Show email on profile
+    showDepartment    Boolean  @default(true) // Show department/college
+    createdAt         DateTime @default(now())
+    updatedAt         DateTime @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+model UserProfile {
+    id              String    @id @default(uuid())
+    userId          String    @unique
+    bio             String?
+    website         String?
+    socialLinks     Json? // { twitter, linkedin, github, etc }
+    profileImageUrl String?
+    bannerImageUrl  String?
+    lastProfileView DateTime?
+    viewCount       Int       @default(0)
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+model Badge {
+    id          String      @id @default(uuid())
+    code        String      @unique // e.g., "top-contributor", "coleng-scholar"
+    name        String // e.g., "Top Contributor"
+    description String
+    icon        String // URL to badge icon
+    rarity      BadgeRarity @default(COMMON) // COMMON, RARE, EPIC, LEGENDARY
+    criteria    String // Description of how to earn
+    createdAt   DateTime    @default(now())
+
+    users UserBadge[]
+
+    @@index([rarity])
+}
+
+model UserBadge {
+    id        String   @id @default(uuid())
+    userId    String
+    badgeId   String
+    earnedAt  DateTime @default(now())
+    awardedBy String? // Admin user ID if manually awarded
+
+    user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, badgeId])
+    @@index([userId])
+    @@index([badgeId])
+}
+
+model UserEmail {
+    id         String   @id @default(uuid())
+    email      String   @unique
+    userId     String
+    isPrimary  Boolean  @default(false)
+    isVerified Boolean  @default(false)
+    createdAt  DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([email])
+}
+
+model College {
+    id            String @id @default(uuid())
+    code          String @unique
+    name          String
+    durationYears Int    @default(4)
+
+    departments Department[]
+    users       User[]
+}
+
+model Department {
+    id        String @id @default(uuid())
+    code      String @unique
+    name      String
+    collegeId String
+
+    college College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+    courses Course[]
+    users   User[]
+
+    @@index([collegeId])
+}
+
+model Course {
+    id           String  @id @default(uuid())
+    code         String  @unique
+    title        String
+    level        Int
+    departmentId String?
+    isGeneral    Boolean @default(false)
+
+    department Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+    topics     Topic[]
+    lessons    Lesson[]
+
+    @@index([departmentId, isGeneral])
+}
+
+model Topic {
+    id           String   @id @default(uuid())
+    title        String
+    courseId     String
+    authorId     String
+    isActive     Boolean  @default(true)
+    lastActivity DateTime @default(now()) @updatedAt
+
+    course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    author    User       @relation("TopicAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+    materials Material[]
+
+    @@index([courseId])
+    @@index([lastActivity])
+}
+
+model Material {
+    id         String   @id @default(uuid())
+    fileName   String
+    fileUrl    String
+    fileSize   Int
+    topicId    String
+    uploaderId String
+    uploadedAt DateTime @default(now())
+
+    topic    Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+    uploader User  @relation(fields: [uploaderId], references: [id], onDelete: Restrict)
+
+    @@index([uploadedAt])
+}
+
+model VaultItem {
+    id          String   @id @default(uuid())
+    title       String
+    userId      String
+    localBlobId String
+    savedAt     DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+}
+
+model Lesson {
+    id           String   @id @default(uuid())
+    title        String
+    description  String?
+    scheduledFor DateTime
+    location     String
+    hostId       String
+    courseId     String
+    createdAt    DateTime @default(now())
+
+    host   User   @relation("LessonHost", fields: [hostId], references: [id], onDelete: Restrict)
+    course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+    rsvps  RSVP[]
+
+    @@index([courseId, scheduledFor])
+}
+
+model RSVP {
+    id          String     @id @default(uuid())
+    userId      String
+    lessonId    String
+    status      RSVPStatus @default(GOING)
+    respondedAt DateTime   @default(now()) @updatedAt
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, lessonId])
+}
+
+enum RSVPStatus {
+    GOING
+    MAYBE
+    DECLINED
+}
+
+enum UserStatus {
+    STUDENT
+    ALUMNI
+    GRADUATED
+}
+
+enum BadgeRarity {
+    COMMON
+    RARE
+    EPIC
+    LEGENDARY
+}

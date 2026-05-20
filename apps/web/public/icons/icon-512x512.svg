@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#dbeafe" rx="100"/>
+  
+  <!-- Outer circle -->
+  <circle cx="256" cy="256" r="200" fill="#eff6ff" stroke="#bfdbfe" stroke-width="8"/>
+  
+  <!-- Pulse waves -->
+  <path d="M 256 100 Q 320 150 320 200 Q 320 250 256 300 Q 192 250 192 200 Q 192 150 256 100" fill="#22c55e" opacity="0.9"/>
+  <path d="M 256 140 Q 290 170 290 200 Q 290 230 256 260 Q 222 230 222 200 Q 222 170 256 140" fill="#ffffff"/>
+  
+  <!-- Inner circle -->
+  <circle cx="256" cy="256" r="80" fill="#22c55e"/>
+  <text x="256" y="280" font-size="100" font-weight="bold" text-anchor="middle" fill="#ffffff" font-family="Arial">C</text>
+</svg>
