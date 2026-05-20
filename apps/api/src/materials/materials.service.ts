@@ -24,9 +24,10 @@ export class MaterialsService {
 
   async createMaterial(
     file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
-    dto: CreateMaterialDto
+    dto: CreateMaterialDto,
+    uploaderId?: string
   ): Promise<MaterialUploadResponseDto> {
-    const hierarchy = await this.ensureColphyHierarchy(dto);
+    const hierarchy = await this.ensureColphyHierarchy(dto, uploaderId);
     const storedFile = await this.storeFile(file);
     const insights = await this.requestStudyInsights(storedFile.fileUrl, hierarchy.departmentCode, dto.title);
 
@@ -83,7 +84,7 @@ export class MaterialsService {
         'content-type': file.mimetype || 'application/pdf',
         'x-upsert': 'true'
       },
-      body: new Blob([file.buffer], { type: file.mimetype || 'application/pdf' })
+      body: file.buffer as unknown as BodyInit
     });
 
     if (!response.ok) {
@@ -98,7 +99,7 @@ export class MaterialsService {
     };
   }
 
-  private async ensureColphyHierarchy(dto: CreateMaterialDto) {
+  private async ensureColphyHierarchy(dto: CreateMaterialDto, uploaderId?: string) {
     const collegeCode = 'COLPHY';
     const departmentCode = dto.departmentCode?.trim().toUpperCase() || collegeCode;
     const courseCode = dto.courseCode?.trim().toUpperCase() || 'COLPHY-VAULT';
@@ -144,7 +145,7 @@ export class MaterialsService {
       data: {
         title: topicTitle,
         courseId: course.id,
-        authorId: await this.getFallbackAuthorId(college.id, department.id)
+        authorId: uploaderId ?? await this.getFallbackAuthorId(college.id, department.id)
       },
       select: {
         id: true,

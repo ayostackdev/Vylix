@@ -7,17 +7,17 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 
 export function Badge({ className, variant = 'default', ...props }: BadgeProps) {
   const variants = {
-    default: 'border-blue-200 bg-blue-50 text-blue-950 ring-1 ring-blue-100',
-    destructive: 'border-orange-200 bg-orange-50 text-orange-800 ring-1 ring-orange-100',
-    success: 'border-green-200 bg-green-100 text-green-800 ring-1 ring-green-100',
-    info: 'border-blue-200 bg-blue-100 text-blue-800 ring-1 ring-blue-100',
-    warning: 'border-amber-200 bg-amber-50 text-amber-800 ring-1 ring-amber-100'
+    default: 'border-blue-100 bg-blue-50 text-sky-700 ring-1 ring-blue-100/70',
+    destructive: 'border-orange-100 bg-orange-50 text-orange-900 ring-1 ring-orange-100/70',
+    success: 'border-green-100 bg-green-50 text-emerald-700 ring-1 ring-green-100/70',
+    info: 'border-blue-100 bg-blue-100 text-blue-900 ring-1 ring-blue-100/70',
+    warning: 'border-amber-100 bg-amber-50 text-amber-900 ring-1 ring-amber-100/70'
   };
 
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide',
+        'cp-pill inline-flex items-center rounded-full border px-3 py-1',
         variants[variant],
         className
       )}

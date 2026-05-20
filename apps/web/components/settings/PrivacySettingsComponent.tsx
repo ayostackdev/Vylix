@@ -72,7 +72,7 @@ export function PrivacySettingsComponent({ userId }: PrivacySettingsComponentPro
       )}
 
       {successMessage && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
+        <div className="p-4 bg-gradient-to-br from-blue-50 to-emerald-50/35 border border-blue-100 rounded-lg text-green-800 text-sm">
           ✓ {successMessage}
         </div>
       )}

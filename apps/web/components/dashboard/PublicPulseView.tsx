@@ -24,19 +24,22 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
 
   return (
     <section className="space-y-6 sm:space-y-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-black text-blue-950 sm:text-4xl">Public Pulse</h2>
-          <p className="max-w-2xl text-sm text-slate-800 sm:text-base">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0 space-y-2">
+          <div className="cp-pill inline-flex w-fit items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700 shadow-sm">
+            Community layer
+          </div>
+          <h2 className="cp-section-title font-black text-gray-900">Public Pulse</h2>
+          <p className="cp-body max-w-2xl sm:text-base">
             Your department-aware live collaboration layer for topics, materials, and revision sessions happening now.
           </p>
         </div>
-        <div className="flex gap-2 items-center">
-          <span className="inline-flex w-fit rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-bold text-blue-800 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <span className="cp-pill inline-flex w-fit rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700 shadow-sm">
             Live collaboration
           </span>
           {showReadOnlyUI && (
-            <span className="inline-flex w-fit rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800 shadow-sm">
+            <span className="cp-pill inline-flex w-fit rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700 shadow-sm">
               👁️ Read-only
             </span>
           )}
@@ -44,10 +47,10 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
       </div>
 
       {showReadOnlyUI && (
-        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 rounded-[1.5rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-50/60 p-4 shadow-sm">
           <div>
-            <p className="font-semibold text-blue-950">Create posts to contribute</p>
-            <p className="text-sm text-slate-800 mt-1">
+            <p className="cp-card-title text-gray-900">Create posts to contribute</p>
+            <p className="cp-body mt-1 text-sm">
               Sign in to share your thoughts, ask questions, and collaborate with other students.
             </p>
           </div>
@@ -61,26 +64,26 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
       )}
 
       <div className="grid gap-4 lg:grid-cols-[1.45fr_1fr]">
-        <article className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
+        <article className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="text-lg font-black text-blue-950">Live Pulse Feed</h3>
+            <h3 className="cp-card-title text-gray-900">Live Pulse Feed</h3>
             <span className="h-3 w-3 animate-pulse rounded-full bg-green-500 shadow-sm shadow-green-300/30" />
           </div>
           <div className="mt-5 grid gap-3">
             {liveFeed.map((item) => (
               <div
                 key={item.title}
-                className={`rounded-xl border border-blue-200 bg-blue-50 p-4 transition-all duration-300 hover:border-blue-300 ${
+                className={`rounded-[1.25rem] border border-green-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-green-200 ${
                   showReadOnlyUI ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-bold text-blue-950">{item.title}</p>
-                  <span className="rounded-full border border-green-200 bg-green-100 px-3 py-1 text-xs font-bold text-green-800">
+                  <p className="cp-card-title text-gray-900">{item.title}</p>
+                  <span className="cp-pill rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700">
                     {item.status}
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-800">{item.activity}</p>
+                <p className="cp-body mt-2 text-sm">{item.activity}</p>
               </div>
             ))}
           </div>
@@ -88,28 +91,28 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
             <button
               onClick={() => {}}
               disabled
-              className="mt-4 w-full px-4 py-2 bg-blue-100 text-blue-600 rounded-lg font-semibold cursor-not-allowed opacity-60 border border-blue-200"
+              className="mt-4 w-full rounded-full border border-green-200 bg-green-50 px-4 py-3 font-black uppercase tracking-[0.16em] text-green-700 cursor-not-allowed opacity-70"
             >
               Sign in to view more posts
             </button>
           )}
         </article>
 
-        <article className="rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
-          <h3 className="text-lg font-black text-blue-950">Upcoming Study Sessions</h3>
+        <article className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
+          <h3 className="cp-card-title text-gray-900">Upcoming Study Sessions</h3>
           <div className="mt-5 space-y-3">
             {sessions.map((session) => (
               <div
                 key={session.topic}
-                className={`rounded-xl border border-blue-200 bg-blue-50 p-4 transition-all duration-300 hover:border-blue-300 ${
+                className={`rounded-[1.25rem] border border-green-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-green-200 ${
                   showReadOnlyUI ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
                 }`}
               >
-                <p className="text-xs font-black uppercase tracking-widest text-blue-800">
+                <p className="cp-pill text-green-700">
                   {session.when}
                 </p>
-                <p className="mt-2 font-bold text-blue-950">{session.topic}</p>
-                <p className="text-xs text-slate-800">{session.where}</p>
+                <p className="cp-card-title mt-2 text-gray-900">{session.topic}</p>
+                <p className="text-xs text-slate-500">{session.where}</p>
               </div>
             ))}
           </div>

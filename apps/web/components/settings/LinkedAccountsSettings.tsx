@@ -91,7 +91,7 @@ export function LinkedAccountsSettings({ userId }: LinkedAccountsSettingsProps) 
                       <p className="font-medium text-gray-900">{email.email}</p>
                       <div className="flex gap-2 mt-1">
                         {email.isPrimary && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             Primary
                           </span>
                         )}
@@ -109,7 +109,7 @@ export function LinkedAccountsSettings({ userId }: LinkedAccountsSettingsProps) 
                     </div>
                     <div className="flex gap-2">
                       {!email.isPrimary && (
-                        <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                        <button className="text-green-700 hover:text-green-800 font-medium text-sm">
                           Make Primary
                         </button>
                       )}
@@ -129,12 +129,12 @@ export function LinkedAccountsSettings({ userId }: LinkedAccountsSettingsProps) 
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="Enter your personal email"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               <button
                 onClick={handleAddEmail}
                 disabled={isAddingEmail || !newEmail}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+                className="px-4 py-2 border border-blue-100 bg-blue-100 text-sky-700 rounded-lg hover:bg-blue-200 disabled:opacity-50 font-bold"
               >
                 {isAddingEmail ? 'Adding...' : 'Add Email'}
               </button>
@@ -145,9 +145,9 @@ export function LinkedAccountsSettings({ userId }: LinkedAccountsSettingsProps) 
           </div>
 
           {/* Why Link Multiple Emails */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="font-semibold text-blue-900 mb-2">Why link multiple emails?</p>
-            <ul className="text-sm text-blue-800 space-y-1">
+          <div className="bg-gradient-to-br from-blue-50 to-emerald-50/35 border border-blue-100 rounded-lg p-4">
+            <p className="font-semibold text-green-900 mb-2">Why link multiple emails?</p>
+            <ul className="text-sm text-green-800 space-y-1">
               <li>• Keep access to your Private Vault after graduation</li>
               <li>• Use either email to log in seamlessly</li>
               <li>• Your vault and materials stay with your account ID, not your email</li>

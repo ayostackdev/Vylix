@@ -46,37 +46,37 @@ export default function StudentDashboard(): JSX.Element {
         />
       )}
 
-      <div className="min-h-screen flex bg-blue-100 text-slate-800">
-        <aside className="w-64 flex-shrink-0 bg-slate-50 p-6 border-r border-blue-50">
+      <div className="flex min-h-dvh flex-col bg-blue-100 text-gray-700 lg:flex-row">
+        <aside className="w-full flex-shrink-0 border-b border-blue-50 bg-slate-50 p-4 sm:p-6 lg:w-64 lg:border-b-0 lg:border-r">
           <div className="mb-6">
-            <h2 className="text-blue-950 font-bold text-lg">Campus</h2>
-            <p className="text-slate-800 text-sm mt-1">Student Portal</p>
+            <h2 className="text-gray-900 font-bold text-lg">Campus</h2>
+            <p className="text-gray-700 text-sm mt-1">Student Portal</p>
           </div>
 
           <nav className="space-y-2">
-            <a className="block rounded-md px-3 py-2 text-slate-800 hover:bg-blue-50" href="#">
+            <a className="block rounded-md px-3 py-2 text-gray-700 hover:bg-blue-50" href="#">
               Dashboard
             </a>
-            <a className="block rounded-md px-3 py-2 text-slate-800 hover:bg-blue-50" href="#">
+            <a className="block rounded-md px-3 py-2 text-gray-700 hover:bg-blue-50" href="#">
               Events
             </a>
-            <a className="block rounded-md px-3 py-2 text-slate-800 hover:bg-blue-50" href="#">
+            <a className="block rounded-md px-3 py-2 text-gray-700 hover:bg-blue-50" href="#">
               Calendar
             </a>
-            <a className="block rounded-md px-3 py-2 text-slate-800 hover:bg-blue-50" href="#">
+            <a className="block rounded-md px-3 py-2 text-gray-700 hover:bg-blue-50" href="#">
               Clubs
             </a>
           </nav>
         </aside>
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <header className="mb-6">
-          <h1 className="text-2xl font-extrabold text-blue-950">Student Dashboard</h1>
-          <p className="mt-1 text-slate-800">Upcoming events and campus highlights</p>
+          <h1 className="text-2xl font-extrabold text-gray-900">Student Dashboard</h1>
+          <p className="mt-1 text-gray-700">Upcoming events and campus highlights</p>
         </header>
 
         <section>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 md:gap-6">
             {sampleEvents.map((event) => (
               <article
                 key={event.id}
@@ -90,16 +90,16 @@ export default function StudentDashboard(): JSX.Element {
                 </div>
 
                 <div className="flex-1">
-                  <h3 id={`event-${event.id}-title`} className="mb-2 text-lg font-bold text-blue-950">
+                  <h3 id={`event-${event.id}-title`} className="mb-2 text-lg font-bold text-gray-900">
                     {event.title}
                   </h3>
-                  <p className="text-sm text-slate-800">{event.desc}</p>
+                  <p className="text-sm text-gray-700">{event.desc}</p>
                 </div>
 
                 <div className="mt-6 flex justify-end">
                   <button
                     type="button"
-                    className="inline-flex items-center rounded-md bg-green-500 px-4 py-2 font-medium text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
+                    className="inline-flex items-center rounded-md border border-blue-100 bg-blue-100 px-4 py-2 font-medium text-sky-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-200"
                   >
                     RSVP
                   </button>

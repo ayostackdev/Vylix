@@ -47,6 +47,22 @@ export function StorageManagementSettings() {
     return Math.min(100, (usedMB / limitMB) * 100);
   };
 
+  const getStorageWidthClass = () => {
+    const percentage = storagePercentage();
+
+    if (percentage <= 0) return 'w-0';
+    if (percentage <= 8) return 'w-1/12';
+    if (percentage <= 16) return 'w-1/6';
+    if (percentage <= 25) return 'w-1/4';
+    if (percentage <= 33) return 'w-1/3';
+    if (percentage <= 50) return 'w-1/2';
+    if (percentage <= 67) return 'w-2/3';
+    if (percentage <= 75) return 'w-3/4';
+    if (percentage <= 84) return 'w-5/6';
+    if (percentage <= 92) return 'w-11/12';
+    return 'w-full';
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -61,7 +77,7 @@ export function StorageManagementSettings() {
       )}
 
       {successMessage && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
+        <div className="p-4 bg-gradient-to-br from-blue-50 to-emerald-50/35 border border-blue-100 rounded-lg text-green-800 text-sm">
           ✓ {successMessage}
         </div>
       )}
@@ -86,11 +102,9 @@ export function StorageManagementSettings() {
               <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                 {/* eslint-disable jsx-a11y/no-static-element-interactions */}
                 <div
-                  className={`h-full transition-all ${
+                  className={`h-full transition-all ${getStorageWidthClass()} ${
                     storagePercentage() > 80 ? 'bg-red-500' : 'bg-blue-600'
                   }`}
-                  // Dynamic width percentage requires inline style in React
-                  style={{ width: `${storagePercentage()}%` }}
                 ></div>
               </div>
 

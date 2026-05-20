@@ -33,15 +33,15 @@ export function LoginModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-200">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-green-100">
         {/* Header */}
-        <div className="border-b border-blue-200 bg-blue-50 px-6 py-4">
+        <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50/35 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-blue-950">
+              <h2 className="cp-section-title font-black text-gray-900">
                 {isSignUp ? 'Join CamPulse' : 'Welcome Back'}
               </h2>
-              <p className="mt-1 text-sm text-slate-700">
+              <p className="cp-body mt-1 text-sm">
                 {isSignUp
                   ? 'Create account to contribute'
                   : 'Sign in to upload & participate'}
@@ -49,7 +49,7 @@ export function LoginModal() {
             </div>
             <button
               onClick={() => setShowLoginModal(false)}
-              className="text-2xl text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-2xl text-gray-500 hover:text-gray-700 transition-colors"
               title="Close modal"
             >
               ✕
@@ -67,14 +67,14 @@ export function LoginModal() {
           )}
 
           {success && (
-            <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800 border border-green-200 font-medium">
+            <div className="rounded-lg bg-gradient-to-br from-blue-50 to-emerald-50/35 p-3 text-sm text-green-800 border border-blue-100 font-medium">
               {success}
             </div>
           )}
 
           {/* Email Input */}
           <div>
-            <label className="block text-sm font-semibold text-blue-950 mb-2">
+            <label className="cp-label block mb-2 text-gray-900">
               Email Address
             </label>
             <input
@@ -82,11 +82,11 @@ export function LoginModal() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@funaab.edu.ng"
-              className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-slate-900 placeholder-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
+              className="w-full rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               disabled={isLoading}
             />
             {isSignUp && (
-              <p className="mt-1 text-xs text-slate-600">
+              <p className="mt-1 text-xs text-gray-600">
                 Use your FUNAAB institutional email
               </p>
             )}
@@ -94,7 +94,7 @@ export function LoginModal() {
 
           {/* Password Input */}
           <div>
-            <label className="block text-sm font-semibold text-blue-950 mb-2">
+            <label className="cp-label block mb-2 text-gray-900">
               Password
             </label>
             <input
@@ -102,7 +102,7 @@ export function LoginModal() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-slate-900 placeholder-slate-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
+              className="w-full rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               disabled={isLoading}
             />
           </div>
@@ -111,7 +111,7 @@ export function LoginModal() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg bg-green-500 py-2.5 font-bold text-white transition-all hover:bg-green-600 hover:shadow-lg hover:shadow-green-400/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg border border-blue-100 bg-blue-100 py-2.5 font-bold text-sky-700 transition-all hover:bg-blue-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading
               ? 'Processing...'
@@ -121,8 +121,8 @@ export function LoginModal() {
           </button>
 
           {/* Toggle Sign Up / Sign In */}
-          <div className="border-t border-blue-200 pt-4 text-center">
-            <p className="text-sm text-slate-700">
+          <div className="border-t border-blue-100 pt-4 text-center">
+            <p className="cp-body text-sm">
               {isSignUp
                 ? 'Already have an account? '
                 : "Don't have an account? "}
@@ -142,8 +142,8 @@ export function LoginModal() {
         </form>
 
         {/* Info Box */}
-        <div className="border-t border-blue-200 bg-blue-50 px-6 py-4">
-          <p className="text-xs text-slate-800">
+        <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50/35 px-6 py-4">
+          <p className="text-xs text-gray-700">
             <strong>Registration Required:</strong> You can browse materials and posts
             without signing in, but you'll need to register to upload, comment, or participate.
           </p>

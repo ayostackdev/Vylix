@@ -13,9 +13,11 @@ function getSupabaseUrl() {
 
 function getSupabaseAnonKey() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!anonKey) return null;
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const resolvedKey = anonKey || publishableKey;
+  if (!resolvedKey) return null;
 
-  return anonKey;
+  return resolvedKey;
 }
 
 function createFallbackClient(): SupabaseClient {

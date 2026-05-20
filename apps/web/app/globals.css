@@ -4,12 +4,12 @@
 
 :root {
   color-scheme: light;
-  --app-bg: #dbeafe;
-  --sidebar-bg: #f8fafc;
-  --card-bg: #eff6ff;
-  --card-border: #bfdbfe;
-  --navy-text: #334155;
-  --navy-strong: #172554;
+  --app-bg: #f1f5ff;
+  --sidebar-bg: rgba(255, 255, 255, 0.74);
+  --card-bg: rgba(255, 255, 255, 0.78);
+  --card-border: rgba(191, 219, 254, 0.8);
+  --navy-text: #4b5563;
+  --navy-strong: #111827;
   --apple-green: #22c55e;
 }
 
@@ -21,20 +21,169 @@
 
 body {
   font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 500;
   color: var(--navy-text);
   background:
-    radial-gradient(900px circle at 15% 0%, rgba(191, 219, 254, 0.8), transparent 42%),
-    radial-gradient(700px circle at 90% 10%, rgba(219, 234, 254, 0.9), transparent 35%),
-    linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+    radial-gradient(900px circle at 12% 0%, rgba(191, 219, 254, 0.72), transparent 38%),
+    radial-gradient(700px circle at 88% 6%, rgba(187, 247, 208, 0.22), transparent 34%),
+    radial-gradient(650px circle at 50% 110%, rgba(219, 234, 254, 0.88), transparent 32%),
+    linear-gradient(180deg, #f9fbff 0%, #eef4ff 52%, #e7efff 100%);
   min-height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-attachment: fixed;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), system-ui, sans-serif;
   color: var(--navy-strong);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+p {
+  overflow-wrap: anywhere;
+}
+
+.cp-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgb(75 85 99 / 0.95);
+}
+
+.cp-title {
+  font-size: clamp(2.4rem, 5vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  font-weight: 900;
+}
+
+.cp-section-title {
+  font-size: clamp(1.45rem, 2.1vw, 2.2rem);
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+  font-weight: 900;
+}
+
+.cp-card-title {
+  font-size: 1.1rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+
+.cp-body {
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: rgb(75 85 99);
+  font-weight: 500;
+}
+
+.cp-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(107 114 128);
+}
+
+.cp-pill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.cp-accent-green {
+  color: var(--apple-green);
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.18);
+  color: #0f172a;
+}
+
+button,
+[role='button'],
+a,
+input,
+textarea,
+select {
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.85);
+  outline-offset: 2px;
+}
+
+@keyframes fadeUpSoft {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmerGlow {
+  0%, 100% {
+    opacity: 0.56;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.03);
+  }
+}
+
+.cp-fade-up {
+  animation: fadeUpSoft 520ms ease-out both;
+}
+
+.cp-float {
+  animation: floatSlow 7s ease-in-out infinite;
+}
+
+.cp-shimmer {
+  animation: shimmerGlow 4.6s ease-in-out infinite;
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.58), rgba(59, 130, 246, 0.58));
+  border: 2px solid rgba(255, 255, 255, 0.82);
 }
 

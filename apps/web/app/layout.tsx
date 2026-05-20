@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${displayFont.variable} ${bodyFont.variable} min-h-screen overflow-x-hidden overflow-y-auto`}>
+      <body className={`${displayFont.variable} ${bodyFont.variable} min-h-dvh overflow-x-hidden overflow-y-auto`}>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

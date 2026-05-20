@@ -32,7 +32,7 @@ export function ProtectedActionButton({
         onClick={() => promptLogin(action)}
         className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all ${
           variant === 'primary'
-            ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-lg hover:shadow-green-400/50'
+            ? 'border border-blue-100 bg-blue-100 text-sky-700 hover:bg-blue-200 hover:shadow-md'
             : 'bg-blue-50 text-green-700 hover:bg-blue-100 border border-blue-200'
         } ${className}`}
         title={`Sign in to ${action.toLowerCase()}`}
@@ -49,7 +49,7 @@ export function ProtectedActionButton({
       onClick={onClick}
       className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all ${
         variant === 'primary'
-          ? 'bg-green-500 text-white hover:bg-green-600 hover:shadow-lg hover:shadow-green-400/50'
+          ? 'border border-blue-100 bg-blue-100 text-sky-700 hover:bg-blue-200 hover:shadow-md'
           : 'bg-blue-50 text-green-700 hover:bg-blue-100 border border-blue-200'
       } ${className}`}
       title={label}

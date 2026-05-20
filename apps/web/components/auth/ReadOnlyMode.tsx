@@ -14,16 +14,16 @@ export function ReadOnlyBanner({ action }: ReadOnlyBannerProps) {
   const { promptLogin } = useAuth();
 
   return (
-    <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 flex items-center justify-between gap-4">
-      <div>
-        <p className="font-semibold text-blue-950">🔓 Sign in to {action}</p>
-        <p className="text-sm text-slate-800 mt-1">
+    <div className="flex flex-col gap-4 rounded-[1.5rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-50/60 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0">
+        <p className="cp-card-title text-gray-900">🔓 Sign in to {action}</p>
+        <p className="cp-body mt-1 text-sm">
           You're browsing in read-only mode. Create an account to contribute and access full features.
         </p>
       </div>
       <button
         onClick={() => promptLogin(action)}
-        className="flex-shrink-0 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold transition-colors whitespace-nowrap hover:shadow-lg hover:shadow-green-400/50"
+        className="flex-shrink-0 self-start whitespace-nowrap rounded-full border border-blue-100 bg-blue-100 px-4 py-2.5 font-black text-sky-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-blue-200 hover:shadow-md sm:self-auto"
       >
         Sign In Now
       </button>

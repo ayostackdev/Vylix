@@ -60,20 +60,20 @@ export function InstallPrompt() {
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 text-2xl">📱</div>
           <div className="flex-1">
-            <h3 className="font-bold text-blue-950 mb-1">Install CamPulse</h3>
-            <p className="text-sm text-slate-800 mb-4">
+            <h3 className="font-black text-gray-900 mb-1">Install CamPulse</h3>
+            <p className="text-sm text-gray-700 mb-4">
               Get faster access and offline support. Add CamPulse to your home screen for the best experience.
             </p>
             <div className="flex gap-2">
               <button
                 onClick={handleInstall}
-                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors hover:shadow-lg hover:shadow-green-400/50"
+                className="flex-1 px-4 py-2 border border-blue-100 bg-blue-100 text-sky-700 rounded-lg font-bold hover:bg-blue-200 transition-colors hover:shadow-md"
               >
                 Install
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-4 py-2 bg-blue-50 text-blue-700 rounded-lg font-semibold hover:bg-blue-100 border border-blue-200 transition-colors"
+                className="px-4 py-2 bg-blue-50 text-green-700 rounded-lg font-bold hover:bg-blue-100 border border-blue-100 transition-colors"
               >
                 Maybe later
               </button>
