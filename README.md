@@ -7,6 +7,11 @@ CamPulse is scaffolded as a multi-app workspace with Nest.js as the main backend
 - apps/python-service: auxiliary FastAPI service for document intelligence, OCR, RAG scaffolding, analytics, Celery tasks, and PDF compression.
 - docs/fastapi-microservice.md: architecture notes for the Python support service stack and workflow.
 
+## Documentation hub
+
+Most project documentation now lives under [docs/README.md](docs/README.md).
+That hub groups architecture, feature notes, deployment guides, and service docs into one place.
+
 ## Architecture highlights
 
 - Dual-layer dashboard with Private Vault and Public Pulse in the frontend.

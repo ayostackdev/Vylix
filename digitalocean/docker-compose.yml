@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: campulse_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=SecureProductionPass2026
+      - POSTGRES_DB=campulse_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis_broker:
+    image: redis:7-alpine
+    container_name: campulse_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  nestjs_api:
+    image: node:20-alpine
+    container_name: campulse_nestjs
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@postgres_db:5432/campulse_db?schema=public
+      - PYTHON_SERVICE_URL=http://fastapi_service:8000
+      - SUPABASE_URL=your_supabase_project_url
+      - SUPABASE_SERVICE_ROLE_KEY=your_supabase_secret_key
+      - SUPABASE_STORAGE_BUCKET=your_bucket_name
+    volumes:
+      - ./repo:/usr/src/app
+    working_dir: /usr/src/app
+    # Installs workspace dependencies, generates Prisma, runs migrations, and starts the specific app
+    command: >
+      sh -c "npm install && 
+             npx prisma generate --schema=apps/api/prisma/schema.prisma && 
+             npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma && 
+             npm run start:prod --workspace=apps/api"
+    depends_on:
+      - postgres_db
+
+  fastapi_service:
+    image: python:3.11-slim
+    container_name: campulse_fastapi
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=CamPulse-Python
+      - ENVIRONMENT=production
+      - POSTGRES_DSN=postgresql://postgres:SecureProductionPass2026@postgres_db:5432/campulse_db
+      - CELERY_BROKER_URL=redis://redis_broker:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
+      - CORS_ORIGINS=["*"]
+    volumes:
+      - ./repo/apps/python-service:/app
+    working_dir: /app
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    depends_on:
+      - postgres_db
+      - redis_broker
+
+  celery_worker:
+    image: python:3.11-slim
+    container_name: campulse_celery
+    restart: always
+    environment:
+      - APP_NAME=CamPulse-Celery
+      - ENVIRONMENT=production
+      - POSTGRES_DSN=postgresql://postgres:SecureProductionPass2026@postgres_db:5432/campulse_db
+      - CELERY_BROKER_URL=redis://redis_broker:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
+    volumes:
+      - ./repo/apps/python-service:/app
+    working_dir: /app
+    command: celery -A app.core.celery_app.celery worker --loglevel=info
+    depends_on:
+      - redis_broker
+
+volumes:
+  postgres_data:
