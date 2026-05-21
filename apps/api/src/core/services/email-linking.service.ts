@@ -1,5 +1,20 @@
 import { Injectable, Logger, ConflictException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+
+export interface UserEmailRecord {
+  id: string;
+  email: string;
+  isPrimary: boolean;
+  isVerified: boolean;
+  createdAt?: Date;
+}
+
+export interface GetUserEmailsResponse {
+  userId: string;
+  emails: UserEmailRecord[];
+  primaryEmail?: string;
+}
 
 export interface LinkEmailDto {
   userId: string;
@@ -38,6 +53,8 @@ export class EmailLinkingService {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
+      const linkedEmails = (user.emails ?? []) as UserEmailRecord[];
+
       // Check if email is already linked to another user
       const existingEmail = await this.prisma.userEmail.findUnique({
         where: { email },
@@ -48,12 +65,12 @@ export class EmailLinkingService {
       }
 
       // Check if this user already has this email (shouldn't happen but defensive check)
-      if (user.emails.some((e) => e.email === email)) {
+      if (linkedEmails.some((emailRecord: UserEmailRecord) => emailRecord.email === email)) {
         return {
           success: true,
           message: 'Email is already linked to this account',
           email,
-          primaryEmail: user.emails.find((e) => e.isPrimary)?.email,
+          primaryEmail: linkedEmails.find((emailRecord: UserEmailRecord) => emailRecord.isPrimary)?.email,
         };
       }
 
@@ -75,7 +92,7 @@ export class EmailLinkingService {
         success: true,
         message: `Email ${email} linked successfully`,
         email: newEmail.email,
-        primaryEmail: user.emails.find((e) => e.isPrimary)?.email,
+        primaryEmail: linkedEmails.find((emailRecord: UserEmailRecord) => emailRecord.isPrimary)?.email,
       };
     } catch (error) {
       this.logger.error(`Error linking email to user ${userId}:`, error);
@@ -104,7 +121,7 @@ export class EmailLinkingService {
       }
 
       // Atomically update primary email
-      await this.prisma.$transaction(async (prisma) => {
+      await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
         // Set all emails to non-primary
         await prisma.userEmail.updateMany({
           where: { userId },
@@ -134,7 +151,7 @@ export class EmailLinkingService {
   /**
    * Gets all emails linked to a user.
    */
-  async getUserEmails(userId: string) {
+  async getUserEmails(userId: string): Promise<GetUserEmailsResponse> {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
@@ -157,8 +174,8 @@ export class EmailLinkingService {
 
       return {
         userId,
-        emails: user.emails,
-        primaryEmail: user.emails.find((e) => e.isPrimary)?.email,
+        emails: user.emails as UserEmailRecord[],
+        primaryEmail: (user.emails as UserEmailRecord[]).find((emailRecord: UserEmailRecord) => emailRecord.isPrimary)?.email,
       };
     } catch (error) {
       this.logger.error(`Error fetching emails for user ${userId}:`, error);
@@ -215,7 +232,8 @@ export class EmailLinkingService {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      const emailToRemove = user.emails.find((e) => e.email === email);
+      const linkedEmails = (user.emails ?? []) as UserEmailRecord[];
+      const emailToRemove = linkedEmails.find((emailRecord: UserEmailRecord) => emailRecord.email === email);
 
       if (!emailToRemove) {
         throw new NotFoundException(
@@ -224,17 +242,17 @@ export class EmailLinkingService {
       }
 
       // Prevent removal of the only email
-      if (user.emails.length === 1) {
+      if (linkedEmails.length === 1) {
         throw new ConflictException(
           'Cannot remove the last email. User must have at least one email.'
         );
       }
 
       // If removing primary email, ensure there's another email to become primary
-      if (emailToRemove.isPrimary && user.emails.length > 1) {
-        await this.prisma.$transaction(async (prisma) => {
+      if (emailToRemove.isPrimary && linkedEmails.length > 1) {
+        await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
           // Find another email to set as primary
-          const newPrimary = user.emails.find((e) => e.id !== emailToRemove.id);
+          const newPrimary = linkedEmails.find((emailRecord: UserEmailRecord) => emailRecord.id !== emailToRemove.id);
 
           if (newPrimary) {
             await prisma.userEmail.update({

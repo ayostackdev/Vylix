@@ -20,6 +20,13 @@ interface JwtPayload {
   app_metadata?: Record<string, any>;
 }
 
+interface LinkedEmailRecord {
+  id: string;
+  email: string;
+  isPrimary: boolean;
+  isVerified: boolean;
+}
+
 @Injectable()
 export class DepartmentGuard implements CanActivate {
   private readonly logger = new Logger(DepartmentGuard.name);
@@ -112,10 +119,12 @@ export class SupabaseAuthGuard implements CanActivate {
         throw new UnauthorizedException('User not found');
       }
 
+      const linkedEmails = (user.emails ?? []) as LinkedEmailRecord[];
+
       // Verify that the email in the token is one of the user's linked emails
       const tokenEmail = payload.email;
       if (tokenEmail) {
-        const hasEmail = user.emails.some((e) => e.email === tokenEmail);
+        const hasEmail = linkedEmails.some((emailRecord: LinkedEmailRecord) => emailRecord.email === tokenEmail);
         if (!hasEmail) {
           this.logger.warn(
             `Token email ${tokenEmail} not linked to user ${user.id}`
@@ -127,18 +136,18 @@ export class SupabaseAuthGuard implements CanActivate {
       // Store user context in ClsService for use in other services/guards
       this.cls.set('userId', user.id);
       this.cls.set('user', user);
-      this.cls.set('emails', user.emails);
+      this.cls.set('emails', linkedEmails);
       this.cls.set('departmentId', user.departmentId);
       this.cls.set('collegeId', user.collegeId);
 
       (request as any)['user'] = {
         id: user.id,
-        emails: user.emails.map((e) => ({
-          email: e.email,
-          isPrimary: e.isPrimary,
-          isVerified: e.isVerified,
+        emails: linkedEmails.map((emailRecord: LinkedEmailRecord) => ({
+          email: emailRecord.email,
+          isPrimary: emailRecord.isPrimary,
+          isVerified: emailRecord.isVerified,
         })),
-        primaryEmail: user.emails.find((e) => e.isPrimary)?.email,
+        primaryEmail: linkedEmails.find((emailRecord: LinkedEmailRecord) => emailRecord.isPrimary)?.email,
       };
 
       return true;

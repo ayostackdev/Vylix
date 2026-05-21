@@ -195,7 +195,7 @@ export class PrivacyService {
         contributions: privacy.showContributions
           ? {
               score: user.contributionScore,
-              badges: user.badges.map((ub) => ub.badge),
+              badges: user.badges.map((userBadge: { badge: unknown }) => userBadge.badge),
             }
           : undefined,
       };

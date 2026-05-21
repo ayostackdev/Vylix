@@ -8,6 +8,15 @@ function getSupabaseUrl() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!url) return null;
 
+  try {
+    const parsedUrl = new URL(url);
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
   return url;
 }
 
@@ -16,6 +25,10 @@ function getSupabaseAnonKey() {
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const resolvedKey = anonKey || publishableKey;
   if (!resolvedKey) return null;
+
+  if (!resolvedKey.startsWith('sb_')) {
+    return null;
+  }
 
   return resolvedKey;
 }

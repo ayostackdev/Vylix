@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../core/prisma/prisma.service';
 
 @Injectable()
@@ -86,18 +87,20 @@ export class AlumniService {
    */
   private async promoteStudentToAlumni(userId: string): Promise<void> {
     try {
-      await this.prisma.$transaction(async (prisma) => {
+      await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
         // Find the user's emails
         const userEmails = await prisma.userEmail.findMany({
           where: { userId },
         });
 
+        const linkedEmails = userEmails as Array<{ id: string; email: string }>; 
+
         // Find institutional and personal emails
-        const institutionalEmail = userEmails.find((e) =>
-          e.email.endsWith('@student.funaab.edu.ng')
+        const institutionalEmail = linkedEmails.find((emailRecord: { id: string; email: string }) =>
+          emailRecord.email.endsWith('@student.funaab.edu.ng')
         );
-        const personalEmail = userEmails.find(
-          (e) => !e.email.endsWith('@student.funaab.edu.ng')
+        const personalEmail = linkedEmails.find(
+          (emailRecord: { id: string; email: string }) => !emailRecord.email.endsWith('@student.funaab.edu.ng')
         );
 
         // Start a transaction to atomically update all related records

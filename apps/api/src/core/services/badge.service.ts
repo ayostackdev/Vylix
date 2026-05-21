@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { BadgeRarity } from '@prisma/client';
+
+type BadgeRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 
 export interface CreateBadgeDto {
   code: string;
@@ -43,7 +44,7 @@ export class BadgeService {
           name: data.name,
           description: data.description,
           icon: data.icon,
-          rarity: data.rarity || 'COMMON',
+          rarity: data.rarity ?? 'COMMON',
           criteria: data.criteria,
         },
       });
@@ -156,10 +157,10 @@ export class BadgeService {
       return {
         userId,
         contributionScore: user.contributionScore,
-        badges: user.badges.map((ub) => ({
-          id: ub.id,
-          badge: ub.badge,
-          earnedAt: ub.earnedAt,
+        badges: user.badges.map((userBadge: { id: string; badge: unknown; earnedAt: Date }) => ({
+          id: userBadge.id,
+          badge: userBadge.badge,
+          earnedAt: userBadge.earnedAt,
         })),
         totalBadges: user.badges.length,
       };
@@ -182,10 +183,10 @@ export class BadgeService {
         total: badges.length,
         badges,
         byRarity: {
-          LEGENDARY: badges.filter((b) => b.rarity === 'LEGENDARY').length,
-          EPIC: badges.filter((b) => b.rarity === 'EPIC').length,
-          RARE: badges.filter((b) => b.rarity === 'RARE').length,
-          COMMON: badges.filter((b) => b.rarity === 'COMMON').length,
+          LEGENDARY: badges.filter((badge: { rarity: BadgeRarity }) => badge.rarity === 'LEGENDARY').length,
+          EPIC: badges.filter((badge: { rarity: BadgeRarity }) => badge.rarity === 'EPIC').length,
+          RARE: badges.filter((badge: { rarity: BadgeRarity }) => badge.rarity === 'RARE').length,
+          COMMON: badges.filter((badge: { rarity: BadgeRarity }) => badge.rarity === 'COMMON').length,
         },
       };
     } catch (error) {
