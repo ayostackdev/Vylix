@@ -4,6 +4,8 @@
   "version": "2.0.0",
   "scripts": {
     "start:dev": "nest start --watch",
+    "postinstall": "npm run prisma:generate",
+    "prebuild": "npm run prisma:generate",
     "build": "nest build",
     "start": "node dist/main",
     "prisma:generate": "prisma generate",

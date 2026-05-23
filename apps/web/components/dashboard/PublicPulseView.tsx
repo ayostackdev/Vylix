@@ -23,7 +23,7 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
   const showReadOnlyUI = isReadOnly && !isAuthenticated;
 
   return (
-    <section className="space-y-6 sm:space-y-8">
+    <section className="space-y-6 text-gray-800 sm:space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-2">
           <div className="cp-pill inline-flex w-fit items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700 shadow-sm">
@@ -35,11 +35,11 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <span className="cp-pill inline-flex w-fit rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700 shadow-sm">
+          <span className="cp-pill inline-flex w-fit rounded-full border border-green-300 bg-green-100 px-3 py-1 text-green-700 shadow-sm">
             Live collaboration
           </span>
           {showReadOnlyUI && (
-            <span className="cp-pill inline-flex w-fit rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700 shadow-sm">
+            <span className="cp-pill inline-flex w-fit rounded-full border border-green-300 bg-green-100 px-3 py-1 text-green-700 shadow-sm">
               👁️ Read-only
             </span>
           )}
@@ -47,19 +47,21 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
       </div>
 
       {showReadOnlyUI && (
-        <div className="flex items-center justify-between gap-4 rounded-[1.5rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-50/60 p-4 shadow-sm">
+        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-100/60 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="cp-card-title text-gray-900">Create posts to contribute</p>
-            <p className="cp-body mt-1 text-sm">
+            <p className="cp-body mt-1 text-sm text-gray-800">
               Sign in to share your thoughts, ask questions, and collaborate with other students.
             </p>
           </div>
-          <ProtectedActionButton
-            icon="✍️"
-            label="Sign In"
-            action="post to Public Pulse"
-            variant="primary"
-          />
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <ProtectedActionButton
+              icon="✍️"
+              label="Sign In"
+              action="post to Public Pulse"
+              variant="primary"
+            />
+          </div>
         </div>
       )}
 
@@ -79,7 +81,7 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="cp-card-title text-gray-900">{item.title}</p>
-                  <span className="cp-pill rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700">
+                  <span className="cp-pill rounded-full border border-green-300 bg-green-100 px-3 py-1 text-green-700">
                     {item.status}
                   </span>
                 </div>
@@ -112,7 +114,7 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
                   {session.when}
                 </p>
                 <p className="cp-card-title mt-2 text-gray-900">{session.topic}</p>
-                <p className="text-xs text-slate-500">{session.where}</p>
+                <p className="text-xs text-slate-700">{session.where}</p>
               </div>
             ))}
           </div>

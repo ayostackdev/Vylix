@@ -10,6 +10,7 @@
     "dev:api": "npm run start:dev -w @campulse/api",
     "dev:python": "npm run dev -w @campulse/python-service",
     "build": "npm run build -w @campulse/web && npm run build -w @campulse/api",
-    "lint": "npm run lint -w @campulse/web && npm run lint -w @campulse/api"
+    "lint": "npm run lint -w @campulse/web && npm run lint -w @campulse/api",
+    "clean": "node scripts/clean.mjs"
   }
 }

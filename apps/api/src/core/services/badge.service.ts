@@ -276,7 +276,7 @@ export class BadgeService {
 
       return {
         total: leaderboard.length,
-        leaderboard: leaderboard.map((user, index) => ({
+        leaderboard: leaderboard.map((user: (typeof leaderboard)[number], index: number) => ({
           rank: index + 1,
           user,
         })),
