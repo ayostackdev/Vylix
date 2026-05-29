@@ -4,7 +4,7 @@ services:
   - name: api
     source_dir: apps/api
     github:
-      repo: YOUR_GITHUB_ORG/YOUR_REPO
+      repo: Ayostack-web/CamPulse
       branch: main
       deploy_on_push: true
     environment_slug: node-js
