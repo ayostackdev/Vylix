@@ -1,3 +1,8 @@
+/**
+ * DTO for creating a new material upload
+ * Accepted file formats: PDF, JPG, PNG (max 50MB)
+ * File is sent as multipart/form-data with field name 'file'
+ */
 export class CreateMaterialDto {
   title!: string;
   courseCode?: string;
@@ -16,8 +21,9 @@ export class MaterialUploadResponseDto {
   collegeCode!: string;
   courseId!: string;
   topicId!: string;
-  summary!: string;
-  questions!: string[];
-  tips!: string[];
+  processingStatus!: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  jobId!: string | null;
+  message!: string;
   uploadedAt!: Date;
+  shareUrl?: string; // URL for sharing to WhatsApp/social
 }

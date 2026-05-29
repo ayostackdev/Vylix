@@ -1,13 +1,11 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { ProtectedActionButton } from '@/components/auth/ProtectedActionButton';
+import { useRealtimePulse } from '@/hooks/useRealtimePulse';
 
-const liveFeed = [
-  { title: 'CSC 311: Mid-Sem Revision', activity: '12 new uploads', status: 'Hot' },
-  { title: 'MTS 101: General Course Room', activity: '8 active students', status: 'Cross-college' },
-  { title: 'PHY 204: Tutorial Thread', activity: '3 new comments', status: 'Trending' }
-];
+const defaultDepartmentCode = process.env.NEXT_PUBLIC_DEFAULT_DEPARTMENT_CODE ?? 'COLPHY';
 
 const sessions = [
   { when: 'Tue • 4:00 PM', where: 'COLCOM LT-2', topic: 'Algorithm Design Clinic' },
@@ -21,6 +19,23 @@ interface PublicPulseViewProps {
 export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
   const { isAuthenticated } = useAuth();
   const showReadOnlyUI = isReadOnly && !isAuthenticated;
+  const realtime = useRealtimePulse({
+    roomType: 'department',
+    roomKey: defaultDepartmentCode,
+    enabled: isAuthenticated
+  });
+
+  const liveFeed = useMemo(() => {
+    if (realtime.items.length > 0) {
+      return realtime.items.slice(0, 3);
+    }
+
+    return [
+      { title: 'CSC 311: Mid-Sem Revision', activity: '12 new uploads', status: 'Hot' },
+      { title: 'MTS 101: General Course Room', activity: '8 active students', status: 'Cross-college' },
+      { title: 'PHY 204: Tutorial Thread', activity: '3 new comments', status: 'Trending' }
+    ];
+  }, [realtime.items]);
 
   return (
     <section className="space-y-6 text-gray-800 sm:space-y-8">
@@ -69,7 +84,12 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
         <article className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
           <div className="flex items-center justify-between gap-3">
             <h3 className="cp-card-title text-gray-900">Live Pulse Feed</h3>
-            <span className="h-3 w-3 animate-pulse rounded-full bg-green-500 shadow-sm shadow-green-300/30" />
+            <div className="flex items-center gap-2">
+              <span className={`h-3 w-3 rounded-full shadow-sm shadow-green-300/30 ${realtime.connected ? 'animate-pulse bg-green-500' : 'bg-slate-400'}`} />
+              <span className="cp-pill rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sky-700">
+                {realtime.connected ? `${realtime.presenceCount} live` : 'Connecting...'}
+              </span>
+            </div>
           </div>
           <div className="mt-5 grid gap-3">
             {liveFeed.map((item) => (
@@ -89,6 +109,12 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
               </div>
             ))}
           </div>
+          {realtime.lastEvent && (
+            <p className="mt-4 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-xs text-slate-700 shadow-sm">
+              Live update: {realtime.lastEvent.title}
+              {realtime.lastEvent.message ? ` · ${realtime.lastEvent.message}` : ''}
+            </p>
+          )}
           {!isAuthenticated && (
             <button
               onClick={() => {}}

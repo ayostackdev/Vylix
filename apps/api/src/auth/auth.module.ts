@@ -9,6 +9,6 @@ import { EmailLinkingService } from '../core/services/email-linking.service';
   imports: [PrismaModule],
   controllers: [AuthController],
   providers: [AlumniService, EmailLinkingService, SupabaseAuthGuard],
-  exports: [AlumniService, EmailLinkingService],
+  exports: [AlumniService, EmailLinkingService, SupabaseAuthGuard],
 })
 export class AuthModule {}

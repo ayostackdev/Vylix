@@ -2,15 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../core/prisma/prisma.service';
+import { CacheService } from '../core/services/cache.service';
 import { TelemetryGateway } from '../telemetry/telemetry.gateway';
 import { CreateMaterialDto, MaterialUploadResponseDto } from './materials.dto';
-
-type StudyInsightsResponse = {
-  department_code: string;
-  summary: string;
-  questions: string[];
-  tips: string[];
-};
+import { MaterialsQueueService } from './materials.queue';
 
 @Injectable()
 export class MaterialsService {
@@ -19,7 +14,9 @@ export class MaterialsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly telemetryGateway: TelemetryGateway
+    private readonly cacheService: CacheService,
+    private readonly telemetryGateway: TelemetryGateway,
+    private readonly materialsQueueService: MaterialsQueueService
   ) {}
 
   async createMaterial(
@@ -29,7 +26,6 @@ export class MaterialsService {
   ): Promise<MaterialUploadResponseDto> {
     const hierarchy = await this.ensureColphyHierarchy(dto, uploaderId);
     const storedFile = await this.storeFile(file);
-    const insights = await this.requestStudyInsights(storedFile.fileUrl, hierarchy.departmentCode, dto.title);
 
     const material = await this.prisma.material.create({
       data: {
@@ -37,14 +33,64 @@ export class MaterialsService {
         fileUrl: storedFile.fileUrl,
         fileSize: file.size,
         topicId: hierarchy.topic.id,
-        uploaderId: hierarchy.topic.authorId
+        uploaderId: hierarchy.topic.authorId,
+        processingStatus: 'QUEUED'
       }
     });
 
-    this.telemetryGateway.emitDepartmentPulse(hierarchy.departmentId, {
+    let jobId: string | null = null;
+
+    try {
+      const job = await this.materialsQueueService.enqueueMaterialProcessing({ materialId: material.id });
+      jobId = job.id ?? null;
+
+      await this.prisma.material.update({
+        where: { id: material.id },
+        data: {
+          processingJobId: jobId,
+          processingStatus: 'QUEUED'
+        }
+      });
+    } catch (error) {
+      await this.prisma.material.update({
+        where: { id: material.id },
+        data: {
+          processingStatus: 'FAILED',
+          processingError: this.formatErrorMessage(error)
+        }
+      });
+
+      throw error;
+    }
+
+    this.telemetryGateway.emitDepartmentPulse(hierarchy.departmentCode, {
       topicId: hierarchy.topic.id,
-      type: 'upload'
+      type: 'upload',
+      title: dto.title,
+      message: `${storedFile.fileName} is now queued for processing.`,
+      payload: {
+        courseId: hierarchy.course.id,
+        departmentId: hierarchy.departmentId,
+        departmentCode: hierarchy.departmentCode,
+        collegeCode: hierarchy.collegeCode,
+        fileName: storedFile.fileName,
+        jobId
+      }
     });
+
+    this.logger.log(
+      JSON.stringify({
+        event: 'materials.processing.queued',
+        queue: 'materials-processing',
+        materialId: material.id,
+        jobId,
+        uploaderId: hierarchy.topic.authorId,
+        departmentCode: hierarchy.departmentCode
+      })
+    );
+
+    // Invalidate cache for this topic
+    this.invalidateMaterialsCache(hierarchy.topic.id);
 
     return {
       id: material.id,
@@ -52,15 +98,168 @@ export class MaterialsService {
       fileName: material.fileName,
       fileUrl: material.fileUrl,
       fileSize: material.fileSize,
-      departmentCode: insights.department_code,
+      departmentCode: hierarchy.departmentCode,
       collegeCode: hierarchy.collegeCode,
       courseId: hierarchy.course.id,
       topicId: material.topicId,
-      summary: insights.summary,
-      questions: insights.questions,
-      tips: insights.tips,
+      processingStatus: 'QUEUED',
+      jobId,
+      message: 'Material upload queued for background processing.',
       uploadedAt: material.uploadedAt
     };
+  }
+
+  /**
+   * Get materials by topic with caching
+   */
+  async getMaterialsByTopic(topicId: string, limit = 50) {
+    const cacheKey = `materials:topic:${topicId}`;
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        return this.prisma.material.findMany({
+          where: { topicId },
+          take: limit,
+          orderBy: { uploadedAt: 'desc' },
+          select: {
+            id: true,
+            fileName: true,
+            fileUrl: true,
+            fileSize: true,
+            processingStatus: true,
+            summary: true,
+            questions: true,
+            tips: true,
+            processedAt: true,
+            uploadedAt: true,
+            uploader: {
+              select: {
+                id: true,
+                fullName: true,
+                avatarUrl: true
+              }
+            }
+          }
+        });
+      },
+      300 // Cache for 5 minutes
+    );
+  }
+
+  /**
+   * Get course details with caching
+   */
+  async getCourseWithCache(courseCode: string) {
+    const cacheKey = `course:${courseCode}`;
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        return this.prisma.course.findUnique({
+          where: { code: courseCode },
+          select: {
+            id: true,
+            code: true,
+            title: true,
+            level: true,
+            departmentId: true,
+            isGeneral: true,
+            department: {
+              select: {
+                id: true,
+                code: true,
+                name: true
+              }
+            }
+          }
+        });
+      },
+      3600 // Cache for 1 hour
+    );
+  }
+
+  /**
+   * Get all topics in a course with caching
+   */
+  async getTopicsInCourseWithCache(courseId: string) {
+    const cacheKey = `course:topics:${courseId}`;
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        return this.prisma.topic.findMany({
+          where: { courseId, isActive: true },
+          orderBy: { lastActivity: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            courseId: true,
+            authorId: true,
+            isActive: true,
+            lastActivity: true,
+            author: {
+              select: {
+                id: true,
+                fullName: true,
+                avatarUrl: true
+              }
+            }
+          }
+        });
+      },
+      600 // Cache for 10 minutes
+    );
+  }
+
+  /**
+   * Get user profile with caching
+   */
+  async getUserProfileWithCache(userId: string) {
+    const cacheKey = `user:profile:${userId}`;
+    
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        return this.prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            fullName: true,
+            matricNumber: true,
+            avatarUrl: true,
+            departmentId: true,
+            collegeId: true,
+            currentLevel: true,
+            status: true,
+            contributionScore: true,
+            profile: {
+              select: {
+                bio: true,
+                website: true,
+                socialLinks: true,
+                profileImageUrl: true,
+                viewCount: true
+              }
+            }
+          }
+        });
+      },
+      1800 // Cache for 30 minutes
+    );
+  }
+
+  /**
+   * Invalidate materials cache for a topic when new material is uploaded
+   */
+  private invalidateMaterialsCache(topicId: string) {
+    this.cacheService.invalidate(`materials:topic:${topicId}`).catch((err) => {
+      this.logger.error(`Failed to invalidate materials cache: ${err}`);
+    });
+  }
+
+  private formatErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : 'Unknown error';
   }
 
   private async storeFile(file: { buffer: Buffer; originalname: string; mimetype: string; size: number }) {
@@ -145,7 +344,7 @@ export class MaterialsService {
       data: {
         title: topicTitle,
         courseId: course.id,
-        authorId: uploaderId ?? await this.getFallbackAuthorId(college.id, department.id)
+        authorId: uploaderId ?? (await this.getFallbackAuthorId(college.id, department.id))
       },
       select: {
         id: true,
@@ -165,15 +364,13 @@ export class MaterialsService {
   private async getFallbackAuthorId(collegeId: string, departmentId: string): Promise<string> {
     const currentYear = new Date().getFullYear();
     const systemEmail = 'colphy.system@campulse.local';
-    
-    // Check if user with this email exists
+
     const existingUserEmail = await this.prisma.userEmail.findUnique({
       where: { email: systemEmail },
       include: { user: true }
     });
 
     if (existingUserEmail?.user) {
-      // Update existing user
       await this.prisma.user.update({
         where: { id: existingUserEmail.user.id },
         data: {
@@ -187,7 +384,6 @@ export class MaterialsService {
       return existingUserEmail.user.id;
     }
 
-    // Create new system user
     const newUser = await this.prisma.user.create({
       data: {
         fullName: 'COLPHY Vault System',
@@ -209,40 +405,5 @@ export class MaterialsService {
     });
 
     return newUser.id;
-  }
-
-  private async requestStudyInsights(fileUrl: string, departmentCode: string, title: string): Promise<StudyInsightsResponse> {
-    const pythonServiceUrl = this.configService.get<string>('PYTHON_SERVICE_URL') ?? 'http://localhost:8000';
-    const response = await fetch(`${pythonServiceUrl}/api/v1/insights/from-url`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        file_url: fileUrl,
-        department_code: departmentCode,
-        title
-      })
-    });
-
-    if (!response.ok) {
-      this.logger.warn(`Python support service unavailable, falling back to local insights. Status: ${response.status}`);
-      return {
-        department_code: departmentCode,
-        summary: `Uploaded material ${title} was recorded successfully.`,
-        questions: [
-          `What are the key takeaways from ${title}?`,
-          `Which concepts in ${title} are most likely to appear in an exam?`,
-          `How can you explain the main idea in ${title} in your own words?`
-        ],
-        tips: [
-          'Review the PDF once offline caching completes.',
-          'Turn the main points into flashcards.',
-          'Discuss the document in Public Pulse when you are ready to share it.'
-        ]
-      };
-    }
-
-    return (await response.json()) as StudyInsightsResponse;
   }
 }

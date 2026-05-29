@@ -21,6 +21,26 @@ services:
     ports:
       - "6379:6379"
 
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: campulse_pgbouncer
+    restart: always
+    ports:
+      - "6432:6432"
+    environment:
+      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@postgres_db:5432/campulse_db
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=1000
+      - DEFAULT_POOL_SIZE=50
+      - MIN_POOL_SIZE=10
+      - RESERVE_POOL_SIZE=5
+      - RESERVE_POOL_TIMEOUT=3
+      - SERVER_LIFETIME=3600
+      - SERVER_IDLE_TIMEOUT=600
+      - STATS_PERIOD=60
+    depends_on:
+      - postgres_db
+
   nestjs_api:
     image: node:20-alpine
     container_name: campulse_nestjs
@@ -30,8 +50,10 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@postgres_db:5432/campulse_db?schema=public
+      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@pgbouncer:6432/campulse_db?schema=public
       - PYTHON_SERVICE_URL=http://fastapi_service:8000
+      - REDIS_URL=redis://redis_broker:6379/0
+      - MAINTENANCE_API_KEY=change-me-in-production
       - SUPABASE_URL=your_supabase_project_url
       - SUPABASE_SERVICE_ROLE_KEY=your_supabase_secret_key
       - SUPABASE_STORAGE_BUCKET=your_bucket_name
@@ -43,9 +65,36 @@ services:
       sh -c "npm install && 
              npx prisma generate --schema=apps/api/prisma/schema.prisma && 
              npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma && 
-             npm run start:prod --workspace=apps/api"
+             npm run start --workspace=apps/api"
     depends_on:
       - postgres_db
+      - pgbouncer
+      - redis_broker
+
+  nestjs_worker:
+    image: node:20-alpine
+    container_name: campulse_nestjs_worker
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@pgbouncer:6432/campulse_db?schema=public
+      - PYTHON_SERVICE_URL=http://fastapi_service:8000
+      - REDIS_URL=redis://redis_broker:6379/0
+      - MAINTENANCE_API_KEY=change-me-in-production
+      - SUPABASE_URL=your_supabase_project_url
+      - SUPABASE_SERVICE_ROLE_KEY=your_supabase_secret_key
+      - SUPABASE_STORAGE_BUCKET=your_bucket_name
+    volumes:
+      - ./repo:/usr/src/app
+    working_dir: /usr/src/app
+    command: >
+      sh -c "npm install && 
+             npx prisma generate --schema=apps/api/prisma/schema.prisma && 
+             npm run start:worker --workspace=apps/api"
+    depends_on:
+      - postgres_db
+      - pgbouncer
+      - redis_broker
 
   fastapi_service:
     image: python:3.11-slim

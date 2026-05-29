@@ -4,12 +4,15 @@
   "version": "2.0.0",
   "scripts": {
     "start:dev": "nest start --watch",
+    "start:dev:worker": "nest start --watch --entryFile worker",
+    "start:worker": "node dist/worker",
     "postinstall": "npm run prisma:generate",
     "prebuild": "npm run prisma:generate",
     "build": "nest build",
     "start": "node dist/main",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "node scripts/prisma-run.mjs migrate dev",
+    "prisma:deploy": "node scripts/prisma-run.mjs migrate deploy"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.8",
@@ -19,7 +22,11 @@
     "@nestjs/schedule": "^4.1.0",
     "@nestjs/websockets": "^10.4.8",
     "@prisma/client": "^5.22.0",
+    "@socket.io/redis-adapter": "^8.1.1",
+    "bullmq": "^5.77.4",
+    "ioredis": "^5.11.0",
     "nestjs-cls": "^4.5.0",
+    "rate-limiter-flexible": "^4.1.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1"
