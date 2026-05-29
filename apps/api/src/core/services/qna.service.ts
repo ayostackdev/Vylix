@@ -344,7 +344,9 @@ export class QnaService {
           }
         },
         {
-          _count: 'desc'
+          _count: {
+            id: 'desc'
+          }
         }
       ],
       take: limit
@@ -353,7 +355,7 @@ export class QnaService {
     return answerers.map(a => ({
       userId: a.authorId,
       answerCount: a._count,
-      helpfulCount: a._sum.helpCount ?? 0
+      helpfulCount: a._sum?.helpCount ?? 0
     }));
   }
 

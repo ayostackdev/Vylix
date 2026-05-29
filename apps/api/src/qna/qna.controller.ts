@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Param, Body, UseGuards, Req, Query, BadRequestException } from '@nestjs/common';
-import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
+import { SupabaseAuthGuard as AuthGuard } from '../core/guards/auth.guard';
 import { QnaService } from '../core/services/qna.service';
 import { Request } from 'express';
 
@@ -11,7 +11,7 @@ interface AuthRequest extends Request {
 }
 
 @Controller('qna')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class QnaController {
   constructor(private readonly qnaService: QnaService) {}
 

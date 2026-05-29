@@ -1,5 +1,5 @@
 import { Controller, Post, Get, UseGuards, Req } from '@nestjs/common';
-import { JwtAuthGuard } from '../core/guards/jwt-auth.guard';
+import { SupabaseAuthGuard as AuthGuard } from '../core/guards/auth.guard';
 import { StreakService } from '../core/services/streak.service';
 import { Request } from 'express';
 
@@ -11,7 +11,7 @@ interface AuthRequest extends Request {
 }
 
 @Controller('gamification')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class GamificationController {
   constructor(private readonly streakService: StreakService) {}
 

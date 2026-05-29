@@ -78,7 +78,6 @@ export class CollaborationService {
       title: conversation.title ?? 'Conversation created',
       message: 'A new conversation is ready for live messages.',
       actorId: userId,
-      conversationId: conversation.id,
       payload: {
         conversationId: conversation.id,
         type: conversation.type,
@@ -313,7 +312,6 @@ export class CollaborationService {
       title: conversation.title ?? 'New message',
       message: content,
       actorId: userId,
-      conversationId,
       payload: {
         conversationId,
         messageId: message.id,
@@ -330,7 +328,6 @@ export class CollaborationService {
         title: conversation.title ?? 'Department message',
         message: content,
         actorId: userId,
-        conversationId,
         payload: {
           conversationId,
           messageId: message.id,
@@ -346,7 +343,6 @@ export class CollaborationService {
         title: conversation.title ?? 'Topic message',
         message: content,
         actorId: userId,
-        conversationId,
         payload: {
           conversationId,
           messageId: message.id,
@@ -411,7 +407,6 @@ export class CollaborationService {
       title: 'Message edited',
       message: nextContent,
       actorId: userId,
-      conversationId: message.conversationId,
       payload: {
         conversationId: message.conversationId,
         messageId,
@@ -452,7 +447,6 @@ export class CollaborationService {
       title: 'Message deleted',
       message: 'A message was removed.',
       actorId: userId,
-      conversationId: message.conversationId,
       payload: {
         conversationId: message.conversationId,
         messageId,
@@ -528,7 +522,6 @@ export class CollaborationService {
       title: 'Read receipt',
       message: 'Conversation marked as read.',
       actorId: userId,
-      conversationId,
       payload: {
         conversationId,
         messageId: targetMessage.id,
@@ -551,7 +544,6 @@ export class CollaborationService {
       title: isTyping ? 'Typing' : 'Typing stopped',
       message: isTyping ? 'Someone is typing...' : 'Typing stopped.',
       actorId: userId,
-      conversationId,
       payload: {
         conversationId,
         isTyping,
