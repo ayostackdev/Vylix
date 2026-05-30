@@ -1,45 +1,22 @@
-# CamPulse v2.0 Monorepo
+# CamPulse (monorepo)
 
-CamPulse is scaffolded as a multi-app workspace with Nest.js as the main backend and a FastAPI Python support service for AI/document workflows:
+Lightweight, multi-app workspace for the CamPulse product.
 
-- apps/web: Next.js 14 App Router client with Tailwind UI foundation and offline-first query persistence.
-- apps/api: Nest.js feature-based backend with Prisma schema, tenant middleware, department guard, telemetry gateway, and maintenance cron.
-- apps/python-service: auxiliary FastAPI service for document intelligence, OCR, RAG scaffolding, analytics, Celery tasks, and PDF compression.
-- docs/fastapi-microservice.md: architecture notes for the Python support service stack and workflow.
+Folders of interest
+- `apps/web` — Next.js frontend
+- `apps/api` — NestJS backend (Prisma schema + migrations)
+- `apps/python-service` — FastAPI support service for document workflows
+- `docs/` — project documentation and deployment guides
 
-## Documentation hub
+Quick start (developer)
+1. Install root workspace deps: `npm install`
+2. Copy env examples into local env files (do not commit secrets):
+   - `apps/web/.env.example` -> `apps/web/.env.local`
+   - `apps/api/.env.example` -> `apps/api/.env`
+3. Generate Prisma client: `npm run prisma:generate -w @campulse/api`
+4. Run services:
+   - API: `npm run dev:api`
+   - Web: `npm run dev:web`
+   - Python service: `cd apps/python-service && uvicorn app.main:app --reload`
 
-Most project documentation now lives under [docs/README.md](docs/README.md).
-That hub groups architecture, feature notes, deployment guides, and service docs into one place.
-
-## Architecture highlights
-
-- Dual-layer dashboard with Private Vault and Public Pulse in the frontend.
-- IndexedDB persistence for TanStack Query cache.
-- Shared-schema multi-tenancy boundary via request context + guard checks.
-- Feature modules for colleges, topics, telemetry, and maintenance.
-- Dynamic academic level utility for FUNAAB session logic.
-- Python support service scaffold for document ingestion, semantic search, OCR, analytics, and compressed PDF storage.
-
-## Quick start
-
-1. Install dependencies:
-   npm install
-2. Copy env templates:
-   - apps/web/.env.example -> apps/web/.env.local
-   - apps/api/.env.example -> apps/api/.env
-3. Set your PostgreSQL connection in apps/api/.env.
-4. Generate Prisma client:
-   npm run prisma:generate -w @campulse/api
-5. Run backend:
-   npm run dev:api
-6. Run frontend:
-   npm run dev:web
-7. Run the Python service:
-   cd apps/python-service
-   uvicorn app.main:app --reload
-
-## Build verification
-
-- Frontend production build: npm run build -w @campulse/web
-- Backend production build: npm run build -w @campulse/api
+More docs: see `docs/README.md` for architecture and deployment guides.
