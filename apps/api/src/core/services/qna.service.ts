@@ -354,7 +354,7 @@ export class QnaService {
 
     return answerers.map(a => ({
       userId: a.authorId,
-      answerCount: a._count,
+      answerCount: a._count?.authorId ?? 0,
       helpfulCount: a._sum?.helpCount ?? 0
     }));
   }

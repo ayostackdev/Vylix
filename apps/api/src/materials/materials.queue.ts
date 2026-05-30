@@ -5,6 +5,7 @@ import { createRedisConnectionOptions } from '../core/queues/redis-connection';
 
 export const MATERIALS_PROCESSING_QUEUE = 'materials-processing';
 export const MATERIALS_PROCESSING_JOB = 'process-material';
+export const MATERIALS_SCAN_JOB = 'virus-scan';
 
 export type MaterialProcessingJobPayload = {
   materialId: string;
@@ -31,6 +32,16 @@ export class MaterialsQueueService implements OnModuleDestroy {
       removeOnComplete: 1_000,
       removeOnFail: 5_000,
       jobId: payload.materialId
+    });
+  }
+
+  enqueueVirusScan(payload: MaterialProcessingJobPayload): Promise<Job<MaterialProcessingJobPayload>> {
+    return this.queue.add(MATERIALS_SCAN_JOB, payload, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 2000 },
+      removeOnComplete: 1000,
+      removeOnFail: 5000,
+      jobId: `scan-${payload.materialId}`
     });
   }
 

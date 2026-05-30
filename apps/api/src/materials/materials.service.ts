@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../core/prisma/prisma.service';
@@ -41,8 +41,9 @@ export class MaterialsService {
     let jobId: string | null = null;
 
     try {
-      const job = await this.materialsQueueService.enqueueMaterialProcessing({ materialId: material.id });
-      jobId = job.id ?? null;
+      // First enqueue a virus-scan job which will enqueue the processing job on success.
+      const scanJob = await this.materialsQueueService.enqueueVirusScan({ materialId: material.id });
+      jobId = scanJob.id ?? null;
 
       await this.prisma.material.update({
         where: { id: material.id },
@@ -265,7 +266,28 @@ export class MaterialsService {
   private async storeFile(file: { buffer: Buffer; originalname: string; mimetype: string; size: number }) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const serviceRoleKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
-    const bucket = this.configService.get<string>('SUPABASE_STORAGE_BUCKET') ?? 'materials';
+    const bucket = this.configService.get<string>('SUPABASE_STORAGE_BUCKET') ?? 'material';
+    const maxUploadMb = parseInt(this.configService.get<string>('MAX_UPLOAD_MB') ?? '50', 10);
+
+    // Server-side validations
+    if (typeof file.size === 'number' && file.size > maxUploadMb * 1024 * 1024) {
+      throw new BadRequestException(`File size exceeds maximum allowed size of ${maxUploadMb} MB`);
+    }
+
+    const allowedMimePatterns = [
+      /^image\//,
+      /^application\/pdf$/,
+      /^text\//,
+      /^application\/msword$/,
+      /^application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document$/,
+      /^application\/zip$/
+    ];
+
+    const mimetype = file.mimetype || '';
+    const isAllowed = allowedMimePatterns.some((rx) => rx.test(mimetype));
+    if (!isAllowed) {
+      throw new BadRequestException('File type is not allowed');
+    }
 
     if (!supabaseUrl || !serviceRoleKey) {
       throw new Error('Supabase storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.');
@@ -291,10 +313,33 @@ export class MaterialsService {
       throw new Error(`Supabase upload failed with status ${response.status}${errorText ? `: ${errorText}` : ''}`);
     }
 
+    // Try to create a signed URL (for private buckets) with a 24h expiry.
+    let fileUrl = `${supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/${bucket}/${objectPath}`;
+    try {
+      const signResp = await fetch(`${supabaseUrl.replace(/\/$/, '')}/storage/v1/object/sign/${bucket}/${objectPath}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${serviceRoleKey}`,
+          apikey: serviceRoleKey,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ expiresIn: 86400 })
+      });
+
+      if (signResp.ok) {
+        const data = await signResp.json().catch(() => null) as any;
+        fileUrl = data?.signedURL || data?.signedUrl || data?.signed_url || fileUrl;
+      } else {
+        this.logger.warn(`Failed to create signed URL: ${signResp.status}`);
+      }
+    } catch (err) {
+      this.logger.warn(`Signed URL creation failed: ${err}`);
+    }
+
     return {
       fileName: file.originalname,
       filePath: objectPath,
-      fileUrl: `${supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/${bucket}/${objectPath}`
+      fileUrl
     };
   }
 

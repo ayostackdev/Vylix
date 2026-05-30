@@ -9,7 +9,7 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=SecureProductionPass2026
+      - POSTGRES_PASSWORD=REPLACE_WITH_POSTGRES_PASSWORD
       - POSTGRES_DB=campulse_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -28,7 +28,7 @@ services:
     ports:
       - "6432:6432"
     environment:
-      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@postgres_db:5432/campulse_db
+      - DATABASE_URL=postgresql://postgres:REPLACE_WITH_POSTGRES_PASSWORD@postgres_db:5432/campulse_db
       - POOL_MODE=transaction
       - MAX_CLIENT_CONN=1000
       - DEFAULT_POOL_SIZE=50
@@ -50,13 +50,13 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@pgbouncer:6432/campulse_db?schema=public
+      - DATABASE_URL=postgresql://postgres:REPLACE_WITH_POSTGRES_PASSWORD@pgbouncer:6432/campulse_db?schema=public
       - PYTHON_SERVICE_URL=http://fastapi_service:8000
       - REDIS_URL=redis://redis_broker:6379/0
-      - MAINTENANCE_API_KEY=change-me-in-production
-      - SUPABASE_URL=your_supabase_project_url
-      - SUPABASE_SERVICE_ROLE_KEY=your_supabase_secret_key
-      - SUPABASE_STORAGE_BUCKET=your_bucket_name
+      - MAINTENANCE_API_KEY=REPLACE_WITH_MAINTENANCE_API_KEY
+      - SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
+      - SUPABASE_SERVICE_ROLE_KEY=REPLACE_WITH_SUPABASE_SERVICE_ROLE_KEY
+      - SUPABASE_STORAGE_BUCKET=material
     volumes:
       - ./repo:/usr/src/app
     working_dir: /usr/src/app
@@ -77,13 +77,13 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:SecureProductionPass2026@pgbouncer:6432/campulse_db?schema=public
+      - DATABASE_URL=postgresql://postgres:REPLACE_WITH_POSTGRES_PASSWORD@pgbouncer:6432/campulse_db?schema=public
       - PYTHON_SERVICE_URL=http://fastapi_service:8000
       - REDIS_URL=redis://redis_broker:6379/0
       - MAINTENANCE_API_KEY=change-me-in-production
-      - SUPABASE_URL=your_supabase_project_url
-      - SUPABASE_SERVICE_ROLE_KEY=your_supabase_secret_key
-      - SUPABASE_STORAGE_BUCKET=your_bucket_name
+      - SUPABASE_URL="https://YOUR-PROJECT.supabase.co"
+      - SUPABASE_SERVICE_ROLE_KEY=REPLACE_WITH_SUPABASE_SERVICE_ROLE_KEY
+      - SUPABASE_STORAGE_BUCKET=material
     volumes:
       - ./repo:/usr/src/app
     working_dir: /usr/src/app
@@ -105,7 +105,7 @@ services:
     environment:
       - APP_NAME=CamPulse-Python
       - ENVIRONMENT=production
-      - POSTGRES_DSN=postgresql://postgres:SecureProductionPass2026@postgres_db:5432/campulse_db
+      - POSTGRES_DSN=postgresql://postgres:REPLACE_WITH_POSTGRES_PASSWORD@postgres_db:5432/campulse_db
       - CELERY_BROKER_URL=redis://redis_broker:6379/0
       - CELERY_RESULT_BACKEND=redis://redis_broker:6379/0
       - CORS_ORIGINS=["*"]
