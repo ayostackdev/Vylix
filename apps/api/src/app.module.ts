@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClsModule } from 'nestjs-cls';
 import { PrismaModule } from './core/prisma/prisma.module';
+import { HealthModule } from './core/health/health.module';
 import { TenantMiddleware } from './core/middlewares/tenant.middleware';
 import { RateLimitMiddleware } from './core/middlewares/rate-limit.middleware';
 import { ColphysModule } from './colleges/colphys/colphys.module';
@@ -28,6 +29,7 @@ import { QnaModule } from './qna/qna.module';
       middleware: { mount: true }
     }),
     PrismaModule,
+    HealthModule,
     ColphysModule,
     ColcomModule,
     ColengModule,

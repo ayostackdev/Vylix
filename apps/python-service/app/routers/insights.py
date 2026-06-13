@@ -47,7 +47,7 @@ async def generate_insights_from_url(payload: InsightsRequest) -> InsightsRespon
             tips=insights.tips,
         )
 
-    request = Request(payload.file_url, headers={"User-Agent": "Campulse/1.0"})
+    request = Request(payload.file_url, headers={"User-Agent": "Vylix/1.0"})
     with urlopen(request) as response:
         content_type = response.headers.get_content_type()
         suffix = ".pdf" if content_type == "application/pdf" or payload.file_url.lower().endswith(".pdf") else ".txt"

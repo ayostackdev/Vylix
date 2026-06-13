@@ -15,16 +15,20 @@ export function PrivateVaultView() {
     <section className="space-y-5 rounded-[1.75rem] border border-sky-100 bg-blue-50 p-4 shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:space-y-8 sm:p-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <div className="cp-pill inline-flex w-fit items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-sky-700 shadow-sm">
-            Secure workspace
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+              Secure workspace
+            </span>
           </div>
-          <h2 className="cp-section-title font-black text-gray-900">Private Vault</h2>
+          <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent mb-3">Private Vault</h2>
           <p className="cp-body max-w-2xl sm:text-base">
             Your personal offline library for zero-interruption study sessions. Materials cached and ready when campus network drops.
           </p>
         </div>
-        <span className="cp-pill inline-flex w-fit rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-sky-700 shadow-sm">
-          Offline-ready
+        <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
+          <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+            Offline-ready
+          </span>
         </span>
       </div>
 
@@ -42,8 +46,10 @@ export function PrivateVaultView() {
       <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <h3 className="cp-card-title text-gray-900">Recent Vault Materials</h3>
-          <span className="cp-pill rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-sky-700">
-            Preview
+          <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px]">
+            <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+              Preview
+            </span>
           </span>
         </div>
 
@@ -57,8 +63,10 @@ export function PrivateVaultView() {
                 <p className="cp-card-title text-gray-900">{item.title}</p>
                 <p className="text-xs text-slate-500">{item.state}</p>
               </div>
-              <span className="cp-pill w-fit rounded-full border border-sky-200 bg-sky-100 px-3 py-1 text-sky-700 shadow-sm">
-                {item.tag}
+              <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
+                <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+                  {item.tag}
+                </span>
               </span>
             </div>
           ))}

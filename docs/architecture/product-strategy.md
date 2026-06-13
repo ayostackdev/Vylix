@@ -1,6 +1,6 @@
 # Product Strategy
 
-CamPulse is positioned as a focused student document and identity platform.
+Vylix is positioned as a focused student document and identity platform.
 
 ## Core promise
 

@@ -1,6 +1,6 @@
-# CamPulse (monorepo)
+# Vylix (monorepo)
 
-Lightweight, multi-app workspace for the CamPulse product.
+Lightweight, multi-app workspace for the Vylix product.
 
 Folders of interest
 - `apps/web` — Next.js frontend
@@ -13,7 +13,7 @@ Quick start (developer)
 2. Copy env examples into local env files (do not commit secrets):
    - `apps/web/.env.example` -> `apps/web/.env.local`
    - `apps/api/.env.example` -> `apps/api/.env`
-3. Generate Prisma client: `npm run prisma:generate -w @campulse/api`
+3. Generate Prisma client: `npm run prisma:generate -w @vylix/api`
 4. Run services:
    - API: `npm run dev:api`
    - Web: `npm run dev:web`

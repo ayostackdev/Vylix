@@ -408,7 +408,7 @@ export class MaterialsService {
 
   private async getFallbackAuthorId(collegeId: string, departmentId: string): Promise<string> {
     const currentYear = new Date().getFullYear();
-    const systemEmail = 'colphy.system@campulse.local';
+    const systemEmail = 'colphy.system@vylix.local';
 
     const existingUserEmail = await this.prisma.userEmail.findUnique({
       where: { email: systemEmail },

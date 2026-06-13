@@ -1,6 +1,6 @@
 # Platform Overview
 
-CamPulse is a monorepo with three main application surfaces:
+Vylix is a monorepo with three main application surfaces:
 
 - `apps/web`: Next.js client with offline-first storage and settings/profile flows.
 - `apps/api`: NestJS backend with Prisma, guards, telemetry, and feature modules.

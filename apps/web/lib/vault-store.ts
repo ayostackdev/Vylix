@@ -15,7 +15,7 @@ export type VaultMaterial = {
   uploadedAt: string;
 };
 
-const VAULT_KEY = 'campulse-vault-materials-v1';
+const VAULT_KEY = 'vylix-vault-materials-v1';
 
 export async function getVaultMaterials(): Promise<VaultMaterial[]> {
   return ((await get(VAULT_KEY)) as VaultMaterial[] | undefined) ?? [];

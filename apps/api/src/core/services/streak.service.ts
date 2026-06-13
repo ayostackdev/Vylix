@@ -35,7 +35,7 @@ export class StreakService {
       });
 
       // Award daily login points
-      await this.awardPoints(userId, 10, 'daily_login', 'Logged in to CamPulse');
+      await this.awardPoints(userId, 10, 'daily_login', 'Logged in to Vylix');
 
       return { currentStreak: 1, longestStreak: 1, pointsEarned: 10 };
     }

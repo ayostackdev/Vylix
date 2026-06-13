@@ -99,7 +99,7 @@ export function useStorageManagement() {
    */
   const openVaultDatabase = useCallback((): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('campulse-vault', 1);
+      const request = indexedDB.open('vylix-vault', 1);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);

@@ -14,13 +14,13 @@ const bodyFont = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'CamPulse v2.0',
+  title: 'Vylix v2.0',
   description: 'Academic operating system for FUNAAB students.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'CamPulse'
+    title: 'Vylix'
   },
   formatDetection: {
     telephone: false

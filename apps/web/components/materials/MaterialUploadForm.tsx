@@ -31,7 +31,7 @@ const POPULAR_EMOJIS = [
 function ProgressBar({ progress }: { progress: number }) {
   return (
     <div
-      className="progress-bar-fill h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-300"
+      className="progress-bar-fill h-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 transition-all duration-300"
       style={{ width: `${progress}%` }}
     />
   );
@@ -136,7 +136,7 @@ export function MaterialUploadForm({ onUploadSuccess, topicId }: MaterialUploadF
     if (!uploadedMaterial) return;
 
     const message = encodeURIComponent(
-      `📚 Check out this material I just shared in CamPulse!\n\n${uploadedMaterial.title}\n\n🔗 ${window.location.origin}/materials/${uploadedMaterial.id}`
+      `📚 Check out this material I just shared in Vylix!\n\n${uploadedMaterial.title}\n\n🔗 ${window.location.origin}/materials/${uploadedMaterial.id}`
     );
 
     const whatsappUrl = `https://wa.me/?text=${message}`;

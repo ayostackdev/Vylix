@@ -41,21 +41,27 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
     <section className="space-y-6 text-gray-800 sm:space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-2">
-          <div className="cp-pill inline-flex w-fit items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-green-700 shadow-sm">
-            Community layer
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+              Community layer
+            </span>
           </div>
-          <h2 className="cp-section-title font-black text-gray-900">Public Pulse</h2>
+          <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent mb-3">Public Pulse</h2>
           <p className="cp-body max-w-2xl sm:text-base">
             Your department-aware live collaboration layer for topics, materials, and revision sessions happening now.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <span className="cp-pill inline-flex w-fit rounded-full border border-green-300 bg-green-100 px-3 py-1 text-green-700 shadow-sm">
-            Live collaboration
+          <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
+            <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+              Live collaboration
+            </span>
           </span>
           {showReadOnlyUI && (
-            <span className="cp-pill inline-flex w-fit rounded-full border border-green-300 bg-green-100 px-3 py-1 text-green-700 shadow-sm">
-              👁️ Read-only
+            <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
+              <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+                👁️ Read-only
+              </span>
             </span>
           )}
         </div>
@@ -101,8 +107,10 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="cp-card-title text-gray-900">{item.title}</p>
-                  <span className="cp-pill rounded-full border border-green-300 bg-green-100 px-3 py-1 text-green-700">
-                    {item.status}
+                  <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px]">
+                    <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+                      {item.status}
+                    </span>
                   </span>
                 </div>
                 <p className="cp-body mt-2 text-sm">{item.activity}</p>
@@ -119,7 +127,7 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
             <button
               onClick={() => {}}
               disabled
-              className="mt-4 w-full rounded-full border border-green-200 bg-green-50 px-4 py-3 font-black uppercase tracking-[0.16em] text-green-700 cursor-not-allowed opacity-70"
+                className="mt-4 w-full rounded-full border border-transparent bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-3 font-black uppercase tracking-[0.16em] text-white cursor-not-allowed opacity-40"
             >
               Sign in to view more posts
             </button>
@@ -136,7 +144,7 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
                   showReadOnlyUI ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'
                 }`}
               >
-                <p className="cp-pill text-green-700">
+                <p className="font-bold text-[11px] uppercase tracking-wider text-transparent bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text">
                   {session.when}
                 </p>
                 <p className="cp-card-title mt-2 text-gray-900">{session.topic}</p>

@@ -40,7 +40,7 @@ class HashingEmbeddingFunction:
 
 
 class VectorStore:
-    def __init__(self, persist_directory: str | Path = "./tmp/chromadb", collection_name: str = "campulse_documents") -> None:
+    def __init__(self, persist_directory: str | Path = "./tmp/chromadb", collection_name: str = "vylix_documents") -> None:
         self.embedding_function = HashingEmbeddingFunction()
         self.persist_directory = Path(persist_directory)
         self.collection_name = collection_name

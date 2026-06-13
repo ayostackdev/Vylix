@@ -38,8 +38,8 @@ export function LoginModal() {
         <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50/35 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="cp-section-title font-black text-gray-900">
-                {isSignUp ? 'Join CamPulse' : 'Welcome Back'}
+              <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent mb-3">
+                {isSignUp ? 'Join Vylix' : 'Welcome Back'}
               </h2>
               <p className="cp-body mt-1 text-sm">
                 {isSignUp
@@ -111,7 +111,7 @@ export function LoginModal() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg border border-blue-100 bg-blue-100 py-2.5 font-bold text-sky-700 transition-all hover:bg-blue-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 py-2.5 font-bold text-white transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading
               ? 'Processing...'
@@ -133,7 +133,7 @@ export function LoginModal() {
                   setError('');
                   setSuccess('');
                 }}
-                className="font-semibold text-green-600 hover:text-green-700 transition-colors"
+                className="font-semibold text-transparent bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text hover:opacity-80 transition-opacity"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>
