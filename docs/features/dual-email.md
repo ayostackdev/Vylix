@@ -13,7 +13,7 @@ This project supports linked school and personal emails so students can keep acc
 
 - a student can sign in
 - link a backup email
-- keep account access after graduation or institutional email loss
+- keep account access after institutional email loss
 
 ## Quick reference
 

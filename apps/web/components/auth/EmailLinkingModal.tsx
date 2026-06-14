@@ -14,7 +14,7 @@ export interface EmailLinkingModalProps {
 /**
  * Progressive onboarding modal for email linking.
  * Presented to students after they authenticate with institutional email.
- * Allows them to optionally link a personal email (Gmail) for post-graduation access.
+ * Allows them to optionally link a personal email (Gmail) for backup access.
  */
 export function EmailLinkingModal({
   isOpen,
@@ -48,7 +48,7 @@ export function EmailLinkingModal({
 
       if (result.success) {
         setSuccessMessage(
-          `${personalEmail} has been successfully linked to your account. You'll keep access to your Private Vault even after graduation!`
+          `${personalEmail} has been successfully linked to your account. You'll keep access to your Private Vault!`
         );
         setPersonalEmail('');
 
@@ -81,7 +81,7 @@ export function EmailLinkingModal({
         {/* Header */}
         <h2 className="text-xl font-bold text-gray-900">Secure Your Private Vault</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Link a personal email to keep access to your Private Vault after you graduate from FUNAAB.
+          Link a personal email to keep access to your Private Vault.
         </p>
 
         {/* Current Email Display */}
@@ -161,7 +161,7 @@ export function EmailLinkingModal({
         <div className="mt-4 rounded-md bg-gray-50 p-3">
           <p className="text-xs font-medium text-gray-600">WHY THIS MATTERS</p>
           <p className="mt-2 text-xs text-gray-600">
-            When you graduate, your institutional email will expire. By linking a personal email now, you'll maintain permanent access to all your study materials and Private Vault contents.
+            By linking a personal email, you'll maintain permanent access to all your study materials and Private Vault contents even if your institutional email changes.
           </p>
         </div>
       </div>

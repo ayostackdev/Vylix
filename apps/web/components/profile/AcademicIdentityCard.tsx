@@ -12,7 +12,8 @@ export interface AcademicIdentityCardProps {
   departmentName: string;
   departmentCode: string;
   avatarUrl?: string;
-  status: 'STUDENT' | 'ALUMNI' | 'GRADUATED';
+  status: 'STUDENT' | 'ALUMNI';
+  collegeDurationYears?: number;
 }
 
 /**
@@ -29,24 +30,30 @@ export function AcademicIdentityCard({
   departmentCode,
   avatarUrl,
   status,
+  collegeDurationYears = 4,
 }: AcademicIdentityCardProps) {
-  const levelInfo = useDynamicAcademicLevel(entryYear);
-  const levelColor = getLevelColor(levelInfo.level);
+  const levelInfo = useDynamicAcademicLevel(entryYear, collegeDurationYears);
+  const levelColor = getLevelColor(levelInfo.level, levelInfo.isAlumni);
+  const isAlumni = levelInfo.isAlumni || status === 'ALUMNI';
 
   return (
     <div className="w-full max-w-md mx-auto">
       {/* Card Container */}
-      <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-lg overflow-hidden text-white p-6">
+      <div className={`rounded-xl shadow-lg overflow-hidden text-white p-6 ${
+        isAlumni
+          ? 'bg-gradient-to-br from-purple-700 to-purple-900'
+          : 'bg-gradient-to-br from-blue-600 to-blue-800'
+      }`}>
         {/* Header with Logo/Icon */}
         <div className="flex justify-between items-start mb-8">
           <div>
             <h2 className="text-sm font-semibold opacity-90">FUNAAB</h2>
-            <p className="text-xs opacity-75">Student Portal</p>
+            <p className="text-xs opacity-75">{isAlumni ? 'Alumni Portal' : 'Student Portal'}</p>
           </div>
           <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-            status === 'ALUMNI' ? 'bg-purple-400' : status === 'GRADUATED' ? 'bg-gray-400' : 'bg-green-400'
+            isAlumni ? 'bg-purple-300 text-purple-900' : 'bg-green-400 text-white'
           }`}>
-            {status === 'ALUMNI' ? 'ALUMNI' : status === 'GRADUATED' ? 'GRADUATED' : 'ACTIVE'}
+            {isAlumni ? 'ALUMNI' : 'ACTIVE'}
           </div>
         </div>
 
@@ -59,7 +66,7 @@ export function AcademicIdentityCard({
               className="w-16 h-16 rounded-full border-3 border-white"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full border-3 border-white bg-blue-400 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full border-3 border-white bg-white/20 flex items-center justify-center">
               <span className="text-2xl font-bold">{fullName.charAt(0)}</span>
             </div>
           )}
@@ -74,18 +81,20 @@ export function AcademicIdentityCard({
 
         {/* Academic Information */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          {/* Level */}
+          {/* Level / Status */}
           <div>
-            <p className="text-xs opacity-75 mb-1">CURRENT LEVEL</p>
+            <p className="text-xs opacity-75 mb-1">{isAlumni ? 'STATUS' : 'CURRENT LEVEL'}</p>
             <div className={`px-3 py-2 rounded-lg inline-block ${levelColor} font-bold text-sm`}>
-              {levelInfo.levelDisplay}
+              {isAlumni ? 'Alumni' : levelInfo.levelDisplay}
             </div>
           </div>
 
-          {/* Entry Year */}
+          {/* Entry / Graduation Year */}
           <div>
-            <p className="text-xs opacity-75 mb-1">ENTRY YEAR</p>
-            <p className="text-lg font-semibold">{entryYear}</p>
+            <p className="text-xs opacity-75 mb-1">{isAlumni ? 'GRADUATED' : 'ENTRY YEAR'}</p>
+            <p className="text-lg font-semibold">
+              {isAlumni ? `${entryYear + collegeDurationYears}` : entryYear}
+            </p>
           </div>
 
           {/* College */}
@@ -108,18 +117,38 @@ export function AcademicIdentityCard({
 
         {/* Footer Info */}
         <div className="text-xs opacity-75 space-y-1">
-          <p>• Level updates automatically at start of each session</p>
-          <p>• No manual updates needed</p>
-          <p>• Valid until graduation</p>
+          {isAlumni ? (
+            <>
+              <p>• Alumni account — your contributions remain visible</p>
+              <p>• You can browse materials and your vault</p>
+              <p>• New uploads and posts are not available</p>
+            </>
+          ) : (
+            <>
+              <p>• Level updates automatically at start of each session</p>
+              <p>• No manual updates needed</p>
+              <p>• Valid throughout your academic journey</p>
+            </>
+          )}
         </div>
       </div>
 
       {/* Info Section Below Card */}
-      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-        <p className="text-sm font-medium text-blue-900 mb-2">How Your Level Updates</p>
-        <p className="text-xs text-blue-800">
-          Your academic level automatically rolls forward each year on August 1st based on your entry year. 
-          You'll be {formatAcademicLevel(levelInfo.level)} in session {levelInfo.currentAcademicSession}.
+      <div className={`mt-4 p-4 rounded-lg ${
+        isAlumni ? 'bg-purple-50' : 'bg-blue-50'
+      }`}>
+        <p className={`text-sm font-medium mb-2 ${
+          isAlumni ? 'text-purple-900' : 'text-blue-900'
+        }`}>
+          {isAlumni ? 'Welcome Back, Alumni' : 'How Your Level Updates'}
+        </p>
+        <p className={`text-xs ${
+          isAlumni ? 'text-purple-800' : 'text-blue-800'
+        }`}>
+          {isAlumni
+            ? `You graduated in ${entryYear + collegeDurationYears}. Your data and contributions are preserved.`
+            : `Your academic level automatically rolls forward each year on August 1st based on your entry year. You'll be ${formatAcademicLevel(levelInfo.level)} in session ${levelInfo.currentAcademicSession}.`
+          }
         </p>
       </div>
     </div>

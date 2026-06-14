@@ -4,7 +4,7 @@ from contextlib import suppress
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from fastapi import APIRouter, File, Query, UploadFile
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
 from app.services.pdf import compress_pdf
@@ -12,6 +12,7 @@ from app.services.ocr import extract_text_with_tesseract
 from app.services.ingestion import ingest_document, search_documents
 from app.services.docling_parser import parse_with_docling
 from app.services.rag import build_chunks
+from app.services.vector_store import VectorStore
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -172,3 +173,74 @@ async def ocr_document(file: UploadFile = File(...)) -> OcrResponse:
     finally:
         with suppress(FileNotFoundError):
             source_path.unlink()
+
+
+class ChatRequest(BaseModel):
+    document_id: str
+    query: str
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    context_chunks: list[str]
+    follow_up_questions: list[str]
+
+
+_vector_store_for_chat = VectorStore()
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat_with_document(payload: ChatRequest) -> ChatResponse:
+    if not payload.query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+
+    results = _vector_store_for_chat.query(payload.query, top_k=3)
+
+    document_results = [r for r in results if r.document_id == payload.document_id]
+
+    relevant_results = document_results if document_results else results
+
+    if not relevant_results:
+        return ChatResponse(
+            answer="I couldn't find relevant content in this document to answer your question. Try rephrasing or asking about a different topic.",
+            context_chunks=[],
+            follow_up_questions=[],
+        )
+
+    best = relevant_results[0]
+    context_chunks = [r.text for r in relevant_results]
+
+    answer = best.text[:500]
+    if len(best.text) > 500:
+        answer = answer.rsplit(" ", 1)[0] + "..."
+
+    follow_up_questions = _generate_follow_ups(best.text, payload.query)
+
+    return ChatResponse(
+        answer=answer,
+        context_chunks=context_chunks,
+        follow_up_questions=follow_up_questions,
+    )
+
+
+def _generate_follow_ups(text: str, query: str) -> list[str]:
+    import re
+    from collections import Counter
+
+    words = re.findall(r"[A-Za-z][A-Za-z\-]{2,}", text.lower())
+    stopwords = {
+        "the", "and", "for", "are", "but", "not", "you", "all", "can", "had",
+        "her", "was", "one", "our", "out", "has", "have", "been", "some",
+        "them", "than", "that", "this", "very", "what", "which", "will",
+        "with", "your", "from", "they", "been", "said", "each",
+    }
+    terms = [w for w in words if w not in stopwords and len(w) > 3]
+    top_terms = [t for t, _ in Counter(terms).most_common(5)]
+
+    suggestions = []
+    for term in top_terms[:3]:
+        suggestions.append(f"What does '{term}' mean in this context?")
+    if not suggestions:
+        suggestions = ["Can you summarize the key points?", "What are the main formulas or concepts?"]
+
+    return suggestions

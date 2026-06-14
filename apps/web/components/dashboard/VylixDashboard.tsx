@@ -7,19 +7,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { PrivateVaultView } from '@/components/dashboard/PrivateVaultView';
 import { PublicPulseView } from '@/components/dashboard/PublicPulseView';
+import { PastQuestionsView } from '@/components/dashboard/PastQuestionsView';
 import { useNetworkState } from '@/hooks/useNetworkState';
 import { useAuth } from '@/context/auth-context';
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
 
 export function VylixDashboard() {
-  const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse'>('pulse');
+  const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions'>('pulse');
   const { isOnline } = useNetworkState();
-  const { isAuthenticated, promptLogin } = useAuth();
-  const userInitials = 'CS';
+  const { user, isAuthenticated, promptLogin } = useAuth();
+  const isAlumni = user?.status === 'ALUMNI';
+  const userInitials = user?.fullName?.charAt(0) ?? 'CS';
   const spotlightStats = [
-    { label: 'Vault readiness', value: isAuthenticated ? 'Unlocked' : 'Preview' },
+    { label: 'Vault readiness', value: isAlumni ? 'Archive' : isAuthenticated ? 'Unlocked' : 'Preview' },
     { label: 'Pulse mode', value: isOnline ? 'Live' : 'Offline' },
-    { label: 'Identity', value: isAuthenticated ? 'Synced' : 'Guest' },
+    { label: 'Identity', value: isAlumni ? 'Alumni' : isAuthenticated ? 'Synced' : 'Guest' },
   ];
 
   useEffect(() => {
@@ -75,6 +77,8 @@ export function VylixDashboard() {
                   <Badge variant="destructive" className="px-3 py-1 text-[11px] sm:text-xs">
                     Offline Mode Active
                   </Badge>
+                ) : isAlumni ? (
+                  <span className="cp-pill inline-flex items-center rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-100/70 sm:text-xs">🎓 Alumni — Read Only</span>
                 ) : isAuthenticated ? (
                   <Badge variant="success" className="px-3 py-1 text-[11px] sm:text-xs">Live & Connected</Badge>
                 ) : (
@@ -115,32 +119,57 @@ export function VylixDashboard() {
             <ReadOnlyBanner action="upload materials and access full features" />
           )}
 
+          {isAlumni && (
+            <div className="cp-fade-up rounded-[1.75rem] border border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/60 p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">🎓</span>
+                <div>
+                  <p className="font-bold text-purple-900">Alumni Account — Read Only</p>
+                  <p className="mt-1 text-sm text-purple-800">
+                    Welcome back! As an alumnus, you can browse materials, view your vault, and explore the Public Pulse. 
+                    Uploading new content and posting are not available.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Tabs
             value={activeLayer}
             onValueChange={(val) => {
               if (val === 'vault' && !isAuthenticated) {
                 promptLogin('access your Private Vault');
               } else {
-                setActiveLayer(val as 'vault' | 'pulse');
+                setActiveLayer(val as 'vault' | 'pulse' | 'questions');
               }
             }}
             className="cp-fade-up flex min-h-0 flex-1 flex-col gap-3 sm:gap-4"
           >
             <div className="flex w-full justify-center">
-              <TabsList className="grid w-full max-w-none grid-cols-2 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-xl sm:rounded-2xl sm:p-1.5">
+              <TabsList className="grid w-full max-w-none grid-cols-3 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-2xl sm:rounded-2xl sm:p-1.5">
                 <TabsTrigger
                   value="vault"
-                  className="rounded-lg px-2 py-2 text-[11px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                   disabled={!isAuthenticated}
                 >
-                  🔐 Private Vault {!isAuthenticated && <span className="ml-1">🔒</span>}
+                  <span className="sm:hidden">🔐</span>
+                  <span className="hidden sm:inline">🔐 Vault</span>
+                  {!isAuthenticated && <span className="ml-1 hidden sm:inline">🔒</span>}
+                </TabsTrigger>
+                <TabsTrigger
+                  value="questions"
+                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                >
+                  <span className="sm:hidden">📝</span>
+                  <span className="hidden sm:inline">📝 Questions</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="pulse"
                   disabled={!isOnline}
-                  className="rounded-lg px-2 py-2 text-[11px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
-                  ✨ Public Pulse
+                  <span className="sm:hidden">✨</span>
+                  <span className="hidden sm:inline">✨ Pulse</span>
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -168,6 +197,9 @@ export function VylixDashboard() {
                     )}
                   </TabsContent>
 
+                  <TabsContent value="questions" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                    <PastQuestionsView />
+                  </TabsContent>
                   <TabsContent value="pulse" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
                     <PublicPulseView isReadOnly={!isAuthenticated} />
                   </TabsContent>

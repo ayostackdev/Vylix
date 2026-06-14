@@ -20,7 +20,7 @@ const sampleEvents: EventItem[] = [
   {
     id: 2,
     title: 'Career Fair: Tech & Design',
-    desc: 'Connect with top companies hiring interns and graduates this summer.'
+    desc: 'Connect with top companies hiring interns this summer.'
   },
   {
     id: 3,

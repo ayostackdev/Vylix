@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
 import { Alert } from '@/components/ui/Alert';
+import { useAuth } from '@/context/auth-context';
 
 interface UploadedMaterial {
   id: string;
@@ -38,14 +39,20 @@ function ProgressBar({ progress }: { progress: number }) {
 }
 
 export function MaterialUploadForm({ onUploadSuccess, topicId }: MaterialUploadFormProps) {
+  const { user } = useAuth();
+  const isAlumni = user?.status === 'ALUMNI';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
+  const [isPastQuestion, setIsPastQuestion] = useState(false);
+  const [examYear, setExamYear] = useState<number>(new Date().getFullYear());
+  const [semester, setSemester] = useState('');
   const [loading, setLoading] = useState(false);
   const [uploadedMaterial, setUploadedMaterial] = useState<UploadedMaterial | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const currentYear = new Date().getFullYear();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -90,6 +97,11 @@ export function MaterialUploadForm({ onUploadSuccess, topicId }: MaterialUploadF
       const formData = new FormData();
       formData.append('file', file);
       formData.append('title', title.trim());
+      if (isPastQuestion) {
+        formData.append('isPastQuestion', 'true');
+        formData.append('examYear', examYear.toString());
+        if (semester) formData.append('semester', semester);
+      }
       if (topicId) {
         formData.append('topicId', topicId);
       }
@@ -180,6 +192,22 @@ export function MaterialUploadForm({ onUploadSuccess, topicId }: MaterialUploadF
     );
   }
 
+  if (isAlumni) {
+    return (
+      <Card className="cp-fade-up">
+        <CardBody>
+          <div className="py-8 text-center">
+            <span className="text-4xl">🎓</span>
+            <h3 className="mt-4 text-lg font-bold text-purple-900">Uploads Disabled</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Alumni accounts are read-only. Your existing materials remain available in the vault.
+            </p>
+          </div>
+        </CardBody>
+      </Card>
+    );
+  }
+
   return (
     <Card className="cp-fade-up">
       <CardHeader
@@ -226,6 +254,50 @@ export function MaterialUploadForm({ onUploadSuccess, topicId }: MaterialUploadF
               )}
             </div>
           </div>
+
+          {/* Past Question Toggle */}
+          <div className="form-group">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isPastQuestion}
+                onChange={(e) => setIsPastQuestion(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-semibold text-gray-900">📝 This is a past question</span>
+            </label>
+          </div>
+
+          {isPastQuestion && (
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="form-group">
+                <label htmlFor="examYear">Exam Year</label>
+                <select
+                  id="examYear"
+                  value={examYear}
+                  onChange={(e) => setExamYear(parseInt(e.target.value, 10))}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  {Array.from({ length: 10 }, (_, i) => currentYear - i).map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="semester">Semester</label>
+                <select
+                  id="semester"
+                  value={semester}
+                  onChange={(e) => setSemester(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Select</option>
+                  <option value="FIRST">First Semester</option>
+                  <option value="SECOND">Second Semester</option>
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* File Upload */}
           <div className="form-group required">

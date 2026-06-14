@@ -38,3 +38,15 @@ export async function deleteVaultMaterial(id: string): Promise<VaultMaterial[]> 
 export async function clearVaultMaterials(): Promise<void> {
   await del(VAULT_KEY);
 }
+
+/**
+ * Save a material to the vault and return the updated list + count.
+ * Components should call this instead of saveVaultMaterial directly
+ * so the backup email prompt hook can intercept the count.
+ */
+export async function saveToVault(
+  material: VaultMaterial
+): Promise<{ materials: VaultMaterial[]; count: number }> {
+  const updated = await saveVaultMaterial(material);
+  return { materials: updated, count: updated.length };
+}

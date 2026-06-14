@@ -148,7 +148,7 @@ export function LinkedAccountsSettings({ userId }: LinkedAccountsSettingsProps) 
           <div className="bg-gradient-to-br from-blue-50 to-emerald-50/35 border border-blue-100 rounded-lg p-4">
             <p className="font-semibold text-green-900 mb-2">Why link multiple emails?</p>
             <ul className="text-sm text-green-800 space-y-1">
-              <li>• Keep access to your Private Vault after graduation</li>
+              <li>• Keep access to your Private Vault</li>
               <li>• Use either email to log in seamlessly</li>
               <li>• Your vault and materials stay with your account ID, not your email</li>
               <li>• Personal emails persist, institutional emails expire</li>
