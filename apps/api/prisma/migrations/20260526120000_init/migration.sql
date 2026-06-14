@@ -2,7 +2,7 @@
 CREATE TYPE "RSVPStatus" AS ENUM ('GOING', 'MAYBE', 'DECLINED');
 
 -- CreateEnum
-CREATE TYPE "UserStatus" AS ENUM ('STUDENT', 'ALUMNI', 'GRADUATED');
+CREATE TYPE "UserStatus" AS ENUM ('STUDENT');
 
 -- CreateEnum
 CREATE TYPE "BadgeRarity" AS ENUM ('COMMON', 'RARE', 'EPIC', 'LEGENDARY');
@@ -17,9 +17,7 @@ CREATE TABLE "User" (
     "matricNumber" TEXT NOT NULL,
     "entryYear" INTEGER NOT NULL,
     "currentLevel" TEXT,
-    "expectedGraduationYear" INTEGER,
     "status" "UserStatus" NOT NULL DEFAULT 'STUDENT',
-    "graduatedAt" TIMESTAMP(3),
     "collegeId" TEXT NOT NULL,
     "departmentId" TEXT NOT NULL,
     "bio" TEXT,
