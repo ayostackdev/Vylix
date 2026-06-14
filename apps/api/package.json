@@ -12,7 +12,12 @@
     "start": "node dist/main",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "node scripts/prisma-run.mjs migrate dev",
-    "prisma:deploy": "node scripts/prisma-run.mjs migrate deploy"
+    "prisma:deploy": "node scripts/prisma-run.mjs migrate deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.8",
@@ -36,10 +41,12 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.7",
+    "@nestjs/testing": "^11.1.26",
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.0",
     "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.8"
   }
 }

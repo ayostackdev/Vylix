@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vylix
+      POSTGRES_PASSWORD: vylix
+      POSTGRES_DB: vylix
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U vylix
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      target: api-run
+    ports:
+      - 4000:4000
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://vylix:vylix@postgres:5432/vylix
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./apps/api/prisma:/app/apps/api/prisma
+
+  web:
+    build:
+      context: .
+      target: web-run
+    ports:
+      - 3000:3000
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://api:4000
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
