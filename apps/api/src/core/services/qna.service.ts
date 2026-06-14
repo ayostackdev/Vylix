@@ -333,7 +333,7 @@ export class QnaService {
           topicId
         }
       },
-      _count: true,
+      _count: { _all: true },
       _sum: {
         helpCount: true
       },
@@ -354,7 +354,7 @@ export class QnaService {
 
     return answerers.map(a => ({
       userId: a.authorId,
-      answerCount: a._count?.authorId ?? 0,
+      answerCount: a._count?._all ?? 0,
       helpfulCount: a._sum?.helpCount ?? 0
     }));
   }
