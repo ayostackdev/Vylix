@@ -26,7 +26,11 @@ export const metadata: Metadata = {
     telephone: false
   },
   icons: {
-    icon: '/icons/icon-192x192.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
     apple: '/icons/icon-192x192.png',
     shortcut: '/icons/icon-192x192.png'
   }
@@ -35,6 +39,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="apple-touch-startup-image" href="/splash.svg" />
+      </head>
       <body className={`${displayFont.variable} ${bodyFont.variable} min-h-dvh overflow-x-hidden overflow-y-auto`}>
         <QueryProvider>{children}</QueryProvider>
       </body>

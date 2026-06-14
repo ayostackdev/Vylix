@@ -6,19 +6,19 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#dbeafe",
-  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "background_color": "#eff6ff",
   "screenshots": [
     {
-      "src": "/icons/screenshot-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
+      "src": "/splash.svg",
+      "type": "image/svg+xml",
+      "sizes": "640x1136",
       "form_factor": "narrow"
     },
     {
-      "src": "/icons/screenshot-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
+      "src": "/splash.svg",
+      "type": "image/svg+xml",
+      "sizes": "640x1136",
       "form_factor": "wide"
     }
   ],
