@@ -24,7 +24,26 @@ export function ProtectedActionButton({
   className = '',
   variant = 'primary',
 }: ActionButtonProps) {
-  const { isAuthenticated, promptLogin } = useAuth();
+  const { user, isAuthenticated, promptLogin } = useAuth();
+  const isAlumni = user?.status === 'ALUMNI';
+
+  if (isAlumni) {
+    return (
+      <button
+        disabled
+        className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold opacity-50 cursor-not-allowed ${
+          variant === 'primary'
+            ? 'bg-gray-300 text-gray-500'
+            : 'bg-white text-gray-400 border border-gray-200'
+        } ${className}`}
+        title="Alumni accounts are read-only"
+      >
+        {icon && <span>{icon}</span>}
+        <span>{label}</span>
+        <span className="ml-1 text-xs opacity-75">Read Only</span>
+      </button>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
@@ -32,8 +51,8 @@ export function ProtectedActionButton({
         onClick={() => promptLogin(action)}
         className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all ${
           variant === 'primary'
-            ? 'border border-blue-100 bg-blue-100 text-sky-700 hover:bg-blue-200 hover:shadow-md'
-            : 'bg-blue-50 text-green-700 hover:bg-blue-100 border border-blue-200'
+            ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 text-white hover:shadow-md'
+            : 'bg-white text-transparent bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text hover:bg-blue-50 border border-blue-200'
         } ${className}`}
         title={`Sign in to ${action.toLowerCase()}`}
       >
@@ -49,8 +68,8 @@ export function ProtectedActionButton({
       onClick={onClick}
       className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all ${
         variant === 'primary'
-          ? 'border border-blue-100 bg-blue-100 text-sky-700 hover:bg-blue-200 hover:shadow-md'
-          : 'bg-blue-50 text-green-700 hover:bg-blue-100 border border-blue-200'
+          ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 text-white hover:shadow-md'
+          : 'bg-white text-transparent bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text hover:bg-blue-50 border border-blue-200'
       } ${className}`}
       title={label}
     >

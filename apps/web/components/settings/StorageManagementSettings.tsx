@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useStorageManagement } from '@/hooks/useStorageManagement';
+import { useAuth } from '@/context/auth-context';
 
 /**
  * Storage Management Settings Component
  * Shows local device storage usage for cached PDFs and allows clearing cache
  */
 export function StorageManagementSettings() {
+  const { user } = useAuth();
   const {
     storageStats,
     isLoading,
@@ -17,6 +19,29 @@ export function StorageManagementSettings() {
     formatStorageSize,
     getExpiryDate,
   } = useStorageManagement();
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleExportData = useCallback(async () => {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const res = await fetch('/api/user/export-data');
+      if (!res.ok) throw new Error('Failed to export data');
+      const json = await res.json();
+      const blob = new Blob([JSON.stringify(json.data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vylix-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError('Failed to export data. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  }, []);
 
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<string | null>(null);
@@ -228,6 +253,28 @@ export function StorageManagementSettings() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Data Export */}
+          {user && (
+            <div className="border border-purple-200 rounded-lg p-4 bg-purple-50">
+              <p className="font-semibold text-purple-900 mb-2">📦 Export Your Data</p>
+              <p className="text-sm text-purple-800 mb-3">
+                Download all your materials and vault items as a JSON file.
+              </p>
+              {exportError && (
+                <div className="mb-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
+                  {exportError}
+                </div>
+              )}
+              <button
+                onClick={handleExportData}
+                disabled={exporting}
+                className="rounded-lg border border-purple-200 bg-white px-4 py-2 font-semibold text-purple-700 hover:bg-purple-100 disabled:opacity-50"
+              >
+                {exporting ? 'Exporting...' : 'Export Data'}
+              </button>
             </div>
           )}
 

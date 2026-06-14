@@ -1,5 +1,5 @@
 {
-  "name": "@campulse/python-service",
+  "name": "@vylix/python-service",
   "private": true,
   "version": "0.1.0",
   "scripts": {

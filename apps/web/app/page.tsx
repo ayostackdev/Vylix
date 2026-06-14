@@ -1,5 +1,5 @@
-import { CamPulseDashboard } from '@/components/dashboard/CamPulseDashboard';
+import { VylixDashboard } from '@/components/dashboard/VylixDashboard';
 
 export default function HomePage() {
-  return <CamPulseDashboard />;
+  return <VylixDashboard />;
 }

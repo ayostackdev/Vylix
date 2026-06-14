@@ -7,6 +7,14 @@ interface User {
   id: string;
   email: string;
   fullName: string;
+  status?: 'STUDENT' | 'ALUMNI';
+  entryYear?: number;
+  matricNumber?: string;
+  currentLevel?: string;
+  collegeCode?: string;
+  collegeName?: string;
+  departmentCode?: string;
+  departmentName?: string;
 }
 
 interface AuthActionResult {
@@ -34,6 +42,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
 
+  const fetchProfile = useCallback(async (userId: string) => {
+    try {
+      const res = await fetch('/api/user/profile');
+      if (!res.ok) return;
+      const json = await res.json();
+      const profile = json.data;
+      if (profile) {
+        setUser((prev) =>
+          prev && prev.id === userId
+            ? {
+                ...prev,
+                status: profile.status,
+                entryYear: profile.entryYear,
+                matricNumber: profile.matricNumber,
+                currentLevel: profile.currentLevel,
+                collegeCode: profile.college?.code,
+                collegeName: profile.college?.name,
+                departmentCode: profile.department?.code,
+                departmentName: profile.department?.name,
+              }
+            : prev
+        );
+      }
+    } catch {
+      // Profile fetch is non-critical
+    }
+  }, []);
+
+  const buildBaseUser = useCallback((sessionUser: any): User => ({
+    id: sessionUser.id,
+    email: sessionUser.email ?? '',
+    fullName:
+      sessionUser.user_metadata?.full_name ??
+      sessionUser.user_metadata?.name ??
+      sessionUser.email?.split('@')[0] ??
+      'Student',
+  }), []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -46,15 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (sessionUser) {
-        setUser({
-          id: sessionUser.id,
-          email: sessionUser.email ?? '',
-          fullName:
-            sessionUser.user_metadata?.full_name ??
-            sessionUser.user_metadata?.name ??
-            sessionUser.email?.split('@')[0] ??
-            'Student',
-        });
+        const baseUser = buildBaseUser(sessionUser);
+        setUser(baseUser);
+        fetchProfile(baseUser.id);
       } else {
         setUser(null);
       }
@@ -72,15 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (sessionUser) {
-        setUser({
-          id: sessionUser.id,
-          email: sessionUser.email ?? '',
-          fullName:
-            sessionUser.user_metadata?.full_name ??
-            sessionUser.user_metadata?.name ??
-            sessionUser.email?.split('@')[0] ??
-            'Student',
-        });
+        const baseUser = buildBaseUser(sessionUser);
+        setUser(baseUser);
+        fetchProfile(baseUser.id);
       } else {
         setUser(null);
       }
@@ -92,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [supabaseClient]);
+  }, [supabaseClient, buildBaseUser, fetchProfile]);
 
   const login = useCallback(async (email: string, password: string, isSignUp = false): Promise<AuthActionResult> => {
     setIsLoading(true);

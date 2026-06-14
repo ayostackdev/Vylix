@@ -9,6 +9,18 @@ export class CreateMaterialDto {
   courseTitle?: string;
   topicTitle?: string;
   departmentCode?: string;
+  isPastQuestion?: boolean;
+  examYear?: number;
+  semester?: string;
+}
+
+export class PastQuestionsQueryDto {
+  courseCode?: string;
+  year?: number;
+  semester?: string;
+  departmentCode?: string;
+  page?: number;
+  limit?: number;
 }
 
 export class MaterialUploadResponseDto {

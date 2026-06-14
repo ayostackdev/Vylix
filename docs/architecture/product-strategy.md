@@ -1,13 +1,13 @@
 # Product Strategy
 
-CamPulse is positioned as a focused student document and identity platform.
+Vylix is positioned as a focused student document and identity platform.
 
 ## Core promise
 
 - upload and organize academic files
 - prevent duplicate uploads with content-based deduplication
 - make files searchable and easy to retrieve
-- keep access continuity through school and after graduation
+- keep access continuity through school
 - support identity continuity with linked school and personal emails
 
 ## MVP scope

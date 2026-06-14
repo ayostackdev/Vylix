@@ -6,12 +6,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "CamPulse AI Service"
+    app_name: str = "Vylix AI Service"
     environment: str = "development"
     api_prefix: str = "/api/v1"
     cors_origins: str = Field(default="http://localhost:3000")
     postgres_dsn: str = Field(
-        default="postgresql://postgres:postgres@localhost:5432/campulse"
+        default="postgresql://postgres:postgres@localhost:5432/vylix"
     )
     celery_broker_url: str = Field(default="redis://localhost:6379/0")
     celery_result_backend: str = Field(default="redis://localhost:6379/1")

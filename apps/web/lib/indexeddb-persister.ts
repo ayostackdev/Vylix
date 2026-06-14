@@ -1,7 +1,7 @@
 import { del, get, set } from 'idb-keyval';
 import type { Persister, PersistedClient } from '@tanstack/react-query-persist-client';
 
-const PERSIST_KEY = 'campulse-react-query-cache-v1';
+const PERSIST_KEY = 'vylix-react-query-cache-v1';
 
 export const indexedDBPersister: Persister = {
   persistClient: async (client: PersistedClient) => {

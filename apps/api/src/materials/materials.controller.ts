@@ -1,7 +1,8 @@
-import { BadRequestException, Body, Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
+import { AlumniReadOnlyGuard } from '../core/guards/alumni.guard';
 import { CreateMaterialDto, MaterialUploadResponseDto } from './materials.dto';
 import { MaterialsService } from './materials.service';
 
@@ -21,7 +22,7 @@ export class MaterialsController {
   constructor(private readonly materialsService: MaterialsService) {}
 
   @Post('upload')
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(SupabaseAuthGuard, AlumniReadOnlyGuard)
   @UseInterceptors(FileInterceptor('file'))
   create(
     @UploadedFile() file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
@@ -53,5 +54,25 @@ export class MaterialsController {
     }
 
     return this.materialsService.createMaterial(file, dto, authenticatedUserId);
+  }
+
+  @Get('past-questions')
+  @UseGuards(SupabaseAuthGuard)
+  async listPastQuestions(
+    @Query('courseCode') courseCode?: string,
+    @Query('year') year?: string,
+    @Query('semester') semester?: string,
+    @Query('departmentCode') departmentCode?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.materialsService.getPastQuestions({
+      courseCode,
+      year: year ? parseInt(year, 10) : undefined,
+      semester,
+      departmentCode,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 }

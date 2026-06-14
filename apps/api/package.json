@@ -1,5 +1,5 @@
 {
-  "name": "@campulse/api",
+  "name": "@vylix/api",
   "private": true,
   "version": "2.0.0",
   "scripts": {
@@ -24,8 +24,11 @@
     "@prisma/client": "^5.22.0",
     "@socket.io/redis-adapter": "^8.1.1",
     "bullmq": "^5.77.4",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "ioredis": "^5.11.0",
     "nestjs-cls": "^4.5.0",
+    "node-appwrite": "^26.2.0",
     "rate-limiter-flexible": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

@@ -7,10 +7,13 @@ export class MaintenanceKeyGuard implements CanActivate {
   constructor(private readonly configService: ConfigService) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const expectedKey = this.configService.get<string>('MAINTENANCE_API_KEY');
+    // Support both the new `MAINTENANCE_API_KEY` name and the existing
+    // `MAINTENANCE_A` environment variable (backwards-compatibility).
+    const expectedKey =
+      this.configService.get<string>('MAINTENANCE_API_KEY') || this.configService.get<string>('MAINTENANCE_A');
 
     if (!expectedKey) {
-      throw new UnauthorizedException('Maintenance API key is not configured.');
+      throw new UnauthorizedException('Maintenance API key is not configured (set MAINTENANCE_API_KEY or MAINTENANCE_A).');
     }
 
     const request = context.switchToHttp().getRequest<Request & { headers: Record<string, string | undefined> }>();

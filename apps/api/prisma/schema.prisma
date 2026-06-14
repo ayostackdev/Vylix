@@ -14,14 +14,13 @@ model User {
     matricNumber           String     @unique
     entryYear              Int
     currentLevel           String?
-    expectedGraduationYear Int?
     status                 UserStatus @default(STUDENT)
-    graduatedAt            DateTime?
     collegeId              String
     departmentId           String
     bio                    String?
     avatarUrl              String?
     contributionScore      Int        @default(0) // Gamification score
+    emailPromptDismissedAt DateTime?
     createdAt              DateTime   @default(now())
     updatedAt              DateTime   @updatedAt
 
@@ -205,6 +204,9 @@ model Material {
     processingError  String?
     processedAt      DateTime?
     uploadedAt       DateTime                 @default(now())
+    isPastQuestion   Boolean                  @default(false)
+    examYear         Int?
+    semester         String?
 
     topic    Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
     uploader User  @relation(fields: [uploaderId], references: [id], onDelete: Restrict)
@@ -463,7 +465,6 @@ enum RSVPStatus {
 enum UserStatus {
     STUDENT
     ALUMNI
-    GRADUATED
 }
 
 enum BadgeRarity {

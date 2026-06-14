@@ -4,7 +4,7 @@ import { Job, Worker } from 'bullmq';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { createRedisConnectionOptions } from '../core/queues/redis-connection';
 import { TelemetryGateway } from '../telemetry/telemetry.gateway';
-import { MATERIALS_PROCESSING_QUEUE, MaterialProcessingJobPayload } from './materials.queue';
+import { MATERIALS_PROCESSING_QUEUE, MATERIALS_PROCESSING_JOB, MaterialProcessingJobPayload } from './materials.queue';
 
 type StudyInsightsResponse = {
   department_code: string;
@@ -27,7 +27,13 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
   async onModuleInit() {
     this.worker = new Worker<MaterialProcessingJobPayload>(
       MATERIALS_PROCESSING_QUEUE,
-      async (job) => this.processJob(job),
+      async (job) => {
+        // Dispatch based on job name: handle scan jobs separately
+        if (job.name === 'virus-scan') {
+          return this.handleScanJob(job);
+        }
+        return this.processJob(job);
+      },
       {
         connection: createRedisConnectionOptions(this.configService),
         concurrency: Number(this.configService.get<string>('MATERIALS_WORKER_CONCURRENCY') ?? 5)
@@ -221,6 +227,34 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
       durationMs: Date.now() - startedAt,
       skipped: false
     };
+  }
+
+  private async handleScanJob(job: Job<MaterialProcessingJobPayload>) {
+    const materialId = job.data.materialId;
+
+    // Update status to SCANNING
+    await this.prisma.material.update({ where: { id: materialId }, data: { processingStatus: 'PROCESSING', processingError: null } });
+
+    // Simple stub scan: in real deployments call an AV service or run clamd
+    try {
+      // Placeholder: perform basic checks (could call external scanner)
+      const material = await this.prisma.material.findUnique({ where: { id: materialId } });
+      if (!material) throw new Error('Material not found for scan');
+
+      // TODO: implement real virus scanning here. For now, assume clean.
+
+      // Enqueue the actual processing job after successful scan
+      const queue = new (require('bullmq').Queue)(MATERIALS_PROCESSING_QUEUE, { connection: createRedisConnectionOptions(this.configService) });
+      await queue.add(MATERIALS_PROCESSING_JOB, { materialId }, { jobId: materialId });
+
+      // Mark as QUEUED for processing
+      await this.prisma.material.update({ where: { id: materialId }, data: { processingStatus: 'QUEUED' } });
+
+      return { materialId, scanned: true };
+    } catch (err) {
+      await this.prisma.material.update({ where: { id: materialId }, data: { processingStatus: 'FAILED', processingError: this.formatError(err) } });
+      throw err;
+    }
   }
 
   private async requestStudyInsights(fileUrl: string, departmentCode: string, title: string): Promise<StudyInsightsResponse> {

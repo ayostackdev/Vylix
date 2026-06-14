@@ -1,4 +1,4 @@
-# PWA Setup - CamPulse
+# PWA Setup - Vylix
 
 ## ✅ What's Been Configured
 
@@ -40,12 +40,12 @@
 
 ### **New User Flow**
 ```
-1. User opens CamPulse on mobile
+1. User opens Vylix on mobile
    ↓
 2. After 2 seconds, install prompt appears:
-   📱 "Install CamPulse"
+   📱 "Install Vylix"
    "Get faster access and offline support. 
-    Add CamPulse to your home screen..."
+    Add Vylix to your home screen..."
    [Install] [Maybe later]
    ↓
 3. User clicks "Install"
@@ -210,28 +210,28 @@ With your existing IndexedDB setup:
 ## 📱 Testing on Real Devices
 
 ### **Android Chrome**
-1. Open CamPulse on Chrome mobile
+1. Open Vylix on Chrome mobile
 2. Wait 2 seconds
 3. Install prompt appears
 4. Tap "Install"
 5. Check home screen
 
 ### **iOS Safari**
-1. Open CamPulse in Safari
+1. Open Vylix in Safari
 2. Tap Share button
 3. Tap "Add to Home Screen"
 4. Creates app-like shortcut
 5. (Full PWA support limited on iOS, but still useful)
 
 ### **Desktop Chrome**
-1. Open CamPulse in Chrome
+1. Open Vylix in Chrome
 2. Click address bar icon (if eligible)
 3. Install as desktop app
 4. Run as standalone window
 
 ---
 
-## 📊 Why This Matters for CamPulse
+## 📊 Why This Matters for Vylix
 
 | Feature | Benefit |
 |---------|---------|

@@ -6,9 +6,11 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
 import { PrismaService } from '../prisma/prisma.service';
+import { PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
  * JWT Payload interface for Supabase tokens
@@ -86,10 +88,21 @@ export class SupabaseAuthGuard implements CanActivate {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cls: ClsService
+    private readonly cls: ClsService,
+    private readonly reflector: Reflector
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Check if route is marked as public
+    const isPublic = this.reflector.getAllAndOverride<boolean>(PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<Request>();
 
     try {

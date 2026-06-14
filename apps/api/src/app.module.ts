@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClsModule } from 'nestjs-cls';
 import { PrismaModule } from './core/prisma/prisma.module';
+import { HealthModule } from './core/health/health.module';
+import { StorageModule } from './core/storage/storage.module';
 import { TenantMiddleware } from './core/middlewares/tenant.middleware';
 import { RateLimitMiddleware } from './core/middlewares/rate-limit.middleware';
 import { ColphysModule } from './colleges/colphys/colphys.module';
@@ -18,6 +20,7 @@ import { SettingsModule } from './settings/settings.module';
 import { CollaborationModule } from './collaboration/collaboration.module';
 import { GamificationModule } from './gamification/gamification.module';
 import { QnaModule } from './qna/qna.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -28,6 +31,8 @@ import { QnaModule } from './qna/qna.module';
       middleware: { mount: true }
     }),
     PrismaModule,
+    StorageModule.register(),
+    HealthModule,
     ColphysModule,
     ColcomModule,
     ColengModule,
@@ -40,7 +45,8 @@ import { QnaModule } from './qna/qna.module';
     SettingsModule,
     CollaborationModule,
     GamificationModule,
-    QnaModule
+    QnaModule,
+    UserModule
   ]
 })
 export class AppModule implements NestModule {
