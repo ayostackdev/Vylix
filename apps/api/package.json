@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.7",
-    "@nestjs/testing": "^11.1.26",
+    "@nestjs/testing": "^10.4.8",
     "@types/express": "^5.0.0",
     "@types/node": "^22.9.0",
     "prisma": "^5.22.0",
