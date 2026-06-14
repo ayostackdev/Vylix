@@ -10,3 +10,4 @@ coverage
 docker-data/
 .docker/
 *.log
+.vercel
