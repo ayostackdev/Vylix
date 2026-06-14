@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 1136">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="50%" stop-color="#f0fdf4"/>
+      <stop offset="100%" stop-color="#ecfdf5"/>
+    </linearGradient>
+    <linearGradient id="v" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="50%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="1136" fill="url(#bg)"/>
+  <rect x="220" y="448" width="200" height="200" rx="40" fill="url(#v)"/>
+  <text x="320" y="590" font-family="system-ui,-apple-system,sans-serif" font-size="120" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-4">V</text>
+  <text x="320" y="700" font-family="system-ui,-apple-system,sans-serif" font-size="36" font-weight="800" fill="#0f172a" text-anchor="middle" letter-spacing="-1">Vylix</text>
+  <text x="320" y="740" font-family="system-ui,-apple-system,sans-serif" font-size="18" fill="#64748b" text-anchor="middle">Academic Operating System</text>
+</svg>
