@@ -26,10 +26,6 @@ function getSupabaseAnonKey() {
   const resolvedKey = anonKey || publishableKey;
   if (!resolvedKey) return null;
 
-  if (!resolvedKey.startsWith('sb_')) {
-    return null;
-  }
-
   return resolvedKey;
 }
 

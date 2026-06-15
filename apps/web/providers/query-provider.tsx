@@ -4,16 +4,40 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { queryClient } from '@/lib/query-client';
 import { indexedDBPersister } from '@/lib/indexeddb-persister';
 import { AuthProvider } from '@/context/auth-context';
+import { ProgressiveGatingProvider, useProgressiveGating } from '@/context/progressive-gating-context';
 import { LoginModal } from '@/components/auth/LoginModal';
+import { EmailVerificationModal } from '@/components/auth/EmailVerificationModal';
+import { GraduationCelebrationModal } from '@/components/auth/GraduationCelebrationModal';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+
+function ProgressiveGatingModals() {
+  const { showEmailModal, closeEmailModal, onEmailVerified, showGraduationModal, closeGraduationModal } = useProgressiveGating();
+
+  return (
+    <>
+      <EmailVerificationModal
+        isOpen={showEmailModal}
+        onClose={closeEmailModal}
+        onVerified={onEmailVerified}
+      />
+      <GraduationCelebrationModal
+        isOpen={showGraduationModal}
+        onClose={closeGraduationModal}
+      />
+    </>
+  );
+}
 
 export function QueryProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <AuthProvider>
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: indexedDBPersister }}>
-        {children}
-        <LoginModal />
-        <InstallPrompt />
+        <ProgressiveGatingProvider>
+          {children}
+          <LoginModal />
+          <ProgressiveGatingModals />
+          <InstallPrompt />
+        </ProgressiveGatingProvider>
       </PersistQueryClientProvider>
     </AuthProvider>
   );

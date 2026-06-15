@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '@/context/auth-context';
+import { useProgressiveGating } from '@/context/progressive-gating-context';
 
 interface ActionButtonProps {
   icon?: string;
@@ -12,10 +13,6 @@ interface ActionButtonProps {
   variant?: 'primary' | 'secondary';
 }
 
-/**
- * Component that shows action buttons for authenticated users,
- * or login prompts for non-authenticated users
- */
 export function ProtectedActionButton({
   icon,
   label,
@@ -24,8 +21,14 @@ export function ProtectedActionButton({
   className = '',
   variant = 'primary',
 }: ActionButtonProps) {
-  const { user, isAuthenticated, promptLogin } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { gate } = useProgressiveGating();
   const isAlumni = user?.status === 'ALUMNI';
+
+  const handleClick = () => {
+    if (!onClick) return;
+    gate(action, onClick);
+  };
 
   if (isAlumni) {
     return (
@@ -48,7 +51,7 @@ export function ProtectedActionButton({
   if (!isAuthenticated) {
     return (
       <button
-        onClick={() => promptLogin(action)}
+        onClick={() => gate(action)}
         className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all ${
           variant === 'primary'
             ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 text-white hover:shadow-md'
@@ -65,7 +68,7 @@ export function ProtectedActionButton({
 
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className={`flex items-center gap-2 rounded-lg px-4 py-2 font-semibold transition-all ${
         variant === 'primary'
           ? 'bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 text-white hover:shadow-md'

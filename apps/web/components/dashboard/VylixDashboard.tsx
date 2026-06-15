@@ -11,6 +11,8 @@ import { PastQuestionsView } from '@/components/dashboard/PastQuestionsView';
 import { useNetworkState } from '@/hooks/useNetworkState';
 import { useAuth } from '@/context/auth-context';
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
+import { SchoolEmailBanner } from '@/components/auth/SchoolEmailBanner';
+import { LevelUpdateBanner } from '@/components/dashboard/LevelUpdateBanner';
 
 export function VylixDashboard() {
   const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions'>('pulse');
@@ -37,6 +39,7 @@ export function VylixDashboard() {
       setActiveLayer('vault');
     }
   };
+
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-hidden overflow-y-auto px-4 py-3 text-gray-800 sm:px-6 sm:py-4 md:px-8 md:py-8 lg:px-12 lg:py-10">
@@ -118,6 +121,10 @@ export function VylixDashboard() {
           {!isAuthenticated && (
             <ReadOnlyBanner action="upload materials and access full features" />
           )}
+
+          {isAuthenticated && !isAlumni && !user?.schoolEmail && <SchoolEmailBanner />}
+
+          {isAuthenticated && !isAlumni && <LevelUpdateBanner />}
 
           {isAlumni && (
             <div className="cp-fade-up rounded-[1.75rem] border border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/60 p-4 shadow-sm">

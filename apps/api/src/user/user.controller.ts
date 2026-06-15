@@ -125,7 +125,11 @@ export class UserController {
         matricNumber: true,
         entryYear: true,
         currentLevel: true,
+        levelUpdatedAt: true,
+        schoolEmail: true,
+        schoolEmailPromptDismissedAt: true,
         status: true,
+        graduatedAt: true,
         bio: true,
         avatarUrl: true,
         contributionScore: true,
@@ -175,6 +179,92 @@ export class UserController {
         materials,
         vaultItems,
       },
+    };
+  }
+
+  @Post('school-email')
+  async setSchoolEmail(@Req() req: Request, @Body() dto: { email: string }) {
+    const userId = this.requireUserId(req);
+
+    const trimmed = dto.email.trim().toLowerCase();
+    if (!trimmed || !trimmed.includes('@')) {
+      throw new NotFoundException('Valid school email is required');
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { schoolEmail: trimmed },
+    });
+
+    this.logger.log(`User ${userId} set school email to ${trimmed}`);
+
+    return {
+      success: true,
+      message: 'School email saved.',
+      data: { schoolEmail: user.schoolEmail },
+    };
+  }
+
+  @Post('dismiss-school-email-prompt')
+  async dismissSchoolEmailPrompt(@Req() req: Request) {
+    const userId = this.requireUserId(req);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { schoolEmailPromptDismissedAt: new Date() },
+    });
+
+    this.logger.log(`User ${userId} dismissed school email prompt`);
+
+    return {
+      success: true,
+      message: 'Dismissed. We will ask again in 7 days.',
+    };
+  }
+
+  @Post('update-level')
+  async updateLevel(@Req() req: Request, @Body() dto: { level: string }) {
+    const userId = this.requireUserId(req);
+
+    const validLevels = ['100L', '200L', '300L', '400L', '500L', 'Spillover'];
+    if (!validLevels.includes(dto.level)) {
+      throw new NotFoundException('Invalid academic level');
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { currentLevel: dto.level, levelUpdatedAt: new Date() },
+    });
+
+    this.logger.log(`User ${userId} updated level to ${dto.level}`);
+
+    return {
+      success: true,
+      message: `Level updated to ${dto.level}`,
+      data: { currentLevel: user.currentLevel, levelUpdatedAt: user.levelUpdatedAt },
+    };
+  }
+
+  @Post('graduate')
+  async graduate(@Req() req: Request) {
+    const userId = this.requireUserId(req);
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        status: 'ALUMNI',
+        currentLevel: 'Graduated',
+        levelUpdatedAt: new Date(),
+        graduatedAt: new Date(),
+      },
+    });
+
+    this.logger.log(`User ${userId} graduated and converted to alumni`);
+
+    return {
+      success: true,
+      message: 'Your account has been converted to alumni status.',
+      data: { status: user.status, graduatedAt: user.graduatedAt },
     };
   }
 

@@ -14,12 +14,16 @@ model User {
     matricNumber           String     @unique
     entryYear              Int
     currentLevel           String?
+    levelUpdatedAt         DateTime?
+    schoolEmail            String?
     status                 UserStatus @default(STUDENT)
+    graduatedAt            DateTime?
     collegeId              String
     departmentId           String
     bio                    String?
     avatarUrl              String?
     contributionScore      Int        @default(0) // Gamification score
+    schoolEmailPromptDismissedAt DateTime?
     emailPromptDismissedAt DateTime?
     createdAt              DateTime   @default(now())
     updatedAt              DateTime   @updatedAt

@@ -11,6 +11,10 @@ interface User {
   entryYear?: number;
   matricNumber?: string;
   currentLevel?: string;
+  levelUpdatedAt?: string;
+  schoolEmail?: string;
+  schoolEmailPromptDismissedAt?: string;
+  graduatedAt?: string;
   collegeCode?: string;
   collegeName?: string;
   departmentCode?: string;
@@ -27,6 +31,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, isSignUp?: boolean) => Promise<AuthActionResult>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
@@ -57,6 +62,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 entryYear: profile.entryYear,
                 matricNumber: profile.matricNumber,
                 currentLevel: profile.currentLevel,
+                levelUpdatedAt: profile.levelUpdatedAt,
+                schoolEmail: profile.schoolEmail,
+                schoolEmailPromptDismissedAt: profile.schoolEmailPromptDismissedAt,
+                graduatedAt: profile.graduatedAt,
                 collegeCode: profile.college?.code,
                 collegeName: profile.college?.name,
                 departmentCode: profile.department?.code,
@@ -206,6 +215,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, [supabaseClient]);
 
+  const signInWithGoogle = useCallback(async () => {
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+  }, [supabaseClient]);
+
   const promptLogin = useCallback((action: string) => {
     setPendingAction(action);
     setShowLoginModal(true);
@@ -216,6 +235,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated: !!user,
     isLoading,
     login,
+    signInWithGoogle,
     logout,
     showLoginModal,
     setShowLoginModal,
