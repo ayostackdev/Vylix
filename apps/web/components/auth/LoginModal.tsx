@@ -35,6 +35,9 @@ export function LoginModal() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
+      // If we reach here, signInWithOAuth didn't redirect (e.g. fallback client)
+      setError('Redirecting to Google... If nothing happens, check that Supabase env vars are set correctly.');
+      setGoogleLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google sign-in failed');
       setGoogleLoading(false);
