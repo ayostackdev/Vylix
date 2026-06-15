@@ -6,14 +6,19 @@ let supabaseClient: SupabaseClient | null = null;
 
 function getSupabaseUrl() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url) return null;
+  if (!url) {
+    console.warn('[supabase] NEXT_PUBLIC_SUPABASE_URL is not set');
+    return null;
+  }
 
   try {
     const parsedUrl = new URL(url);
     if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      console.warn('[supabase] Invalid protocol:', parsedUrl.protocol);
       return null;
     }
   } catch {
+    console.warn('[supabase] Failed to parse URL:', url);
     return null;
   }
 
@@ -24,7 +29,10 @@ function getSupabaseAnonKey() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const resolvedKey = anonKey || publishableKey;
-  if (!resolvedKey) return null;
+  if (!resolvedKey) {
+    console.warn('[supabase] No anon key found');
+    return null;
+  }
 
   return resolvedKey;
 }
@@ -62,9 +70,11 @@ export function getSupabaseBrowserClient(): SupabaseClient {
     const anonKey = getSupabaseAnonKey();
 
     if (!url || !anonKey) {
+      console.warn('[supabase] Using fallback client (url=%s, anonKey=%s)', !!url, !!anonKey);
       return createFallbackClient();
     }
 
+    console.log('[supabase] Initialized real client');
     supabaseClient = createClient(url, anonKey, {
       auth: {
         persistSession: true,
