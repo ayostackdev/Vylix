@@ -45,6 +45,7 @@ function createFallbackClient(): SupabaseClient {
         },
       }),
       signInWithPassword: async () => emptyAuthResult,
+      signInWithOAuth: async () => ({ data: null, error: null }),
       signUp: async () => emptyAuthResult,
       signOut: async () => ({ error: null }),
       getUser: async () => emptyUser,
