@@ -13,6 +13,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "node scripts/prisma-run.mjs migrate dev",
     "prisma:deploy": "node scripts/prisma-run.mjs migrate deploy",
+    "seed": "npx ts-node prisma/seed.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -38,6 +39,9 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1"
+  },
+  "prisma": {
+    "seed": "npx ts-node prisma/seed.ts"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.7",

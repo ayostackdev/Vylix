@@ -6,10 +6,12 @@ interface CardProps {
   children: ReactNode;
   className?: string;
   elevated?: boolean;
+  glass?: boolean;
+  hoverable?: boolean;
   onClick?: () => void;
 }
 
-export function Card({ children, className = '', elevated = false, onClick }: CardProps) {
+export function Card({ children, className = '', elevated = false, glass = false, hoverable = false, onClick }: CardProps) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault();
@@ -19,7 +21,7 @@ export function Card({ children, className = '', elevated = false, onClick }: Ca
 
   return (
     <div
-      className={`card ${elevated ? 'card-elevated' : ''} ${className}`}
+      className={`${glass ? 'glass' : 'card'} ${elevated ? 'card-elevated' : ''} ${hoverable ? 'scale-hover cursor-pointer' : ''} ${className}`}
       onClick={onClick}
       onKeyDown={onClick ? handleKeyDown : undefined}
       tabIndex={onClick ? 0 : undefined}

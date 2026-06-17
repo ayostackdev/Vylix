@@ -7,9 +7,6 @@ import { HealthModule } from './core/health/health.module';
 import { StorageModule } from './core/storage/storage.module';
 import { TenantMiddleware } from './core/middlewares/tenant.middleware';
 import { RateLimitMiddleware } from './core/middlewares/rate-limit.middleware';
-import { ColphysModule } from './colleges/colphys/colphys.module';
-import { ColcomModule } from './colleges/colcom/colcom.module';
-import { ColengModule } from './colleges/coleng/coleng.module';
 import { CoursesModule } from './courses/courses.module';
 import { TopicsModule } from './topics/topics.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
@@ -33,9 +30,6 @@ import { UserModule } from './user/user.module';
     PrismaModule,
     StorageModule.register(),
     HealthModule,
-    ColphysModule,
-    ColcomModule,
-    ColengModule,
     CoursesModule,
     TopicsModule,
     TelemetryModule,

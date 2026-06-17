@@ -208,6 +208,7 @@ model Material {
     processingError  String?
     processedAt      DateTime?
     uploadedAt       DateTime                 @default(now())
+    isSeed           Boolean                  @default(false)
     isPastQuestion   Boolean                  @default(false)
     examYear         Int?
     semester         String?
@@ -219,6 +220,8 @@ model Material {
     @@index([processingJobId])
     @@index([uploadedAt])
     @@index([topicId, uploadedAt])
+    @@index([topicId, isSeed])
+    @@index([isSeed])
 }
 
 model Conversation {

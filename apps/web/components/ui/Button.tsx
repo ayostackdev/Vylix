@@ -34,7 +34,7 @@ export function Button({
 
   return (
     <button
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} press-effect ${className}`}
       disabled={isLoading || props.disabled}
       {...props}
     >

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 
 interface PastQuestion {
   id: string;
@@ -42,7 +43,14 @@ export function PastQuestionsView() {
       if (searchYear) params.set('year', searchYear);
       if (searchSemester) params.set('semester', searchSemester);
 
-      const res = await fetch(`/api/materials/past-questions?${params.toString()}`);
+      const headers: Record<string, string> = {};
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const res = await fetch(`/api/materials/past-questions?${params.toString()}`, { headers });
       if (!res.ok) throw new Error('Failed to fetch past questions');
       const json = await res.json();
       setItems(json.items ?? []);

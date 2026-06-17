@@ -7,6 +7,7 @@ interface User {
   id: string;
   email: string;
   fullName: string;
+  avatarUrl?: string;
   status?: 'STUDENT' | 'ALUMNI';
   entryYear?: number;
   matricNumber?: string;
@@ -87,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       sessionUser.user_metadata?.name ??
       sessionUser.email?.split('@')[0] ??
       'Student',
+    avatarUrl: sessionUser.user_metadata?.avatar_url ?? sessionUser.user_metadata?.picture ?? undefined,
   }), []);
 
   useEffect(() => {
@@ -163,6 +165,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               data.session.user.user_metadata?.full_name ??
               data.session.user.user_metadata?.name ??
               email.split('@')[0],
+            avatarUrl: data.session.user.user_metadata?.avatar_url ?? data.session.user.user_metadata?.picture ?? undefined,
           });
           setShowLoginModal(false);
           return {
@@ -194,6 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data.user.user_metadata?.full_name ??
             data.user.user_metadata?.name ??
             email.split('@')[0],
+          avatarUrl: data.user.user_metadata?.avatar_url ?? data.user.user_metadata?.picture ?? undefined,
         });
       }
 

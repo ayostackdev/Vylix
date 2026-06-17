@@ -104,7 +104,7 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
         });
 
         if (failedMaterial) {
-          this.telemetryGateway.emitDepartmentPulse(failedMaterial.topic.course.department?.code ?? 'COLPHY', {
+          this.telemetryGateway.emitDepartmentPulse(failedMaterial.topic.course.department?.code ?? 'UNKNOWN', {
             topicId: failedMaterial.topicId,
             type: 'status',
             title: 'Material processing failed',
@@ -151,7 +151,7 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
     if (material.processingStatus === 'COMPLETED' && material.summary && material.questions && material.tips) {
       return {
         materialId: material.id,
-        departmentCode: material.topic.course.department?.code ?? 'COLPHY',
+        departmentCode: material.topic.course.department?.code ?? 'UNKNOWN',
         durationMs: Date.now() - startedAt,
         skipped: true
       };
@@ -160,7 +160,7 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
     if (material.processingJobId && job.id && material.processingJobId !== job.id) {
       return {
         materialId: material.id,
-        departmentCode: material.topic.course.department?.code ?? 'COLPHY',
+        departmentCode: material.topic.course.department?.code ?? 'UNKNOWN',
         durationMs: Date.now() - startedAt,
         skipped: true
       };
@@ -175,7 +175,7 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
       }
     });
 
-    this.telemetryGateway.emitDepartmentPulse(material.topic.course.department?.code ?? 'COLPHY', {
+    this.telemetryGateway.emitDepartmentPulse(material.topic.course.department?.code ?? 'UNKNOWN', {
       topicId: material.topicId,
       type: 'status',
       title: 'Material processing started',
@@ -191,7 +191,7 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
 
     const insights = await this.requestStudyInsights(
       material.fileUrl,
-      material.topic.course.department?.code ?? 'COLPHY',
+      material.topic.course.department?.code ?? 'UNKNOWN',
       material.topic.title
     );
 
@@ -207,7 +207,7 @@ export class MaterialsProcessingWorkerService implements OnModuleInit, OnModuleD
       }
     });
 
-    this.telemetryGateway.emitDepartmentPulse(insights.department_code ?? material.topic.course.department?.code ?? 'COLPHY', {
+    this.telemetryGateway.emitDepartmentPulse(insights.department_code ?? material.topic.course.department?.code ?? 'UNKNOWN', {
       topicId: material.topicId,
       type: 'status',
       title: 'Material processing completed',

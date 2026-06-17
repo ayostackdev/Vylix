@@ -355,44 +355,93 @@ export class MaterialsService {
   }
 
   private async ensureColphyHierarchy(dto: CreateMaterialDto, uploaderId?: string) {
-    const collegeCode = 'COLPHY';
-    const departmentCode = dto.departmentCode?.trim().toUpperCase() || collegeCode;
-    const courseCode = dto.courseCode?.trim().toUpperCase() || 'COLPHY-VAULT';
-    const courseTitle = dto.courseTitle?.trim() || 'Colphy Vault Uploads';
+    const departmentCode = dto.departmentCode?.trim().toUpperCase();
+    const courseCode = dto.courseCode?.trim().toUpperCase() || 'GENERAL-VAULT';
+    const courseTitle = dto.courseTitle?.trim() || 'General Vault Uploads';
     const topicTitle = dto.topicTitle?.trim() || dto.title;
 
-    const college = await this.prisma.college.upsert({
-      where: { code: collegeCode },
-      update: {},
-      create: {
-        code: collegeCode,
-        name: 'College of Physics',
-        durationYears: 4
-      }
-    });
+    let collegeId: string;
+    let departmentId: string;
+    let collegeCode: string;
+    let deptCode: string;
 
-    const department = await this.prisma.department.upsert({
-      where: { code: departmentCode },
-      update: { collegeId: college.id },
-      create: {
-        code: departmentCode,
-        name: 'Department of Physics',
-        collegeId: college.id
+    if (departmentCode) {
+      const existing = await this.prisma.department.findUnique({
+        where: { code: departmentCode },
+        include: { college: true }
+      });
+
+      if (existing) {
+        collegeId = existing.college.id;
+        collegeCode = existing.college.code;
+        departmentId = existing.id;
+        deptCode = existing.code;
+      } else {
+        const college = await this.prisma.college.upsert({
+          where: { code: departmentCode },
+          update: {},
+          create: {
+            code: departmentCode,
+            name: `College of ${departmentCode}`,
+            durationYears: 4
+          }
+        });
+        collegeId = college.id;
+        collegeCode = college.code;
+
+        const department = await this.prisma.department.upsert({
+          where: { code: departmentCode },
+          update: { collegeId: college.id },
+          create: {
+            code: departmentCode,
+            name: `Department of ${departmentCode}`,
+            collegeId: college.id
+          }
+        });
+        departmentId = department.id;
+        deptCode = department.code;
       }
-    });
+    } else {
+      const college = await this.prisma.college.findFirst({
+        orderBy: { code: 'asc' }
+      });
+
+      if (!college) {
+        throw new Error('No colleges exist. Run the database seed first.');
+      }
+
+      collegeId = college.id;
+      collegeCode = college.code;
+
+      const department = await this.prisma.department.findFirst({
+        where: { collegeId: college.id },
+        orderBy: { code: 'asc' }
+      }) ?? await this.prisma.department.upsert({
+        where: { code: 'VAULT' },
+        update: { collegeId: college.id },
+        create: {
+          code: 'VAULT',
+          name: 'General Vault',
+          collegeId: college.id
+        }
+      });
+
+      departmentId = department.id;
+      deptCode = department.code;
+    }
 
     const course = await this.prisma.course.upsert({
       where: { code: courseCode },
       update: {
         title: courseTitle,
-        departmentId: department.id
+        departmentId: departmentId
       },
       create: {
         code: courseCode,
         title: courseTitle,
         level: 100,
-        departmentId: department.id,
-        isGeneral: false
+        departmentId: departmentId,
+        isGeneral: true
       }
     });
 
@@ -400,7 +449,7 @@ export class MaterialsService {
       data: {
         title: topicTitle,
         courseId: course.id,
-        authorId: uploaderId ?? (await this.getFallbackAuthorId(college.id, department.id))
+        authorId: uploaderId ?? (await this.getFallbackAuthorId(collegeId, departmentId))
       },
       select: {
         id: true,
@@ -409,9 +458,9 @@ export class MaterialsService {
     });
 
     return {
-      collegeCode: college.code,
-      departmentCode: department.code,
-      departmentId: department.id,
+      collegeCode,
+      departmentCode: deptCode,
+      departmentId,
       course,
       topic
     };
@@ -419,7 +468,7 @@ export class MaterialsService {
 
   private async getFallbackAuthorId(collegeId: string, departmentId: string): Promise<string> {
     const currentYear = new Date().getFullYear();
-    const systemEmail = 'colphy.system@vylix.local';
+    const systemEmail = 'vault.system@vylix.local';
 
     const existingUserEmail = await this.prisma.userEmail.findUnique({
       where: { email: systemEmail },
@@ -441,8 +490,8 @@ export class MaterialsService {
 
     const newUser = await this.prisma.user.create({
       data: {
-        fullName: 'COLPHY Vault System',
-        matricNumber: 'COLPHY-SYSTEM',
+        fullName: 'Vault System',
+        matricNumber: 'VAULT-SYSTEM',
         entryYear: currentYear,
         currentLevel: '100L',
         status: 'STUDENT',

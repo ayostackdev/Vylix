@@ -78,12 +78,22 @@ export function VylixDashboard() {
                 </span>
                 {!isOnline ? (
                   <Badge variant="destructive" className="px-3 py-1 text-[11px] sm:text-xs">
+                    <span className="relative flex h-1.5 w-1.5 mr-1">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
+                    </span>
                     Offline Mode Active
                   </Badge>
                 ) : isAlumni ? (
                   <span className="cp-pill inline-flex items-center rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-100/70 sm:text-xs">🎓 Alumni — Read Only</span>
                 ) : isAuthenticated ? (
-                  <Badge variant="success" className="px-3 py-1 text-[11px] sm:text-xs">Live & Connected</Badge>
+                  <Badge variant="live" className="px-3 py-1 text-[11px] sm:text-xs">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    </span>
+                    Live & Connected
+                  </Badge>
                 ) : (
                   <Badge variant="default" className="px-3 py-1 text-[11px] sm:text-xs">Browse Only</Badge>
                 )}
@@ -91,7 +101,7 @@ export function VylixDashboard() {
 
               <div className="flex items-center gap-4 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm">
                 <Avatar className="h-14 w-14 shadow-sm ring-4 ring-blue-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[2px] [&>div]:rounded-full">
-                  <AvatarImage src="/avatars/student-profile.jpg" alt="Student profile photo" />
+                  <AvatarImage src={user?.avatarUrl ?? undefined} alt="Student profile photo" />
                   <AvatarFallback className="bg-green-50 font-black text-gray-900">{userInitials}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -105,11 +115,11 @@ export function VylixDashboard() {
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-[2rem] border border-blue-100 bg-blue-50/95 p-4 shadow-[0_24px_80px_rgba(148,163,184,0.14)] sm:gap-5 sm:p-5 md:p-6 lg:p-7">
-          <aside className="cp-fade-up grid gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:gap-4">
+          <aside className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:gap-4">
             {spotlightStats.map((stat, index) => (
               <article
                 key={stat.label}
-                className="rounded-[1.5rem] border-l-4 border-t border-blue-100 bg-white p-4 shadow-[0_12px_30px_rgba(59,130,246,0.08)]"
+                className={`cp-fade-up rounded-[1.5rem] border-l-4 border-t border-blue-100 bg-white p-4 shadow-[0_12px_30px_rgba(59,130,246,0.08)] delay-${index + 1}`}
                 style={{ borderLeftColor: ['#2563eb', '#0ea5e9', '#10b981'][index] }}
               >
                 <p className="cp-label">{stat.label}</p>
@@ -152,11 +162,11 @@ export function VylixDashboard() {
             }}
             className="cp-fade-up flex min-h-0 flex-1 flex-col gap-3 sm:gap-4"
           >
-            <div className="flex w-full justify-center">
+            <div className="flex w-full justify-center cp-fade-in">
               <TabsList className="grid w-full max-w-none grid-cols-3 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-2xl sm:rounded-2xl sm:p-1.5">
                 <TabsTrigger
                   value="vault"
-                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                   disabled={!isAuthenticated}
                 >
                   <span className="sm:hidden">🔐</span>
@@ -165,7 +175,7 @@ export function VylixDashboard() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="questions"
-                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">📝</span>
                   <span className="hidden sm:inline">📝 Questions</span>
@@ -173,7 +183,7 @@ export function VylixDashboard() {
                 <TabsTrigger
                   value="pulse"
                   disabled={!isOnline}
-                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">✨</span>
                   <span className="hidden sm:inline">✨ Pulse</span>
@@ -215,7 +225,7 @@ export function VylixDashboard() {
             </section>
           </Tabs>
 
-          <footer className="mt-auto border-t border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50/35 px-3 py-3 sm:px-6 sm:py-4">
+          <footer className="mt-auto border-t border-blue-100 bg-gradient-to-r from-blue-50/80 to-emerald-50/35 px-3 py-3 backdrop-blur-sm sm:px-6 sm:py-4">
             <div className="flex items-center justify-between gap-3 text-left">
               <div>
                 <p className="font-bold text-[10px] uppercase tracking-wider bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">
@@ -226,13 +236,20 @@ export function VylixDashboard() {
                 </p>
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 shadow-sm">
-                <span
-                  className={`h-2 w-2 rounded-full shadow-[0_0_0_4px_rgba(59,130,246,0.12)] ${
-                    isAuthenticated ? 'bg-emerald-500' : 'bg-slate-400'
-                  }`}
-                />
-                <span className="cp-pill text-green-700 sm:text-[10px]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 shadow-sm transition-all hover:shadow-md">
+                <span className="relative flex h-2 w-2">
+                  <span
+                    className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
+                      isAuthenticated ? 'bg-emerald-400' : 'bg-slate-400'
+                    }`}
+                  />
+                  <span
+                    className={`relative inline-flex h-2 w-2 rounded-full ${
+                      isAuthenticated ? 'bg-emerald-500' : 'bg-slate-400'
+                    }`}
+                  />
+                </span>
+                <span className="cp-pill sm:text-[10px]">
                   {isAuthenticated ? 'Authenticated' : 'Guest'}
                 </span>
               </div>
