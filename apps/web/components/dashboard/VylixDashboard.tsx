@@ -14,10 +14,12 @@ import { useAuth } from '@/context/auth-context';
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
 import { SchoolEmailBanner } from '@/components/auth/SchoolEmailBanner';
 import { LevelUpdateBanner } from '@/components/dashboard/LevelUpdateBanner';
+import { ProfileModal } from '@/components/auth/ProfileModal';
 
 export function VylixDashboard() {
   const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions'>('pulse');
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const { isOnline } = useNetworkState();
   const { user, isAuthenticated, promptLogin } = useAuth();
   const isAlumni = user?.status === 'ALUMNI';
@@ -101,7 +103,28 @@ export function VylixDashboard() {
                 )}
               </div>
 
-              <div className="flex items-center gap-4 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm">
+              <div
+                className="flex items-center gap-4 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm cursor-pointer transition-all hover:bg-blue-100/70 active:scale-[0.98]"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    promptLogin('view your profile');
+                  } else {
+                    setShowProfileModal(true);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (!isAuthenticated) {
+                      promptLogin('view your profile');
+                    } else {
+                      setShowProfileModal(true);
+                    }
+                  }
+                }}
+              >
                 <Avatar className="h-14 w-14 shadow-sm ring-4 ring-blue-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[2px] [&>div]:rounded-full">
                   <AvatarImage src={user?.avatarUrl ?? undefined} alt="Student profile photo" />
                   <AvatarFallback className="bg-green-50 font-black text-gray-900">{userInitials}</AvatarFallback>
@@ -276,6 +299,11 @@ export function VylixDashboard() {
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
         onSuccess={() => setShowUploadModal(false)}
+      />
+
+      <ProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
       />
     </div>
   );
