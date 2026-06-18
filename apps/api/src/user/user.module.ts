@@ -4,11 +4,11 @@ import { SupabaseAuthGuard } from '../core/guards/auth.guard';
 import { EmailLinkingService } from '../core/services/email-linking.service';
 import { StreakService } from '../core/services/streak.service';
 import { CacheService } from '../core/services/cache.service';
-import { UserController } from './user.controller';
+import { UserController, ReferenceController } from './user.controller';
 
 @Module({
   imports: [PrismaModule],
-  controllers: [UserController],
+  controllers: [UserController, ReferenceController],
   providers: [SupabaseAuthGuard, EmailLinkingService, StreakService, CacheService],
 })
 export class UserModule {}

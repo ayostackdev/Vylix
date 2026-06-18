@@ -2,19 +2,23 @@ import {
   Controller,
   Post,
   Get,
+  Patch,
   Body,
+  Param,
   UseGuards,
   Req,
   Logger,
   UnauthorizedException,
   NotFoundException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
 import { EmailLinkingService } from '../core/services/email-linking.service';
 import { StreakService } from '../core/services/streak.service';
 import { PrismaService } from '../core/prisma/prisma.service';
+import { Public } from '../core/decorators/public.decorator';
 
 const BACKUP_LINK_POINTS = 50;
 
@@ -340,5 +344,76 @@ export class UserController {
       ),
       nextMilestone: getNextMilestone(vaultCount),
     };
+  }
+
+  @Patch('profile')
+  async updateProfile(
+    @Req() req: Request,
+    @Body() dto: { matricNumber?: string; entryYear?: number; collegeId?: string; departmentId?: string; currentLevel?: string }
+  ) {
+    const userId = this.requireUserId(req);
+
+    const data: Record<string, any> = {};
+    if (dto.matricNumber !== undefined) {
+      const existing = await this.prisma.user.findUnique({ where: { matricNumber: dto.matricNumber } });
+      if (existing && existing.id !== userId) {
+        throw new BadRequestException('Matric number already in use');
+      }
+      data.matricNumber = dto.matricNumber;
+    }
+    if (dto.entryYear !== undefined) data.entryYear = dto.entryYear;
+    if (dto.currentLevel !== undefined) data.currentLevel = dto.currentLevel;
+    if (dto.collegeId !== undefined) {
+      const college = await this.prisma.college.findUnique({ where: { id: dto.collegeId } });
+      if (!college) throw new NotFoundException('College not found');
+      data.collegeId = dto.collegeId;
+    }
+    if (dto.departmentId !== undefined) {
+      const department = await this.prisma.department.findUnique({ where: { id: dto.departmentId } });
+      if (!department) throw new NotFoundException('Department not found');
+      data.departmentId = dto.departmentId;
+    }
+
+    if (Object.keys(data).length === 0) {
+      throw new BadRequestException('No fields to update');
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+      select: {
+        id: true,
+        fullName: true,
+        matricNumber: true,
+        entryYear: true,
+        currentLevel: true,
+        levelUpdatedAt: true,
+        status: true,
+        collegeId: true,
+        departmentId: true,
+      },
+    });
+
+    return { data: user };
+  }
+}
+
+@Controller('colleges')
+@UseGuards(SupabaseAuthGuard)
+export class ReferenceController {
+  constructor(private readonly prisma: PrismaService) {}
+
+  @Public()
+  @Get()
+  async listColleges() {
+    return this.prisma.college.findMany({ orderBy: { name: 'asc' } });
+  }
+
+  @Public()
+  @Get(':collegeId/departments')
+  async listDepartments(@Param('collegeId') collegeId: string) {
+    const college = await this.prisma.college.findUnique({ where: { id: collegeId } });
+    if (!college) throw new NotFoundException('College not found');
+    return this.prisma.department.findMany({ where: { collegeId }, orderBy: { name: 'asc' } });
   }
 }
