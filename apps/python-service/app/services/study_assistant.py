@@ -3,7 +3,9 @@ from __future__ import annotations
 import re
 from collections import Counter
 from dataclasses import dataclass
-from typing import Iterable
+
+
+from app.services.gemini import generate_insights
 
 STOPWORDS = {
     "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "have", "he", "her",
@@ -34,17 +36,25 @@ def infer_department_code(text: str, explicit_code: str | None = None) -> str:
 def generate_study_insights(text: str, *, department_code: str | None = None) -> StudyInsights:
     cleaned_text = re.sub(r"\s+", " ", text).strip()
     inferred_department = infer_department_code(cleaned_text, department_code)
-    summary = build_summary(cleaned_text)
-    questions = build_questions(cleaned_text)
-    tips = build_tips(cleaned_text)
+
+    ai_result = generate_insights(cleaned_text, inferred_department)
+    if ai_result:
+        return StudyInsights(
+            department_code=inferred_department,
+            summary=ai_result.get("summary", build_summary(cleaned_text)),
+            questions=ai_result.get("questions", build_questions(cleaned_text)),
+            tips=ai_result.get("tips", build_tips(cleaned_text)),
+        )
 
     return StudyInsights(
         department_code=inferred_department,
-        summary=summary,
-        questions=questions,
-        tips=tips,
+        summary=build_summary(cleaned_text),
+        questions=build_questions(cleaned_text),
+        tips=build_tips(cleaned_text),
     )
 
+
+# ── Heuristic fallbacks (used when no Gemini key is set) ──────────────────
 
 def build_summary(text: str, max_sentences: int = 3) -> str:
     sentences = split_sentences(text)

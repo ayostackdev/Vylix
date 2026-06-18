@@ -11,6 +11,7 @@ from app.services.pdf import compress_pdf
 from app.services.ocr import extract_text_with_tesseract
 from app.services.ingestion import ingest_document, search_documents
 from app.services.docling_parser import parse_with_docling
+from app.services.gemini import chat as gemini_chat
 from app.services.rag import build_chunks
 from app.services.vector_store import VectorStore
 
@@ -210,9 +211,9 @@ async def chat_with_document(payload: ChatRequest) -> ChatResponse:
     best = relevant_results[0]
     context_chunks = [r.text for r in relevant_results]
 
-    answer = best.text[:500]
-    if len(best.text) > 500:
-        answer = answer.rsplit(" ", 1)[0] + "..."
+    context_text = "\n\n".join(context_chunks)
+    ai_answer = gemini_chat(payload.query, context_text)
+    answer = ai_answer if ai_answer else best.text[:500]
 
     follow_up_questions = _generate_follow_ups(best.text, payload.query)
 

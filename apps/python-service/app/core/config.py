@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     celery_broker_url: str = Field(default="redis://localhost:6379/0")
     celery_result_backend: str = Field(default="redis://localhost:6379/1")
     max_upload_mb: int = Field(default=50, ge=1)
+    gemini_api_key: str | None = Field(default=None)
     temp_dir: Path = Field(default=Path("./tmp"))
     upload_dir: Path = Field(default=Path("./storage/uploads"))
 
