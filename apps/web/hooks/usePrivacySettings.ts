@@ -49,7 +49,8 @@ export function usePrivacySettings() {
           throw new Error('No active session');
         }
 
-        const response = await fetch(`/api/settings/privacy/${userId}`, {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const response = await fetch(`${apiBaseUrl}/api/settings/privacy/${userId}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
           },
@@ -83,7 +84,8 @@ export function usePrivacySettings() {
           throw new Error('No active session');
         }
 
-        const response = await fetch(`/api/settings/privacy/${userId}`, {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const response = await fetch(`${apiBaseUrl}/api/settings/privacy/${userId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +122,8 @@ export function usePrivacySettings() {
           throw new Error('No active session');
         }
 
-        const response = await fetch(`/api/settings/stealth-mode/${userId}`, {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const response = await fetch(`${apiBaseUrl}/api/settings/stealth-mode/${userId}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
@@ -172,7 +175,8 @@ export function useBadges() {
           throw new Error('No active session');
         }
 
-        const response = await fetch(`/api/settings/badges/${userId}`, {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const response = await fetch(`${apiBaseUrl}/api/settings/badges/${userId}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
           },
@@ -205,7 +209,8 @@ export function useBadges() {
         throw new Error('No active session');
       }
 
-      const response = await fetch('/api/settings/leaderboard', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/settings/leaderboard`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
         },
@@ -236,7 +241,8 @@ export function useBadges() {
         throw new Error('No active session');
       }
 
-      const response = await fetch('/api/settings/badges/all', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/settings/badges/all`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
         },

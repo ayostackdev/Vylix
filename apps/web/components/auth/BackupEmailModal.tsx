@@ -36,7 +36,8 @@ export function BackupEmailModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const res = await fetch('/api/user/link-backup-email', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/user/link-backup-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,9 +67,13 @@ export function BackupEmailModal({
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        await fetch('/api/user/dismiss-email-prompt', {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        await fetch(`${apiBaseUrl}/api/user/dismiss-email-prompt`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${session.access_token}` },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
         });
       }
     } catch {

@@ -33,7 +33,8 @@ export function GraduationCelebrationModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const res = await fetch('/api/user/graduate', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/user/graduate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

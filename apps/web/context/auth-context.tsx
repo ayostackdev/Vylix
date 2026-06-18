@@ -50,7 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
-      const res = await fetch('/api/user/profile');
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/user/profile`);
       if (!res.ok) return;
       const json = await res.json();
       const profile = json.data;

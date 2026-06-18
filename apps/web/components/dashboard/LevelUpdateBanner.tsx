@@ -27,7 +27,8 @@ export function LevelUpdateBanner() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const res = await fetch('/api/user/update-level', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/user/update-level`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

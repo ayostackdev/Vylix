@@ -14,7 +14,8 @@ export function ProfileBackupBanner() {
     if (!session) return;
 
     try {
-      const res = await fetch('/api/user/backup-status', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/user/backup-status`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) {
@@ -33,9 +34,13 @@ export function ProfileBackupBanner() {
   const handleDismiss = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      await fetch('/api/user/dismiss-email-prompt', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      await fetch(`${apiBaseUrl}/api/user/dismiss-email-prompt`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
     }
     setShowModal(false);

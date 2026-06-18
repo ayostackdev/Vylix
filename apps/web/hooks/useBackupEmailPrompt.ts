@@ -50,7 +50,8 @@ export function useBackupEmailPrompt() {
     }
 
     try {
-      const res = await fetch('/api/user/backup-status', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/user/backup-status`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) {

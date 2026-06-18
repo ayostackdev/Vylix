@@ -50,7 +50,8 @@ export function PastQuestionsView() {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const res = await fetch(`/api/materials/past-questions?${params.toString()}`, { headers });
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/materials/past-questions?${params.toString()}`, { headers });
       if (!res.ok) throw new Error('Failed to fetch past questions');
       const json = await res.json();
       setItems(json.items ?? []);
