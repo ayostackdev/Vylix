@@ -21,9 +21,13 @@ export function SchoolEmailBanner() {
   const handleDismiss = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      await fetch('/api/user/dismiss-school-email-prompt', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      await fetch(`${apiBaseUrl}/api/user/dismiss-school-email-prompt`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
       }).catch(() => {});
     }
     window.location.reload();

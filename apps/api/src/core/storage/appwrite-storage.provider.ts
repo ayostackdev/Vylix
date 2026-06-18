@@ -1,8 +1,10 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client, Storage } from 'node-appwrite';
-import { InputFile } from 'node-appwrite/dist/inputFile.js';
+import type { InputFile } from 'node-appwrite/dist/inputFile';
 import { randomUUID } from 'crypto';
+
+const { InputFile: InputFileCtor } = require('node-appwrite/file') as { InputFile: typeof InputFile };
 import { StorageProvider, StoredFile } from './storage-provider.interface';
 
 @Injectable()
@@ -57,7 +59,7 @@ export class AppwriteStorageProvider implements StorageProvider {
     }
 
     const fileId = objectPath ?? randomUUID();
-    const inputFile = InputFile.fromBuffer(file.buffer, file.originalname);
+    const inputFile = InputFileCtor.fromBuffer(file.buffer, file.originalname);
 
     const created = await this.storage.createFile({
       bucketId: this.bucketId,

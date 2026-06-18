@@ -8,6 +8,7 @@ import {
   Logger,
   UnauthorizedException,
   NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
@@ -77,6 +78,22 @@ export class UserController {
       email: dto.email,
       provider: 'email',
     });
+
+    // Also link the JWT signup email if it isn't already linked, so the
+    // auth guard's email check doesn't reject subsequent requests.
+    const tokenEmail = (req as any).user?.tokenEmail as string | undefined;
+    if (tokenEmail && tokenEmail !== dto.email) {
+      try {
+        await this.emailLinkingService.linkEmailToUser({
+          userId,
+          email: tokenEmail,
+          provider: 'email',
+        });
+        this.logger.log(`Auto-linked JWT email ${tokenEmail} for user ${userId}`);
+      } catch {
+        // Non-critical — the user already has access via the guard bypass
+      }
+    }
 
     await this.streakService.awardPoints(
       userId,
@@ -191,18 +208,46 @@ export class UserController {
       throw new NotFoundException('Valid school email is required');
     }
 
-    const user = await this.prisma.user.update({
+    const existing = await this.prisma.user.findUnique({
       where: { id: userId },
-      data: { schoolEmail: trimmed },
     });
+    if (!existing) {
+      throw new NotFoundException(
+        'User record not found. Complete registration first.'
+      );
+    }
 
-    this.logger.log(`User ${userId} set school email to ${trimmed}`);
+    try {
+      const user = await this.prisma.user.update({
+        where: { id: userId },
+        data: { schoolEmail: trimmed },
+      });
 
-    return {
-      success: true,
-      message: 'School email saved.',
-      data: { schoolEmail: user.schoolEmail },
-    };
+      // Create a UserEmail record so the auth guard's email check passes for
+      // subsequent requests. Do nothing if the email is already linked.
+      await this.prisma.userEmail.upsert({
+        where: { email: trimmed },
+        update: {},
+        create: {
+          email: trimmed,
+          userId,
+          isVerified: true,
+        },
+      });
+
+      this.logger.log(`User ${userId} set school email to ${trimmed}`);
+
+      return {
+        success: true,
+        message: 'School email saved.',
+        data: { schoolEmail: user.schoolEmail },
+      };
+    } catch (error) {
+      this.logger.error(`Failed to save school email for user ${userId}:`, error);
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to save school email'
+      );
+    }
   }
 
   @Post('dismiss-school-email-prompt')

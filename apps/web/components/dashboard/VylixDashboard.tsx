@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { PrivateVaultView } from '@/components/dashboard/PrivateVaultView';
 import { PublicPulseView } from '@/components/dashboard/PublicPulseView';
 import { PastQuestionsView } from '@/components/dashboard/PastQuestionsView';
+import { UploadMaterialModal } from '@/components/dashboard/UploadMaterialModal';
 import { useNetworkState } from '@/hooks/useNetworkState';
 import { useAuth } from '@/context/auth-context';
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
@@ -16,6 +17,7 @@ import { LevelUpdateBanner } from '@/components/dashboard/LevelUpdateBanner';
 
 export function VylixDashboard() {
   const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions'>('pulse');
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const { isOnline } = useNetworkState();
   const { user, isAuthenticated, promptLogin } = useAuth();
   const isAlumni = user?.status === 'ALUMNI';
@@ -257,6 +259,24 @@ export function VylixDashboard() {
           </footer>
         </div>
       </div>
+
+      {isAuthenticated && activeLayer === 'vault' && (
+        <button
+          onClick={() => setShowUploadModal(true)}
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl press-effect animate-scale-in"
+          title="Upload material"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      )}
+
+      <UploadMaterialModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onSuccess={() => setShowUploadModal(false)}
+      />
     </div>
   );
 }

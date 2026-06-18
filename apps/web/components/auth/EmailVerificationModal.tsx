@@ -42,7 +42,8 @@ export function EmailVerificationModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const res = await fetch('/api/user/school-email', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/user/school-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,7 +111,8 @@ export function EmailVerificationModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      await fetch('/api/user/school-email', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      await fetch(`${apiBaseUrl}/api/user/school-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

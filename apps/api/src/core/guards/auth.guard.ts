@@ -134,9 +134,12 @@ export class SupabaseAuthGuard implements CanActivate {
 
       const linkedEmails = (user.emails ?? []) as LinkedEmailRecord[];
 
-      // Verify that the email in the token is one of the user's linked emails
+      // Verify that the email in the token is one of the user's linked emails.
+      // Skip this check if the user has no linked emails at all — they are
+      // still in the onboarding flow and need to be able to call endpoints
+      // such as school-email to create their first link.
       const tokenEmail = payload.email;
-      if (tokenEmail) {
+      if (tokenEmail && linkedEmails.length > 0) {
         const hasEmail = linkedEmails.some((emailRecord: LinkedEmailRecord) => emailRecord.email === tokenEmail);
         if (!hasEmail) {
           this.logger.warn(
@@ -155,6 +158,7 @@ export class SupabaseAuthGuard implements CanActivate {
 
       (request as any)['user'] = {
         id: user.id,
+        tokenEmail: payload.email, // the email from the JWT
         emails: linkedEmails.map((emailRecord: LinkedEmailRecord) => ({
           email: emailRecord.email,
           isPrimary: emailRecord.isPrimary,
