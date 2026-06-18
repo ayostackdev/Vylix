@@ -18,8 +18,10 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: true,
-    credentials: true
+    origin: ['https://vylix.vercel.app', 'http://localhost:3000'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+    credentials: true,
   });
 
   await app.listen(process.env.PORT ? Number(process.env.PORT) : 4000);
