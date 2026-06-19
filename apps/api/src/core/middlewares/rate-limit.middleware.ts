@@ -17,7 +17,7 @@ export class RateLimitMiddleware implements NestMiddleware {
         const redis = new Redis(redisUrl);
         this.rateLimiter = new RateLimiterRedis({
           storeClient: redis,
-          points: 100, // 100 requests
+          points: 1000, // 1000 requests
           duration: 60, // per 60 seconds
           blockDuration: 5 // block for 5 seconds if exceeded
         });
@@ -32,13 +32,16 @@ export class RateLimitMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     if (!this.rateLimiter) {
-      // Rate limiter not available, allow request
+      return next();
+    }
+
+    const userId = (req as any).user?.id;
+    if (!userId) {
       return next();
     }
 
     try {
-      const key = this.getClientKey(req);
-      await this.rateLimiter.consume(key);
+      await this.rateLimiter.consume(userId);
       next();
     } catch (error) {
       const retryAfter = Math.ceil((error as any).msBeforeNext / 1000) || 60;
@@ -49,11 +52,5 @@ export class RateLimitMiddleware implements NestMiddleware {
         retryAfter
       });
     }
-  }
-
-  private getClientKey(req: Request): string {
-    // Try to get user ID from auth context, fallback to IP
-    const userId = (req as any).user?.id;
-    return userId || req.ip || 'unknown';
   }
 }

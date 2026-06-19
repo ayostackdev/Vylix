@@ -137,8 +137,9 @@ export class UserController {
   @Get('profile')
   async getProfile(@Req() req: Request) {
     const userId = this.requireUserId(req);
+    const userAgent = (req as any).user;
 
-    const user = await this.prisma.user.findUnique({
+    let user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -160,7 +161,34 @@ export class UserController {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      const tokenEmail = userAgent?.tokenEmail;
+      user = await this.prisma.user.create({
+        data: {
+          id: userId,
+          fullName: tokenEmail?.split('@')[0] ?? 'Student',
+          emails: tokenEmail ? {
+            create: { email: tokenEmail, isPrimary: true, isVerified: true }
+          } : undefined,
+        },
+        select: {
+          id: true,
+          fullName: true,
+          matricNumber: true,
+          entryYear: true,
+          currentLevel: true,
+          levelUpdatedAt: true,
+          schoolEmail: true,
+          schoolEmailPromptDismissedAt: true,
+          status: true,
+          graduatedAt: true,
+          bio: true,
+          avatarUrl: true,
+          contributionScore: true,
+          college: { select: { id: true, code: true, name: true, durationYears: true } },
+          department: { select: { id: true, code: true, name: true } },
+        },
+      });
+      this.logger.log(`Auto-created user ${userId}`);
     }
 
     return { data: user };
@@ -212,13 +240,22 @@ export class UserController {
       throw new NotFoundException('Valid school email is required');
     }
 
-    const existing = await this.prisma.user.findUnique({
+    let existing = await this.prisma.user.findUnique({
       where: { id: userId },
     });
+
     if (!existing) {
-      throw new NotFoundException(
-        'User record not found. Complete registration first.'
-      );
+      const tokenEmail = (req as any).user?.tokenEmail;
+      existing = await this.prisma.user.create({
+        data: {
+          id: userId,
+          fullName: tokenEmail?.split('@')[0] ?? 'Student',
+          emails: tokenEmail ? {
+            create: { email: tokenEmail, isPrimary: true, isVerified: true }
+          } : undefined,
+        },
+      });
+      this.logger.log(`Auto-created user ${userId} via school-email`);
     }
 
     try {
@@ -227,8 +264,7 @@ export class UserController {
         data: { schoolEmail: trimmed },
       });
 
-      // Create a UserEmail record so the auth guard's email check passes for
-      // subsequent requests. Do nothing if the email is already linked.
+      // Link the school email so it passes the auth guard check
       await this.prisma.userEmail.upsert({
         where: { email: trimmed },
         update: {},
@@ -238,6 +274,20 @@ export class UserController {
           isVerified: true,
         },
       });
+
+      // Also link the JWT email if different, so the auth guard doesn't reject
+      const tokenEmail = (req as any).user?.tokenEmail;
+      if (tokenEmail && tokenEmail !== trimmed) {
+        await this.prisma.userEmail.upsert({
+          where: { email: tokenEmail },
+          update: {},
+          create: {
+            email: tokenEmail,
+            userId,
+            isVerified: true,
+          },
+        });
+      }
 
       this.logger.log(`User ${userId} set school email to ${trimmed}`);
 

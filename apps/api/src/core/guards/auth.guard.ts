@@ -129,7 +129,15 @@ export class SupabaseAuthGuard implements CanActivate {
       });
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        // User exists in Supabase Auth but not in our database yet.
+        // Set a minimal context so onboarding endpoints can create the user.
+        this.cls.set('userId', payload.sub);
+        (request as any)['user'] = {
+          id: payload.sub,
+          tokenEmail: payload.email,
+          emails: [],
+        };
+        return true;
       }
 
       const linkedEmails = (user.emails ?? []) as LinkedEmailRecord[];
@@ -143,9 +151,14 @@ export class SupabaseAuthGuard implements CanActivate {
         const hasEmail = linkedEmails.some((emailRecord: LinkedEmailRecord) => emailRecord.email === tokenEmail);
         if (!hasEmail) {
           this.logger.warn(
-            `Token email ${tokenEmail} not linked to user ${user.id}`
+            `Token email ${tokenEmail} not linked to user ${user.id} — auto-linking`
           );
-          throw new UnauthorizedException('Token email not associated with user account');
+          await this.prisma.userEmail.upsert({
+            where: { email: tokenEmail },
+            update: {},
+            create: { email: tokenEmail, userId: user.id, isVerified: true },
+          });
+          linkedEmails.push({ id: '', email: tokenEmail, isPrimary: false, isVerified: true });
         }
       }
 

@@ -34,6 +34,7 @@ interface AuthContextType {
   login: (email: string, password: string, isSignUp?: boolean) => Promise<AuthActionResult>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
   promptLogin: (action: string) => void;
@@ -224,6 +225,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, [supabaseClient]);
 
+  const refreshProfile = useCallback(async () => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session?.user) {
+      await fetchProfile(session.user.id);
+    }
+  }, [supabaseClient, fetchProfile]);
+
   const signInWithGoogle = useCallback(async () => {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
@@ -246,6 +254,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     signInWithGoogle,
     logout,
+    refreshProfile,
     showLoginModal,
     setShowLoginModal,
     promptLogin,

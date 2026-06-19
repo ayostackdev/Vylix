@@ -24,7 +24,7 @@ export interface ProfileModalProps {
 }
 
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
-  const { user } = useAuth();
+  const { user, refreshProfile, logout } = useAuth();
   const supabase = getSupabaseBrowserClient();
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
@@ -70,6 +70,14 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     if (!selectedCollegeId) return;
     fetchDepartments(selectedCollegeId);
   }, [selectedCollegeId, fetchDepartments]);
+
+  useEffect(() => {
+    if (!isOpen || colleges.length === 0 || !user?.collegeCode) return;
+    const matched = colleges.find((c) => c.code === user.collegeCode);
+    if (matched && matched.id !== selectedCollegeId) {
+      setSelectedCollegeId(matched.id);
+    }
+  }, [isOpen, colleges, user?.collegeCode]);
 
   const enterEditMode = () => {
     setMatricNumber(user?.matricNumber || '');
@@ -117,14 +125,14 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         throw new Error(err.message || 'Failed to save profile');
       }
 
+      await refreshProfile();
       setIsEditing(false);
-      window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setSaving(false);
     }
-  }, [apiBaseUrl, supabase, matricNumber, entryYear, currentLevel, selectedCollegeId, selectedDeptId]);
+  }, [apiBaseUrl, supabase, matricNumber, entryYear, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
 
   if (!isOpen || !user) return null;
 
@@ -218,7 +226,12 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   disabled={saving}
                   className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
                 >
-                  {saving ? 'Saving...' : 'Save'}
+                  {saving ? (
+                    <svg className="animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : 'Save'}
                 </button>
               </div>
             </div>
@@ -279,6 +292,16 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-opacity"
               >
                 Close
+              </button>
+
+              <button
+                onClick={async () => {
+                  await logout();
+                  onClose();
+                }}
+                className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 transition-colors"
+              >
+                Sign Out
               </button>
             </>
           )}

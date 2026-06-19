@@ -15,16 +15,20 @@ export class GraduationCronService {
     const sessionStartYear = this.getActiveSessionStartYear();
 
     const students = await this.prisma.user.findMany({
-      where: { status: 'STUDENT' },
+      where: {
+        status: 'STUDENT',
+        entryYear: { not: null },
+        collegeId: { not: null },
+      },
       include: { college: { select: { durationYears: true } } },
     });
 
     let graduatedCount = 0;
 
     for (const student of students) {
-      const yearsElapsed = sessionStartYear - student.entryYear + 1;
+      const yearsElapsed = sessionStartYear - student.entryYear! + 1;
 
-      if (yearsElapsed > student.college.durationYears) {
+      if (yearsElapsed > student.college!.durationYears) {
         await this.prisma.user.update({
           where: { id: student.id },
           data: {
@@ -34,7 +38,7 @@ export class GraduationCronService {
         });
         graduatedCount++;
         this.logger.log(
-          `Marked user ${student.id} (${student.fullName}) as ALUMNI — ${yearsElapsed} years elapsed, duration: ${student.college.durationYears}`
+          `Marked user ${student.id} (${student.fullName}) as ALUMNI — ${yearsElapsed} years elapsed, duration: ${student.college!.durationYears}`
         );
       }
     }

@@ -11,15 +11,15 @@ datasource db {
 model User {
     id                     String     @id @default(uuid())
     fullName               String
-    matricNumber           String     @unique
-    entryYear              Int
+    matricNumber           String?    @unique
+    entryYear              Int?
     currentLevel           String?
     levelUpdatedAt         DateTime?
     schoolEmail            String?
     status                 UserStatus @default(STUDENT)
     graduatedAt            DateTime?
-    collegeId              String
-    departmentId           String
+    collegeId              String?
+    departmentId           String?
     bio                    String?
     avatarUrl              String?
     contributionScore      Int        @default(0) // Gamification score
@@ -28,8 +28,8 @@ model User {
     createdAt              DateTime   @default(now())
     updatedAt              DateTime   @updatedAt
 
-    college                 College              @relation(fields: [collegeId], references: [id], onDelete: Restrict)
-    department              Department           @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+    college                 College?             @relation(fields: [collegeId], references: [id], onDelete: Restrict)
+    department              Department?          @relation(fields: [departmentId], references: [id], onDelete: Restrict)
     vaultItems              VaultItem[]
     topicsCreated           Topic[]              @relation("TopicAuthor")
     materials               Material[]

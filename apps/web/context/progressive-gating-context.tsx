@@ -43,7 +43,7 @@ interface ProgressiveGatingContextType extends GatingState {
 const ProgressiveGatingContext = createContext<ProgressiveGatingContextType | undefined>(undefined);
 
 export function ProgressiveGatingProvider({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, promptLogin, setShowLoginModal } = useAuth();
+  const { user, isAuthenticated, promptLogin, refreshProfile } = useAuth();
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showGraduationModal, setShowGraduationModal] = useState(false);
   const [pendingGateCallback, setPendingGateCallback] = useState<(() => void) | null>(null);
@@ -53,12 +53,13 @@ export function ProgressiveGatingProvider({ children }: { children: React.ReactN
   const openGraduationModal = useCallback(() => setShowGraduationModal(true), []);
   const closeGraduationModal = useCallback(() => setShowGraduationModal(false), []);
 
-  const onEmailVerified = useCallback(() => {
+  const onEmailVerified = useCallback(async () => {
     setShowEmailModal(false);
+    await refreshProfile();
     const cb = pendingGateCallback;
     setPendingGateCallback(null);
     cb?.();
-  }, [pendingGateCallback]);
+  }, [pendingGateCallback, refreshProfile]);
 
   const gate = useCallback(async (action: string, onSuccess?: () => void): Promise<boolean> => {
     if (!isAuthenticated) {
