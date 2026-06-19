@@ -404,47 +404,57 @@ export class UserController {
     const userId = this.requireUserId(req);
 
     const data: Record<string, any> = {};
-    if (dto.matricNumber !== undefined) {
-      const existing = await this.prisma.user.findUnique({ where: { matricNumber: dto.matricNumber } });
-      if (existing && existing.id !== userId) {
-        throw new BadRequestException('Matric number already in use');
+    try {
+      if (dto.matricNumber !== undefined) {
+        const existing = await this.prisma.user.findUnique({ where: { matricNumber: dto.matricNumber } });
+        if (existing && existing.id !== userId) {
+          throw new BadRequestException('Matric number already in use');
+        }
+        data.matricNumber = dto.matricNumber;
       }
-      data.matricNumber = dto.matricNumber;
-    }
-    if (dto.entryYear !== undefined) data.entryYear = dto.entryYear;
-    if (dto.currentLevel !== undefined) data.currentLevel = dto.currentLevel;
-    if (dto.collegeId !== undefined) {
-      const college = await this.prisma.college.findUnique({ where: { id: dto.collegeId } });
-      if (!college) throw new NotFoundException('College not found');
-      data.collegeId = dto.collegeId;
-    }
-    if (dto.departmentId !== undefined) {
-      const department = await this.prisma.department.findUnique({ where: { id: dto.departmentId } });
-      if (!department) throw new NotFoundException('Department not found');
-      data.departmentId = dto.departmentId;
-    }
+      if (dto.entryYear !== undefined) data.entryYear = dto.entryYear;
+      if (dto.currentLevel !== undefined) data.currentLevel = dto.currentLevel;
+      if (dto.collegeId !== undefined) {
+        const college = await this.prisma.college.findUnique({ where: { id: dto.collegeId } });
+        if (!college) throw new NotFoundException('College not found');
+        data.collegeId = dto.collegeId;
+      }
+      if (dto.departmentId !== undefined) {
+        const department = await this.prisma.department.findUnique({ where: { id: dto.departmentId } });
+        if (!department) throw new NotFoundException('Department not found');
+        data.departmentId = dto.departmentId;
+      }
 
-    if (Object.keys(data).length === 0) {
-      throw new BadRequestException('No fields to update');
+      if (Object.keys(data).length === 0) {
+        throw new BadRequestException('No fields to update');
+      }
+
+      const user = await this.prisma.user.update({
+        where: { id: userId },
+        data,
+        select: {
+          id: true,
+          fullName: true,
+          matricNumber: true,
+          entryYear: true,
+          currentLevel: true,
+          levelUpdatedAt: true,
+          status: true,
+          collegeId: true,
+          departmentId: true,
+        },
+      });
+
+      return { data: user };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException || error instanceof UnauthorizedException) {
+        throw error;
+      }
+      this.logger.error(`updateProfile failed for user ${userId}:`, error);
+      throw new InternalServerErrorException(
+        error instanceof Error ? error.message : 'Failed to update profile'
+      );
     }
-
-    const user = await this.prisma.user.update({
-      where: { id: userId },
-      data,
-      select: {
-        id: true,
-        fullName: true,
-        matricNumber: true,
-        entryYear: true,
-        currentLevel: true,
-        levelUpdatedAt: true,
-        status: true,
-        collegeId: true,
-        departmentId: true,
-      },
-    });
-
-    return { data: user };
   }
 }
 
