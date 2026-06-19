@@ -33,8 +33,6 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [selectedCollegeId, setSelectedCollegeId] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState('');
-  const [matricNumber, setMatricNumber] = useState('');
-  const [entryYear, setEntryYear] = useState('');
   const [currentLevel, setCurrentLevel] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -80,8 +78,6 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   }, [isOpen, colleges, user?.collegeCode]);
 
   const enterEditMode = () => {
-    setMatricNumber(user?.matricNumber || '');
-    setEntryYear(user?.entryYear?.toString() || '');
     setCurrentLevel(user?.currentLevel || '');
     const matchedCollege = colleges.find((c) => c.code === user?.collegeCode);
     setSelectedCollegeId(matchedCollege?.id || '');
@@ -105,8 +101,6 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       if (!session) throw new Error('No session');
 
       const body: Record<string, any> = {};
-      if (matricNumber) body.matricNumber = matricNumber;
-      if (entryYear) body.entryYear = parseInt(entryYear, 10);
       if (currentLevel) body.currentLevel = currentLevel;
       if (selectedCollegeId) body.collegeId = selectedCollegeId;
       if (selectedDeptId) body.departmentId = selectedDeptId;
@@ -132,7 +126,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     } finally {
       setSaving(false);
     }
-  }, [apiBaseUrl, supabase, matricNumber, entryYear, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
+  }, [apiBaseUrl, supabase, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
 
   if (!isOpen || !user) return null;
 
@@ -163,26 +157,6 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
           {isEditing ? (
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Matric Number</label>
-                <input
-                  type="text"
-                  value={matricNumber}
-                  onChange={(e) => setMatricNumber(e.target.value)}
-                  placeholder="e.g. 20/1234"
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm placeholder-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Entry Year</label>
-                <input
-                  type="number"
-                  value={entryYear}
-                  onChange={(e) => setEntryYear(e.target.value)}
-                  placeholder="e.g. 2020"
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm placeholder-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-                />
-              </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">College</label>
                 <select
@@ -256,7 +230,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 )}
                 {user.entryYear && (
                   <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Entry Year</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Started</p>
                     <p className="mt-1 font-semibold text-gray-900">{user.entryYear}</p>
                   </div>
                 )}
