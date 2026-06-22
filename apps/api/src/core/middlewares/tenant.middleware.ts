@@ -10,12 +10,16 @@ export class TenantMiddleware implements NestMiddleware {
     const departmentId = (req.headers['x-department-id'] as string | undefined) ?? req.body?.departmentId;
     const collegeId = (req.headers['x-college-id'] as string | undefined) ?? req.body?.collegeId;
 
-    if (departmentId) {
-      this.cls.set('departmentId', departmentId);
-    }
+    try {
+      if (departmentId) {
+        this.cls.set('departmentId', departmentId);
+      }
 
-    if (collegeId) {
-      this.cls.set('collegeId', collegeId);
+      if (collegeId) {
+        this.cls.set('collegeId', collegeId);
+      }
+    } catch {
+      // CLS context may not be available if ClsMiddleware hasn't run yet
     }
 
     next();

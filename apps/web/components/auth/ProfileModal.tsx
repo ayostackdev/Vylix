@@ -187,6 +187,22 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Level</label>
+                <select
+                  value={currentLevel}
+                  onChange={(e) => setCurrentLevel(e.target.value)}
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                >
+                  <option value="">Select Level</option>
+                  <option value="100L">100L</option>
+                  <option value="200L">200L</option>
+                  <option value="300L">300L</option>
+                  <option value="400L">400L</option>
+                  <option value="500L">500L</option>
+                  <option value="Spillover">Spillover</option>
+                </select>
+              </div>
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={cancelEdit}

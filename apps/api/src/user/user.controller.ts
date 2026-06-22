@@ -13,12 +13,14 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
 import { EmailLinkingService } from '../core/services/email-linking.service';
 import { StreakService } from '../core/services/streak.service';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { Public } from '../core/decorators/public.decorator';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 const BACKUP_LINK_POINTS = 50;
 
@@ -162,33 +164,60 @@ export class UserController {
 
     if (!user) {
       const tokenEmail = userAgent?.tokenEmail;
-      user = await this.prisma.user.create({
-        data: {
-          id: userId,
-          fullName: tokenEmail?.split('@')[0] ?? 'Student',
-          emails: tokenEmail ? {
-            create: { email: tokenEmail, isPrimary: true, isVerified: true }
-          } : undefined,
-        },
-        select: {
-          id: true,
-          fullName: true,
-          matricNumber: true,
-          entryYear: true,
-          currentLevel: true,
-          levelUpdatedAt: true,
-          schoolEmail: true,
-          schoolEmailPromptDismissedAt: true,
-          status: true,
-          graduatedAt: true,
-          bio: true,
-          avatarUrl: true,
-          contributionScore: true,
-          college: { select: { id: true, code: true, name: true, durationYears: true } },
-          department: { select: { id: true, code: true, name: true } },
-        },
-      });
-      this.logger.log(`Auto-created user ${userId}`);
+      try {
+        user = await this.prisma.user.create({
+          data: {
+            id: userId,
+            fullName: tokenEmail?.split('@')[0] ?? 'Student',
+            emails: tokenEmail ? {
+              create: { email: tokenEmail, isPrimary: true, isVerified: true }
+            } : undefined,
+          },
+          select: {
+            id: true,
+            fullName: true,
+            matricNumber: true,
+            entryYear: true,
+            currentLevel: true,
+            levelUpdatedAt: true,
+            schoolEmail: true,
+            schoolEmailPromptDismissedAt: true,
+            status: true,
+            graduatedAt: true,
+            bio: true,
+            avatarUrl: true,
+            contributionScore: true,
+            college: { select: { id: true, code: true, name: true, durationYears: true } },
+            department: { select: { id: true, code: true, name: true } },
+          },
+        });
+        this.logger.log(`Auto-created user ${userId}`);
+      } catch {
+        user = await this.prisma.user.create({
+          data: {
+            id: userId,
+            fullName: tokenEmail?.split('@')[0] ?? 'Student',
+          },
+          select: {
+            id: true,
+            fullName: true,
+            matricNumber: true,
+            entryYear: true,
+            currentLevel: true,
+            levelUpdatedAt: true,
+            schoolEmail: true,
+            schoolEmailPromptDismissedAt: true,
+            status: true,
+            graduatedAt: true,
+            bio: true,
+            avatarUrl: true,
+            contributionScore: true,
+            college: { select: { id: true, code: true, name: true, durationYears: true } },
+            department: { select: { id: true, code: true, name: true } },
+          },
+        });
+        this.logger.log(`Auto-created user ${userId} (without email link)`);
+      }
     }
 
     return { data: user };
@@ -396,11 +425,40 @@ export class UserController {
     };
   }
 
+  @Public()
+  @Get('profile-test')
+  async testProfile() {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { id: '252250c6-78a0-486b-92c7-a47aef961953' } });
+      return { user };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : 'unknown' };
+    }
+  }
+
+  @Public()
+  @Get('profile-test-update')
+  async testProfileUpdate() {
+    try {
+      const user = await this.prisma.user.update({
+        where: { id: '252250c6-78a0-486b-92c7-a47aef961953' },
+        data: { currentLevel: '200L', collegeId: 'dd0df60c-7aa6-4969-bdcb-a22da3785865', departmentId: 'b1d3e841-50b8-4dc5-962a-72dff8af88a3' },
+        select: { id: true, fullName: true, matricNumber: true, entryYear: true, currentLevel: true, levelUpdatedAt: true, status: true, collegeId: true, departmentId: true },
+      });
+      return { data: user };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message + ' | ' + e.constructor.name + ' | ' + JSON.stringify((e as any).code ?? '') + ' | ' + (e as any).stack : 'unknown' };
+    }
+  }
+
   @Patch('profile')
   async updateProfile(
     @Req() req: Request,
-    @Body() dto: { matricNumber?: string; entryYear?: number; collegeId?: string; departmentId?: string; currentLevel?: string }
+    @Body() dto: UpdateProfileDto
   ) {
+    console.log('========== updateProfile CALLED ==========');
+    console.log('dto:', JSON.stringify(dto));
+    console.log('user:', JSON.stringify((req as any).user));
     const userId = this.requireUserId(req);
 
     const data: Record<string, any> = {};
@@ -450,7 +508,36 @@ export class UserController {
       if (error instanceof BadRequestException || error instanceof NotFoundException || error instanceof UnauthorizedException) {
         throw error;
       }
-      this.logger.error(`updateProfile failed for user ${userId}:`, error);
+
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        const tokenEmail = (req as any).user?.tokenEmail;
+        await this.prisma.user.create({
+          data: {
+            id: userId,
+            fullName: tokenEmail?.split('@')[0] ?? 'Student',
+          },
+        });
+        const user = await this.prisma.user.update({
+          where: { id: userId },
+          data,
+          select: {
+            id: true,
+            fullName: true,
+            matricNumber: true,
+            entryYear: true,
+            currentLevel: true,
+            levelUpdatedAt: true,
+            status: true,
+            collegeId: true,
+            departmentId: true,
+          },
+        });
+        return { data: user };
+      }
+
+      const errorMsg = error instanceof Error ? `${error.message} | ${error.constructor.name} | ${JSON.stringify((error as any).code ?? '')} | ${(error as any).stack}` : 'Unknown error';
+      this.logger.error(`updateProfile failed for user ${userId}: ${errorMsg}`);
+      try { require('fs').appendFileSync(require('path').join(require('os').tmpdir(), 'update-profile-error.log'), `${new Date().toISOString()} userId=${userId} error=${errorMsg}\n`); } catch {}
       throw new InternalServerErrorException(
         error instanceof Error ? error.message : 'Failed to update profile'
       );

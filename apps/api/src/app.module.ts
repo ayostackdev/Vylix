@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ClsModule } from 'nestjs-cls';
+import { ClsModule, ClsMiddleware } from 'nestjs-cls';
 import { PrismaModule } from './core/prisma/prisma.module';
 import { HealthModule } from './core/health/health.module';
 import { StorageModule } from './core/storage/storage.module';
@@ -25,7 +25,7 @@ import { UserModule } from './user/user.module';
     ScheduleModule.forRoot(),
     ClsModule.forRoot({
       global: true,
-      middleware: { mount: true }
+      middleware: { mount: false }
     }),
     PrismaModule,
     StorageModule.register(),
@@ -46,7 +46,7 @@ import { UserModule } from './user/user.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(RateLimitMiddleware, TenantMiddleware)
+      .apply(ClsMiddleware, RateLimitMiddleware, TenantMiddleware)
       .forRoutes('*');
   }
 }
