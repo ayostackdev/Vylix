@@ -34,7 +34,7 @@ function buildSuccessHtml(
 }
 
 export async function GET(request: NextRequest) {
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const isHttps = request.nextUrl.protocol === 'https:';

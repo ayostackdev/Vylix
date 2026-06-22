@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     path: '/',
   });
 
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
 
   const params = new URLSearchParams({
     client_id: clientId,
