@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import crypto from 'crypto';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   if (!clientId) {
     return NextResponse.json(
@@ -14,10 +14,11 @@ export async function GET() {
   const cookieStore = await cookies();
 
   const state = crypto.randomBytes(32).toString('hex');
+  const isHttps = request.nextUrl.protocol === 'https:';
 
   cookieStore.set('google_oauth_state', state, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isHttps,
     sameSite: 'lax',
     maxAge: 60 * 5,
     path: '/',

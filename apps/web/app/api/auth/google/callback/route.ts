@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const isHttps = request.nextUrl.protocol === 'https:';
 
   if (!clientId || !clientSecret) {
     return new Response(buildErrorHtml('Google OAuth is not configured'), {
@@ -64,7 +65,13 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
   const savedState = cookieStore.get('google_oauth_state')?.value;
 
-  cookieStore.delete('google_oauth_state');
+  cookieStore.set('google_oauth_state', '', {
+    httpOnly: true,
+    secure: isHttps,
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/',
+  });
 
   if (!savedState || savedState !== returnedState) {
     return new Response(buildErrorHtml('State mismatch. Please try again.'), {
