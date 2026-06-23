@@ -53,8 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) return;
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const res = await fetch(`${apiBaseUrl}/api/user/profile`, {
+      const res = await fetch('/api/user/profile', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (!res.ok) return;

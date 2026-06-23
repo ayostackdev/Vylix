@@ -26,7 +26,6 @@ export interface ProfileModalProps {
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { user, refreshProfile, logout } = useAuth();
   const supabase = getSupabaseBrowserClient();
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
   const [isEditing, setIsEditing] = useState(false);
   const [colleges, setColleges] = useState<College[]>([]);
@@ -41,23 +40,23 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      const res = await fetch(`${apiBaseUrl}/api/colleges`, {
+      const res = await fetch('/api/colleges', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) setColleges(await res.json());
     } catch {}
-  }, [apiBaseUrl, supabase]);
+  }, [supabase]);
 
   const fetchDepartments = useCallback(async (collegeId: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      const res = await fetch(`${apiBaseUrl}/api/colleges/${collegeId}/departments`, {
+      const res = await fetch(`/api/colleges/${collegeId}/departments`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) setDepartments(await res.json());
     } catch {}
-  }, [apiBaseUrl, supabase]);
+  }, [supabase]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -105,7 +104,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       if (selectedCollegeId) body.collegeId = selectedCollegeId;
       if (selectedDeptId) body.departmentId = selectedDeptId;
 
-      const res = await fetch(`${apiBaseUrl}/api/user/profile`, {
+      const res = await fetch('/api/user/profile', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +125,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     } finally {
       setSaving(false);
     }
-  }, [apiBaseUrl, supabase, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
+  }, [supabase, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
 
   if (!isOpen || !user) return null;
 
