@@ -2,8 +2,9 @@ import { IsString, IsOptional, IsBoolean, IsNumber, IsIn } from 'class-validator
 import { Transform } from 'class-transformer';
 
 export class CreateMaterialDto {
+  @IsOptional()
   @IsString()
-  title!: string;
+  title?: string;
 
   @IsOptional()
   @IsString()

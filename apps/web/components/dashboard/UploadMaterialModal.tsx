@@ -12,26 +12,34 @@ interface UploadMaterialModalProps {
 const ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
 const MAX_SIZE = 50 * 1024 * 1024;
 
+function titleFromFilename(name: string): string {
+  return name
+    .replace(/\.[^/.]+$/, '')
+    .replace(/[_-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMaterialModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [title, setTitle] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [courseCode, setCourseCode] = useState('');
   const [isPastQuestion, setIsPastQuestion] = useState(false);
   const [examYear, setExamYear] = useState('');
   const [semester, setSemester] = useState<'FIRST' | 'SECOND' | ''>('');
   const [uploading, setUploading] = useState(false);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   const reset = () => {
-    setFile(null);
-    setTitle('');
+    setFiles([]);
     setCourseCode('');
     setIsPastQuestion(false);
     setExamYear('');
     setSemester('');
+    setCurrentFileIndex(0);
     setProgress(0);
     setError(null);
     setUploading(false);
@@ -43,41 +51,99 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
     onClose();
   };
 
-  const validateFile = (f: File): string | null => {
-    if (!ACCEPTED_TYPES.includes(f.type)) {
-      return 'Only PDF, JPEG, and PNG files are accepted.';
+  const validateFiles = (incoming: FileList | File[]): File[] => {
+    const valid: File[] = [];
+    for (const f of incoming) {
+      if (!ACCEPTED_TYPES.includes(f.type)) {
+        setError(`"${f.name}" is not an accepted format. Only PDF, JPEG, and PNG.`);
+        return [];
+      }
+      if (f.size > MAX_SIZE) {
+        setError(`"${f.name}" exceeds the 50 MB limit.`);
+        return [];
+      }
+      valid.push(f);
     }
-    if (f.size > MAX_SIZE) {
-      return 'File size must be under 50 MB.';
-    }
-    return null;
+    return valid;
   };
 
-  const handleFileSelect = (f: File) => {
-    const err = validateFile(f);
-    if (err) {
-      setError(err);
-      setFile(null);
-      return;
-    }
+  const handleFilesChosen = (incoming: FileList | File[]) => {
+    const valid = validateFiles(incoming);
+    if (valid.length === 0) return;
     setError(null);
-    setFile(f);
+    setFiles((prev) => [...prev, ...valid]);
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    const f = e.dataTransfer.files[0];
-    if (f) handleFileSelect(f);
+    if (e.dataTransfer.files.length > 0) {
+      handleFilesChosen(e.dataTransfer.files);
+    }
+  };
+
+  const uploadSingle = async (
+    file: File,
+    index: number,
+    total: number,
+    sessionToken: string,
+  ): Promise<void> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const autoTitle = titleFromFilename(file.name);
+    formData.append('title', autoTitle);
+    if (courseCode.trim()) formData.append('courseCode', courseCode.trim().toUpperCase());
+    if (isPastQuestion) {
+      formData.append('isPastQuestion', 'true');
+      if (examYear) formData.append('examYear', examYear);
+      if (semester) formData.append('semester', semester);
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const fileProgress = Math.round((e.loaded / e.total) * 100);
+          const overall = Math.round((index / total) * 100 + fileProgress / total);
+          setProgress(Math.min(overall, 100));
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          try {
+            const body = JSON.parse(xhr.responseText);
+            reject(new Error(body.message || body.error || `"${file.name}" failed`));
+          } catch {
+            reject(new Error(`"${file.name}" failed (${xhr.status})`));
+          }
+        }
+      };
+
+      xhr.onerror = () => reject(new Error(`Network error uploading "${file.name}"`));
+      xhr.onabort = () => reject(new Error(`Upload of "${file.name}" cancelled`));
+
+      xhr.open('POST', '/api/materials/upload');
+      xhr.setRequestHeader('Authorization', `Bearer ${sessionToken}`);
+      xhr.send(formData);
+    });
   };
 
   const handleUpload = async () => {
-    if (!file || !title.trim()) {
-      setError('Please select a file and enter a title.');
+    if (files.length === 0) {
+      setError('Please select at least one file.');
       return;
     }
 
     setUploading(true);
+    setCurrentFileIndex(0);
     setProgress(0);
     setError(null);
 
@@ -88,44 +154,10 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
         throw new Error('You must be signed in to upload.');
       }
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('title', title.trim());
-      if (courseCode.trim()) formData.append('courseCode', courseCode.trim().toUpperCase());
-      if (isPastQuestion) {
-        formData.append('isPastQuestion', 'true');
-        if (examYear) formData.append('examYear', examYear);
-        if (semester) formData.append('semester', semester);
+      for (let i = 0; i < files.length; i++) {
+        setCurrentFileIndex(i);
+        await uploadSingle(files[i], i, files.length, session.access_token);
       }
-
-      const xhr = new XMLHttpRequest();
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          setProgress(Math.round((e.loaded / e.total) * 100));
-        }
-      };
-
-      await new Promise<void>((resolve, reject) => {
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            try {
-              const body = JSON.parse(xhr.responseText);
-              reject(new Error(body.message || body.error || 'Upload failed'));
-            } catch {
-              reject(new Error(`Upload failed (${xhr.status})`));
-            }
-          }
-        };
-        xhr.onerror = () => reject(new Error('Network error during upload'));
-        xhr.onabort = () => reject(new Error('Upload cancelled'));
-
-        xhr.open('POST', '/api/materials/upload');
-        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`);
-        xhr.send(formData);
-      });
 
       setProgress(100);
       setTimeout(() => {
@@ -178,7 +210,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
             className={`relative cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all ${
               dragOver
                 ? 'border-blue-400 bg-blue-50'
-                : file
+                : files.length > 0
                   ? 'border-emerald-300 bg-emerald-50/30'
                   : 'border-blue-200 bg-blue-50/50 hover:border-blue-300 hover:bg-blue-50'
             }`}
@@ -186,55 +218,62 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
             <input
               ref={fileInputRef}
               type="file"
+              multiple
               accept=".pdf,.jpg,.jpeg,.png"
               className="hidden"
               onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFileSelect(f);
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFilesChosen(e.target.files);
+                }
               }}
             />
-            {file ? (
+            {files.length > 0 ? (
               <div className="space-y-2">
                 <span className="text-3xl">📄</span>
-                <p className="font-semibold text-gray-900">{file.name}</p>
-                <p className="text-xs text-gray-500">
-                  {(file.size / 1024 / 1024).toFixed(1)} MB
-                </p>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                  className="text-xs text-red-600 hover:text-red-800 font-medium"
-                >
-                  Remove
-                </button>
+                <p className="font-semibold text-gray-900">{files.length} file(s) selected</p>
+                <ul className="mx-auto max-w-sm space-y-1 text-left text-xs text-gray-600">
+                  {files.map((f, i) => (
+                    <li key={i} className="flex items-center justify-between gap-2 rounded-md bg-white/60 px-2 py-1">
+                      <span className="truncate">{f.name}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-gray-400">{(f.size / 1024 / 1024).toFixed(1)} MB</span>
+                        {!uploading && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                            className="text-red-500 hover:text-red-700 font-bold text-xs"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                {!uploading && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setFiles([]); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                    className="text-xs text-red-600 hover:text-red-800 font-medium"
+                  >
+                    Clear all
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-2">
                 <span className="text-4xl">📁</span>
                 <p className="font-semibold text-gray-700">
-                  Drop a file here or click to browse
+                  Drop files here or click to browse
                 </p>
                 <p className="text-xs text-gray-500">
-                  PDF, JPEG, or PNG — max 50 MB
+                  PDF, JPEG, or PNG — max 50 MB each — select multiple
                 </p>
               </div>
             )}
           </div>
 
           <div>
-            <label className="cp-label block mb-1.5 text-gray-900">Title *</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. CSC 311 Lecture Notes — Week 5"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              disabled={uploading}
-            />
-          </div>
-
-          <div>
             <label className="cp-label block mb-1.5 text-gray-900">
-              Course Code <span className="text-gray-400 font-normal">(optional)</span>
+              Course Code <span className="text-gray-400 font-normal">(optional — auto-detected from filename)</span>
             </label>
             <input
               type="text"
@@ -295,7 +334,9 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
           {uploading && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-gray-700">Uploading...</span>
+                <span className="font-medium text-gray-700">
+                  Uploading {currentFileIndex + 1} of {files.length}
+                </span>
                 <span className="text-gray-500">{progress}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
@@ -317,10 +358,10 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
             </button>
             <button
               onClick={handleUpload}
-              disabled={uploading || !file || !title.trim()}
+              disabled={uploading || files.length === 0}
               className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white transition-all hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed press-effect"
             >
-              {uploading ? `Uploading ${progress}%` : 'Upload'}
+              {uploading ? `Uploading ${currentFileIndex + 1}/${files.length}` : `Upload ${files.length > 0 ? `(${files.length} file${files.length > 1 ? 's' : ''})` : ''}`}
             </button>
           </div>
         </div>

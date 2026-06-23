@@ -70,7 +70,7 @@ export class MaterialsService {
     this.telemetryGateway.emitDepartmentPulse(hierarchy.departmentCode, {
       topicId: hierarchy.topic.id,
       type: 'upload',
-      title: dto.title,
+      title: dto.title || material.fileName,
       message: `${storedFile.fileName} is now queued for processing.`,
       payload: {
         courseId: hierarchy.course.id,
@@ -98,7 +98,7 @@ export class MaterialsService {
 
     return {
       id: material.id,
-      title: dto.title,
+      title: dto.title || material.fileName,
       fileName: material.fileName,
       fileUrl: material.fileUrl,
       fileSize: material.fileSize,
@@ -404,7 +404,8 @@ export class MaterialsService {
     const departmentCode = dto.departmentCode?.trim().toUpperCase();
     const courseCode = dto.courseCode?.trim().toUpperCase() || 'GENERAL-VAULT';
     const courseTitle = dto.courseTitle?.trim() || 'General Vault Uploads';
-    const topicTitle = dto.topicTitle?.trim() || dto.title;
+    const displayTitle = dto.title?.trim() || dto.topicTitle?.trim() || 'Untitled Material';
+    const topicTitle = dto.topicTitle?.trim() || displayTitle;
 
     let collegeId: string;
     let departmentId: string;
