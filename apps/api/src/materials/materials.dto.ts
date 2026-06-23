@@ -1,16 +1,38 @@
-/**
- * DTO for creating a new material upload
- * Accepted file formats: PDF, JPG, PNG (max 50MB)
- * File is sent as multipart/form-data with field name 'file'
- */
+import { IsString, IsOptional, IsBoolean, IsNumber, IsIn } from 'class-validator';
+import { Transform } from 'class-transformer';
+
 export class CreateMaterialDto {
+  @IsString()
   title!: string;
+
+  @IsOptional()
+  @IsString()
   courseCode?: string;
+
+  @IsOptional()
+  @IsString()
   courseTitle?: string;
+
+  @IsOptional()
+  @IsString()
   topicTitle?: string;
+
+  @IsOptional()
+  @IsString()
   departmentCode?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
   isPastQuestion?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : undefined))
   examYear?: number;
+
+  @IsOptional()
+  @IsString()
   semester?: string;
 }
 
