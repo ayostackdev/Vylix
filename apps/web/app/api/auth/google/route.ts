@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
     path: '/',
   });
 
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
+  const rawOrigin = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
+  const origin = new URL(rawOrigin).origin;
 
   const params = new URLSearchParams({
     client_id: clientId,
