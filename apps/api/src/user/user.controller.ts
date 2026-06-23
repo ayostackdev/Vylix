@@ -497,38 +497,50 @@ export class UserController {
         throw error;
       }
 
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        const tokenEmail = (req as any).user?.tokenEmail;
-        await this.prisma.user.create({
-          data: {
-            id: userId,
-            fullName: tokenEmail?.split('@')[0] ?? 'Student',
-          },
-        });
-        const user = await this.prisma.user.update({
-          where: { id: userId },
-          data,
-          select: {
-            id: true,
-            fullName: true,
-            matricNumber: true,
-            entryYear: true,
-            currentLevel: true,
-            levelUpdatedAt: true,
-            status: true,
-            collegeId: true,
-            departmentId: true,
-          },
-        });
-        return { data: user };
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          const tokenEmail = (req as any).user?.tokenEmail;
+          try {
+            await this.prisma.user.create({
+              data: {
+                id: userId,
+                fullName: tokenEmail?.split('@')[0] ?? 'Student',
+              },
+            });
+          } catch (createError: any) {
+            if (createError?.code === 'P2002') {
+              const existing = await this.prisma.user.findUnique({ where: { id: userId } });
+              if (!existing) throw createError;
+            } else {
+              throw createError;
+            }
+          }
+          const user = await this.prisma.user.update({
+            where: { id: userId },
+            data,
+            select: {
+              id: true,
+              fullName: true,
+              matricNumber: true,
+              entryYear: true,
+              currentLevel: true,
+              levelUpdatedAt: true,
+              status: true,
+              collegeId: true,
+              departmentId: true,
+            },
+          });
+          return { data: user };
+        }
+        if (error.code === 'P2002') {
+          throw new BadRequestException('A record with that value already exists');
+        }
       }
 
       const errorMsg = error instanceof Error ? `${error.message} | ${error.constructor.name} | ${JSON.stringify((error as any).code ?? '')} | ${(error as any).stack}` : 'Unknown error';
       this.logger.error(`updateProfile failed for user ${userId}: ${errorMsg}`);
       try { require('fs').appendFileSync(require('path').join(require('os').tmpdir(), 'update-profile-error.log'), `${new Date().toISOString()} userId=${userId} error=${errorMsg}\n`); } catch {}
-      throw new InternalServerErrorException(
-        error instanceof Error ? error.message : 'Failed to update profile'
-      );
+      throw new InternalServerErrorException('Failed to update profile');
     }
   }
 }

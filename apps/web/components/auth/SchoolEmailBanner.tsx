@@ -33,6 +33,7 @@ export function SchoolEmailBanner() {
     window.location.reload();
   }, [supabase]);
 
+  if (user?.schoolEmail) return null;
   if (!shouldShowBanner(user?.schoolEmailPromptDismissedAt)) return null;
 
   return (
