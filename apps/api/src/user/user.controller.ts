@@ -141,86 +141,74 @@ export class UserController {
     const userId = this.requireUserId(req);
     const userAgent = (req as any).user;
 
-    let user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        fullName: true,
-        matricNumber: true,
-        entryYear: true,
-        currentLevel: true,
-        levelUpdatedAt: true,
-        schoolEmail: true,
-        schoolEmailPromptDismissedAt: true,
-        status: true,
-        graduatedAt: true,
-        bio: true,
-        avatarUrl: true,
-        contributionScore: true,
-        college: { select: { id: true, code: true, name: true, durationYears: true } },
-        department: { select: { id: true, code: true, name: true } },
-      },
-    });
+    const select = {
+      id: true,
+      fullName: true,
+      matricNumber: true,
+      entryYear: true,
+      currentLevel: true,
+      levelUpdatedAt: true,
+      schoolEmail: true,
+      schoolEmailPromptDismissedAt: true,
+      status: true,
+      graduatedAt: true,
+      bio: true,
+      avatarUrl: true,
+      contributionScore: true,
+      college: { select: { id: true, code: true, name: true, durationYears: true } },
+      department: { select: { id: true, code: true, name: true } },
+    } as const;
 
-    if (!user) {
-      const tokenEmail = userAgent?.tokenEmail;
-      try {
-        user = await this.prisma.user.create({
-          data: {
-            id: userId,
-            fullName: tokenEmail?.split('@')[0] ?? 'Student',
-            emails: tokenEmail ? {
-              create: { email: tokenEmail, isPrimary: true, isVerified: true }
-            } : undefined,
-          },
-          select: {
-            id: true,
-            fullName: true,
-            matricNumber: true,
-            entryYear: true,
-            currentLevel: true,
-            levelUpdatedAt: true,
-            schoolEmail: true,
-            schoolEmailPromptDismissedAt: true,
-            status: true,
-            graduatedAt: true,
-            bio: true,
-            avatarUrl: true,
-            contributionScore: true,
-            college: { select: { id: true, code: true, name: true, durationYears: true } },
-            department: { select: { id: true, code: true, name: true } },
-          },
-        });
-        this.logger.log(`Auto-created user ${userId}`);
-      } catch {
-        user = await this.prisma.user.create({
-          data: {
-            id: userId,
-            fullName: tokenEmail?.split('@')[0] ?? 'Student',
-          },
-          select: {
-            id: true,
-            fullName: true,
-            matricNumber: true,
-            entryYear: true,
-            currentLevel: true,
-            levelUpdatedAt: true,
-            schoolEmail: true,
-            schoolEmailPromptDismissedAt: true,
-            status: true,
-            graduatedAt: true,
-            bio: true,
-            avatarUrl: true,
-            contributionScore: true,
-            college: { select: { id: true, code: true, name: true, durationYears: true } },
-            department: { select: { id: true, code: true, name: true } },
-          },
-        });
-        this.logger.log(`Auto-created user ${userId} (without email link)`);
+    try {
+      let user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select,
+      });
+
+      if (!user) {
+        const tokenEmail = userAgent?.tokenEmail;
+        try {
+          user = await this.prisma.user.create({
+            data: {
+              id: userId,
+              fullName: tokenEmail?.split('@')[0] ?? 'Student',
+              emails: tokenEmail ? {
+                create: { email: tokenEmail, isPrimary: true, isVerified: true }
+              } : undefined,
+            },
+            select,
+          });
+          this.logger.log(`Auto-created user ${userId}`);
+        } catch (createError: any) {
+          // If another request created the user concurrently, fetch it
+          if (createError?.code === 'P2002') {
+            const existing = await this.prisma.user.findUnique({ where: { id: userId }, select });
+            if (existing) {
+              user = existing;
+              this.logger.log(`Re-fetched user ${userId} after concurrent create`);
+            } else {
+              throw createError;
+            }
+          } else {
+            // Fallback: try creating without email link
+            user = await this.prisma.user.create({
+              data: {
+                id: userId,
+                fullName: tokenEmail?.split('@')[0] ?? 'Student',
+              },
+              select,
+            });
+            this.logger.log(`Auto-created user ${userId} (without email link)`);
+          }
+        }
       }
-    }
 
-    return { data: user };
+      return { data: user };
+    } catch (error) {
+      const errorMsg = error instanceof Error ? `${error.message} | ${error.constructor.name} | ${JSON.stringify((error as any).code ?? '')}` : 'Unknown error';
+      this.logger.error(`getProfile failed for user ${userId}: ${errorMsg}`);
+      throw new InternalServerErrorException('Failed to load profile');
+    }
   }
 
   @Get('export-data')
