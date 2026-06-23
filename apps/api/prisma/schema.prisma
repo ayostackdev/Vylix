@@ -197,6 +197,7 @@ model Material {
     id               String                   @id @default(uuid())
     fileName         String
     fileUrl          String
+    filePath         String?
     fileSize         Int
     topicId          String
     uploaderId       String

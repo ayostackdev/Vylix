@@ -104,6 +104,8 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       if (selectedCollegeId) body.collegeId = selectedCollegeId;
       if (selectedDeptId) body.departmentId = selectedDeptId;
 
+      console.log('[ProfileModal] Saving body:', JSON.stringify(body));
+
       const res = await fetch('/api/user/profile', {
         method: 'PATCH',
         headers: {

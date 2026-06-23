@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { useAuth } from '@/context/auth-context';
 
 interface PastQuestion {
   id: string;
@@ -22,6 +23,7 @@ interface PastQuestion {
 }
 
 export function PastQuestionsView() {
+  const { user } = useAuth();
   const [items, setItems] = useState<PastQuestion[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -30,6 +32,8 @@ export function PastQuestionsView() {
   const [searchCourse, setSearchCourse] = useState('');
   const [searchYear, setSearchYear] = useState('');
   const [searchSemester, setSearchSemester] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const limit = 20;
 
   const fetchPastQuestions = useCallback(async () => {
@@ -66,6 +70,34 @@ export function PastQuestionsView() {
   useEffect(() => {
     fetchPastQuestions();
   }, [fetchPastQuestions]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    setDeletingId(id);
+    setError(null);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/materials/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to delete material');
+      }
+
+      setItems((prev) => prev.filter((item) => item.id !== id));
+      setConfirmDeleteId(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete');
+    } finally {
+      setDeletingId(null);
+    }
+  }, []);
 
   const totalPages = Math.ceil(total / limit);
 
@@ -173,6 +205,33 @@ export function PastQuestionsView() {
                   >
                     📥 Download
                   </a>
+                  {user?.id === item.uploader.id && (
+                    confirmDeleteId === item.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          disabled={deletingId === item.id}
+                          className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        >
+                          {deletingId === item.id ? '...' : 'Confirm'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          disabled={deletingId === item.id}
+                          className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(item.id)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        🗑 Delete
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             ))}

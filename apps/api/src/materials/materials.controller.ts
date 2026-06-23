@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
@@ -54,6 +54,20 @@ export class MaterialsController {
     }
 
     return this.materialsService.createMaterial(file, dto, authenticatedUserId);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @UseGuards(SupabaseAuthGuard)
+  async delete(
+    @Param('id') id: string,
+    @Req() req: Request
+  ): Promise<void> {
+    const authenticatedUserId = (req as Request & { user?: { id?: string } }).user?.id;
+    if (!authenticatedUserId) {
+      throw new BadRequestException('Authenticated user context is missing.');
+    }
+    await this.materialsService.deleteMaterial(id, authenticatedUserId);
   }
 
   @Get('past-questions')

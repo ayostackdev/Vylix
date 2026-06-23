@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { CacheService } from '../core/services/cache.service';
 import { TelemetryGateway } from '../telemetry/telemetry.gateway';
@@ -30,6 +30,7 @@ export class MaterialsService {
       data: {
         fileName: storedFile.fileName,
         fileUrl: storedFile.fileUrl,
+        filePath: storedFile.filePath,
         fileSize: file.size,
         topicId: hierarchy.topic.id,
         uploaderId: hierarchy.topic.authorId,
@@ -348,6 +349,51 @@ export class MaterialsService {
     this.cacheService.invalidate(`materials:topic:${topicId}`).catch((err) => {
       this.logger.error(`Failed to invalidate materials cache: ${err}`);
     });
+  }
+
+  async deleteMaterial(materialId: string, userId: string): Promise<void> {
+    const material = await this.prisma.material.findUnique({
+      where: { id: materialId },
+      select: { id: true, filePath: true, fileUrl: true, topicId: true, uploaderId: true },
+    });
+
+    if (!material) {
+      throw new NotFoundException('Material not found');
+    }
+
+    if (material.uploaderId !== userId) {
+      throw new ForbiddenException('You can only delete your own uploads');
+    }
+
+    const filePath = material.filePath || this.extractPathFromUrl(material.fileUrl);
+
+    try {
+      await this.storageProvider.delete(filePath);
+    } catch (err) {
+      this.logger.error(`Failed to delete file from storage: ${err}`);
+    }
+
+    await this.prisma.material.delete({ where: { id: materialId } });
+
+    this.invalidateMaterialsCache(material.topicId);
+
+    this.logger.log(
+      JSON.stringify({
+        event: 'materials.deleted',
+        materialId,
+        uploaderId: userId,
+        topicId: material.topicId,
+      })
+    );
+  }
+
+  private extractPathFromUrl(fileUrl: string): string {
+    try {
+      const url = new URL(fileUrl);
+      const match = url.pathname.match(/\/storage\/v1\/object\/(public|sign)\/[^/]+\/(.+)/);
+      if (match) return decodeURIComponent(match[2]);
+    } catch {}
+    throw new Error(`Cannot extract storage path from URL: ${fileUrl}`);
   }
 
   private formatErrorMessage(error: unknown) {
