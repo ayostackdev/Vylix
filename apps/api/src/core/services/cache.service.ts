@@ -9,7 +9,12 @@ export class CacheService {
 
   constructor(configService: ConfigService) {
     const redisUrl = configService.get<string>('REDIS_URL');
-    this.redis = new Redis(redisUrl || 'redis://localhost:6379/0');
+    const redisOptions: any = redisUrl || 'redis://localhost:6379/0';
+    if (redisUrl?.startsWith('rediss://')) {
+      this.redis = new Redis(redisUrl, { tls: { rejectUnauthorized: false } });
+    } else {
+      this.redis = new Redis(redisOptions);
+    }
     
     this.redis.on('error', (err) => {
       this.logger.error('Redis connection error:', err);

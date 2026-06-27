@@ -14,7 +14,8 @@ export class RateLimitMiddleware implements NestMiddleware {
     
     if (redisUrl) {
       try {
-        const redis = new Redis(redisUrl);
+        const redisOptions: any = redisUrl.startsWith('rediss://') ? { tls: { rejectUnauthorized: false } } : {};
+        const redis = new Redis(redisUrl, redisOptions);
         this.rateLimiter = new RateLimiterRedis({
           storeClient: redis,
           points: 1000, // 1000 requests

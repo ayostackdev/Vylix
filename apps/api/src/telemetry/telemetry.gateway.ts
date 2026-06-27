@@ -80,7 +80,8 @@ export class TelemetryGateway implements OnGatewayInit, OnGatewayConnection, OnG
     
     if (redisUrl) {
       try {
-        const pubClient = new Redis(redisUrl);
+        const redisOptions: any = redisUrl.startsWith('rediss://') ? { tls: { rejectUnauthorized: false } } : {};
+        const pubClient = new Redis(redisUrl, redisOptions);
         const subClient = pubClient.duplicate();
         
         server.adapter(createAdapter(pubClient, subClient));

@@ -10,7 +10,7 @@ function parseRedisUrl(redisUrl: string): RedisOptions {
     username: url.username || undefined,
     password: url.password || undefined,
     db: url.pathname && url.pathname !== '/' ? Number(url.pathname.slice(1)) : 0,
-    tls: url.protocol === 'rediss:' ? {} : undefined,
+    tls: url.protocol === 'rediss:' ? { rejectUnauthorized: false } : undefined,
     maxRetriesPerRequest: null,
     enableReadyCheck: false
   };
