@@ -198,7 +198,7 @@ export function PastQuestionsView() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <a
-                    href={item.fileUrl}
+                    href={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/materials/${item.id}/file`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-xs font-bold text-white hover:shadow-md transition-shadow"

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpRedirectResponse, Param, Post, Query, Redirect, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
@@ -68,6 +68,13 @@ export class MaterialsController {
       throw new BadRequestException('Authenticated user context is missing.');
     }
     await this.materialsService.deleteMaterial(id, authenticatedUserId);
+  }
+
+  @Get(':id/file')
+  @UseGuards(SupabaseAuthGuard)
+  async getFile(@Param('id') id: string) {
+    const url = await this.materialsService.getFileRedirectUrl(id);
+    return { url };
   }
 
   @Get('my-materials')

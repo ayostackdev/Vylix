@@ -240,6 +240,19 @@ export class MaterialsService {
     return { items, total, page, limit };
   }
 
+  async getFileRedirectUrl(id: string): Promise<string> {
+    const material = await this.prisma.material.findUnique({
+      where: { id },
+      select: { id: true, filePath: true },
+    });
+
+    if (!material) {
+      throw new NotFoundException('Material not found');
+    }
+
+    return this.storageProvider.getSignedUrl(material.filePath);
+  }
+
   async getMyMaterials(
     userId: string,
     params: { page?: number; limit?: number },

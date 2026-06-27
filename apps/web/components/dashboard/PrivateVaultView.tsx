@@ -126,7 +126,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
                   </div>
                   <div className="flex items-center gap-2">
                     <a
-                      href={item.fileUrl}
+                      href={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/materials/${item.id}/file`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
