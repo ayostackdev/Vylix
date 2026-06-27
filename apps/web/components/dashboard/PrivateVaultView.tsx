@@ -21,6 +21,8 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
   const [items, setItems] = useState<VaultMaterial[]>([]);
   const [loading, setLoading] = useState(true);
   const [chatDocument, setChatDocument] = useState<{ id: string; title: string } | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const {
     showModal,
     checkAfterSave,
@@ -28,6 +30,27 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
     handleDismissed,
     handleSuccess,
   } = useBackupEmailPrompt();
+
+  const handleDelete = useCallback(async (id: string) => {
+    setDeletingId(id);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/materials/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (!res.ok) throw new Error('Failed to delete');
+
+      setItems((prev) => prev.filter((item) => item.id !== id));
+      setConfirmDeleteId(null);
+    } catch {}
+    setDeletingId(null);
+  }, []);
 
   const openFile = useCallback(async (id: string) => {
     try {
@@ -154,9 +177,31 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
                     >
                       Chat
                     </button>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      {item.processingStatus}
-                    </span>
+                    {confirmDeleteId === item.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          disabled={deletingId === item.id}
+                          className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        >
+                          {deletingId === item.id ? '...' : 'Confirm'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          disabled={deletingId === item.id}
+                          className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-[11px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(item.id)}
+                        className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
               ))
