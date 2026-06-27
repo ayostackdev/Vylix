@@ -29,6 +29,24 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
     handleSuccess,
   } = useBackupEmailPrompt();
 
+  const openFile = useCallback(async (id: string) => {
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/materials/${id}/file`, { headers });
+      if (!res.ok) throw new Error('Failed to get file URL');
+      const { url } = await res.json();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {
+      // silently fail
+    }
+  }, []);
+
   const fetchVault = useCallback(async () => {
     setLoading(true);
     try {
@@ -125,14 +143,12 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
                     <p className="text-xs text-slate-500">{item.topic?.title ?? ''}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a
-                      href={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/materials/${item.id}/file`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => openFile(item.id)}
                       className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
                     >
                       View
-                    </a>
+                    </button>
                     <button
                       onClick={() => setChatDocument({ id: item.id, title: item.fileName })}
                       className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"

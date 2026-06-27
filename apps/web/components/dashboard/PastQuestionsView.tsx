@@ -71,6 +71,22 @@ export function PastQuestionsView() {
     fetchPastQuestions();
   }, [fetchPastQuestions]);
 
+  const openFile = useCallback(async (id: string) => {
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/materials/${id}/file`, { headers });
+      if (!res.ok) throw new Error('Failed to get file URL');
+      const { url } = await res.json();
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch {}
+  }, []);
+
   const handleDelete = useCallback(async (id: string) => {
     setDeletingId(id);
     setError(null);
@@ -197,14 +213,12 @@ export function PastQuestionsView() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/materials/${item.id}/file`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => openFile(item.id)}
                     className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-xs font-bold text-white hover:shadow-md transition-shadow"
                   >
                     📥 Download
-                  </a>
+                  </button>
                   {user?.id === item.uploader.id && (
                     confirmDeleteId === item.id ? (
                       <div className="flex items-center gap-1">
