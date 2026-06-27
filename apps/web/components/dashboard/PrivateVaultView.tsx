@@ -51,6 +51,8 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
   const [loading, setLoading] = useState(true);
   const [cachedIds, setCachedIds] = useState<Set<string>>(new Set());
   const [chatDocument, setChatDocument] = useState<{ id: string; title: string } | null>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerTitle, setViewerTitle] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const {
@@ -89,7 +91,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
     setDeletingId(null);
   }, []);
 
-  const openFile = useCallback(async (id: string) => {
+  const openFile = useCallback(async (id: string, title: string) => {
     try {
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -103,7 +105,8 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
       if (!res.ok) throw new Error('Failed to get file');
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+      setViewerUrl(blobUrl);
+      setViewerTitle(title);
     } catch {}
   }, []);
 
@@ -157,6 +160,12 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
     refreshCache();
     checkAfterSave();
   }, [fetchVault, refreshCache, checkAfterSave, refreshKey]);
+
+  useEffect(() => {
+    return () => {
+      if (viewerUrl?.startsWith('blob:')) URL.revokeObjectURL(viewerUrl);
+    };
+  }, [viewerUrl]);
 
   const totalSize = items.reduce((acc, i) => acc + (i.fileSize || 0), 0);
   const sizeMb = totalSize > 0 ? `${(totalSize / (1024 * 1024)).toFixed(1)} MB` : '0 MB';
@@ -230,7 +239,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
-                        onClick={() => openFile(item.id)}
+                        onClick={() => openFile(item.id, item.fileName)}
                         className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
                       >
                         View
@@ -291,6 +300,21 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
             />
           )}
         </div>
+
+        {viewerUrl && (
+          <div className="fixed inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-sm">
+            <div className="flex items-center justify-between bg-black/80 px-4 py-3">
+              <p className="truncate text-sm font-semibold text-white max-w-[70%]">{viewerTitle}</p>
+              <button
+                onClick={() => { setViewerUrl(null); setViewerTitle(''); }}
+                className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white hover:bg-white/20 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+            <embed src={viewerUrl} type="application/pdf" className="flex-1 w-full" />
+          </div>
+        )}
       </section>
 
       <BackupEmailModal

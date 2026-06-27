@@ -34,6 +34,8 @@ export function PastQuestionsView() {
   const [searchSemester, setSearchSemester] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerTitle, setViewerTitle] = useState('');
   const limit = 20;
 
   const fetchPastQuestions = useCallback(async () => {
@@ -71,7 +73,13 @@ export function PastQuestionsView() {
     fetchPastQuestions();
   }, [fetchPastQuestions]);
 
-  const openFile = useCallback(async (id: string) => {
+  useEffect(() => {
+    return () => {
+      if (viewerUrl?.startsWith('blob:')) URL.revokeObjectURL(viewerUrl);
+    };
+  }, [viewerUrl]);
+
+  const openFile = useCallback(async (id: string, title: string) => {
     try {
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -83,8 +91,9 @@ export function PastQuestionsView() {
       const res = await fetch(`${apiBaseUrl}/api/materials/${id}/file`, { headers });
       if (!res.ok) throw new Error('Failed to get file');
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      const blobUrl = URL.createObjectURL(blob);
+      setViewerUrl(blobUrl);
+      setViewerTitle(title);
     } catch {}
   }, []);
 
@@ -215,10 +224,10 @@ export function PastQuestionsView() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
-                    onClick={() => openFile(item.id)}
+                    onClick={() => openFile(item.id, item.fileName)}
                     className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-xs font-bold text-white hover:shadow-md transition-shadow"
                   >
-                    📥 Download
+                    📖 View
                   </button>
                   {user?.id === item.uploader.id && (
                     confirmDeleteId === item.id ? (
@@ -276,6 +285,21 @@ export function PastQuestionsView() {
           </div>
         )}
       </div>
+
+      {viewerUrl && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-sm">
+          <div className="flex items-center justify-between bg-black/80 px-4 py-3">
+            <p className="truncate text-sm font-semibold text-white max-w-[70%]">{viewerTitle}</p>
+            <button
+              onClick={() => { setViewerUrl(null); setViewerTitle(''); }}
+              className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white hover:bg-white/20 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+          <embed src={viewerUrl} type="application/pdf" className="flex-1 w-full" />
+        </div>
+      )}
     </section>
   );
 }
