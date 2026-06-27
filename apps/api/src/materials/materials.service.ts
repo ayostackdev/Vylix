@@ -166,7 +166,7 @@ export class MaterialsService {
     const limit = Math.min(params.limit ?? 20, 50);
     const skip = (page - 1) * limit;
 
-    const where: any = { isPastQuestion: true };
+    const where: any = {};
 
     if (params.courseCode) {
       const course = await this.prisma.course.findUnique({
