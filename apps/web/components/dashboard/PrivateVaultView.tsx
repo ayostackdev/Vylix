@@ -6,6 +6,7 @@ import { useBackupEmailPrompt } from '@/hooks/useBackupEmailPrompt';
 import { BackupEmailModal } from '@/components/auth/BackupEmailModal';
 import { ProfileBackupBanner } from '@/components/profile/ProfileBackupBanner';
 import { ChatPanel } from '@/components/chat/ChatPanel';
+import { PdfViewer } from './PdfViewer';
 
 const CACHE_NAME = 'vault-files';
 
@@ -93,14 +94,25 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
 
   const openFile = useCallback(async (id: string, title: string) => {
     try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const url = `${apiBaseUrl}/api/materials/${id}/file`;
+
+      const cache = await caches.open(CACHE_NAME);
+      const cachedRes = await cache.match(url);
+      if (cachedRes) {
+        const blob = await cachedRes.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setViewerUrl(blobUrl);
+        setViewerTitle(title);
+        return;
+      }
+
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       const headers: Record<string, string> = {};
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const url = `${apiBaseUrl}/api/materials/${id}/file`;
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error('Failed to get file');
       const blob = await res.blob();
