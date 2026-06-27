@@ -250,7 +250,12 @@ export class MaterialsService {
       throw new NotFoundException('Material not found');
     }
 
-    return this.storageProvider.getSignedUrl(material.filePath);
+    const path = material.filePath;
+    if (!path) {
+      throw new NotFoundException('File path not available for this material');
+    }
+
+    return this.storageProvider.getSignedUrl(path);
   }
 
   async getMyMaterials(
