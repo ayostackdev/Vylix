@@ -260,7 +260,7 @@ export function VylixDashboard() {
                             Upload
                           </button>
                         </div>
-                        <PrivateVaultView />
+                        <PrivateVaultView refreshKey={refreshKey} />
                       </div>
                     )}
                   </TabsContent>

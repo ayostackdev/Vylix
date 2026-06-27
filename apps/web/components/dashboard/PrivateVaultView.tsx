@@ -1,24 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useBackupEmailPrompt } from '@/hooks/useBackupEmailPrompt';
 import { BackupEmailModal } from '@/components/auth/BackupEmailModal';
 import { ProfileBackupBanner } from '@/components/profile/ProfileBackupBanner';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 
-const quickStats = [
-  { label: 'Saved PDFs', value: '0' },
-  { label: 'Available Offline', value: '0' },
-  { label: 'Space Used', value: '0 MB' },
-];
+interface VaultMaterial {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  processingStatus: string;
+  uploadedAt: string;
+  topic: { title: string } | null;
+}
 
-const recentItems = [
-  { title: 'MTS 201 Tutorial Sheet', tag: 'PDF', state: 'Not cached yet' },
-  { title: 'PHY 303 Past Questions', tag: 'Archive', state: 'Not cached yet' },
-  { title: 'CSC 311 Lecture Notes', tag: 'Slides', state: 'Not cached yet' },
-];
-
-export function PrivateVaultView() {
+export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
+  const [items, setItems] = useState<VaultMaterial[]>([]);
+  const [loading, setLoading] = useState(true);
   const [chatDocument, setChatDocument] = useState<{ id: string; title: string } | null>(null);
   const {
     showModal,
@@ -28,9 +29,40 @@ export function PrivateVaultView() {
     handleSuccess,
   } = useBackupEmailPrompt();
 
+  const fetchVault = useCallback(async () => {
+    setLoading(true);
+    try {
+      const headers: Record<string, string> = {};
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/materials/past-questions?limit=50`, { headers });
+      if (!res.ok) throw new Error('Failed to fetch vault materials');
+      const json = await res.json();
+      setItems(json.items ?? []);
+    } catch {
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
+    fetchVault();
     checkAfterSave();
-  }, [checkAfterSave]);
+  }, [fetchVault, checkAfterSave, refreshKey]);
+
+  const totalSize = items.reduce((acc, i) => acc + (i.fileSize || 0), 0);
+  const sizeMb = totalSize > 0 ? `${(totalSize / (1024 * 1024)).toFixed(1)} MB` : '0 MB';
+  const stats = [
+    { label: 'Saved PDFs', value: String(items.length) },
+    { label: 'Available Offline', value: '0' },
+    { label: 'Space Used', value: sizeMb },
+  ];
 
   return (
     <>
@@ -59,14 +91,14 @@ export function PrivateVaultView() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
-          {quickStats.map((stat) => (
+          {stats.map((stat) => (
             <article
               key={stat.label}
               className="rounded-[1.5rem] border border-sky-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
             >
               <p className="cp-label">{stat.label}</p>
               <p className="mt-3 text-3xl font-black tracking-tight text-gray-900">
-                {stat.value}
+                {loading ? '...' : stat.value}
               </p>
             </article>
           ))}
@@ -75,38 +107,45 @@ export function PrivateVaultView() {
         <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <h3 className="cp-card-title text-gray-900">Recent Vault Materials</h3>
-            <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px]">
-              <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
-                Preview
-              </span>
-            </span>
           </div>
 
           <div className="mt-5 grid gap-3">
-            {recentItems.map((item) => (
-              <div
-                key={item.title}
-                className="flex flex-col gap-2 rounded-[1.25rem] border border-sky-100 bg-blue-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div>
-                  <p className="cp-card-title text-gray-900">{item.title}</p>
-                  <p className="text-xs text-slate-500">{item.state}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setChatDocument({ id: item.title, title: item.title })}
-                    className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
-                  >
-                    💬 Chat
-                  </button>
-                  <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
-                    <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
-                      {item.tag}
+            {loading ? (
+              <p className="text-sm text-slate-400">Loading...</p>
+            ) : items.length === 0 ? (
+              <p className="text-sm text-slate-400">No materials yet. Upload from the Past Questions tab.</p>
+            ) : (
+              items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-2 rounded-[1.25rem] border border-sky-100 bg-blue-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="cp-card-title text-gray-900">{item.fileName}</p>
+                    <p className="text-xs text-slate-500">{item.topic?.title ?? ''}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={item.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
+                    >
+                      View
+                    </a>
+                    <button
+                      onClick={() => setChatDocument({ id: item.id, title: item.fileName })}
+                      className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
+                    >
+                      Chat
+                    </button>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      {item.processingStatus}
                     </span>
-                  </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           {chatDocument && (
