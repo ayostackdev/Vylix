@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { useAuth } from '@/context/auth-context';
 
 interface UploadMaterialModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ function titleFromFilename(name: string): string {
 }
 
 export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMaterialModalProps) {
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [courseCode, setCourseCode] = useState('');
@@ -97,6 +99,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
     const autoTitle = titleFromFilename(file.name);
     formData.append('title', autoTitle);
     if (courseCode.trim()) formData.append('courseCode', courseCode.trim().toUpperCase());
+    if (user?.departmentCode) formData.append('departmentCode', user.departmentCode);
     if (isPastQuestion) {
       formData.append('isPastQuestion', 'true');
       if (examYear) formData.append('examYear', examYear);

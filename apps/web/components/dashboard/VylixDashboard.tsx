@@ -21,6 +21,7 @@ export function VylixDashboard() {
   const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions' | 'chat'>('pulse');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { isOnline } = useNetworkState();
   const { user, isAuthenticated, promptLogin } = useAuth();
   const isAlumni = user?.status === 'ALUMNI';
@@ -277,7 +278,7 @@ export function VylixDashboard() {
                           Upload Past Question
                         </button>
                       </div>
-                      <PastQuestionsView />
+                      <PastQuestionsView key={refreshKey} />
                     </div>
                   </TabsContent>
                   <TabsContent value="chat" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
@@ -344,7 +345,7 @@ export function VylixDashboard() {
       <UploadMaterialModal
         isOpen={showUploadModal}
         onClose={() => setShowUploadModal(false)}
-        onSuccess={() => setShowUploadModal(false)}
+        onSuccess={() => { setShowUploadModal(false); setRefreshKey(k => k + 1); }}
       />
 
       <ProfileModal
