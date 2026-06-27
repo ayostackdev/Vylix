@@ -9,6 +9,7 @@ import { PrivateVaultView } from '@/components/dashboard/PrivateVaultView';
 import { PublicPulseView } from '@/components/dashboard/PublicPulseView';
 import { PastQuestionsView } from '@/components/dashboard/PastQuestionsView';
 import { UploadMaterialModal } from '@/components/dashboard/UploadMaterialModal';
+import { CollaborationView } from '@/components/chat/CollaborationView';
 import { useNetworkState } from '@/hooks/useNetworkState';
 import { useAuth } from '@/context/auth-context';
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
@@ -17,7 +18,7 @@ import { LevelUpdateBanner } from '@/components/dashboard/LevelUpdateBanner';
 import { ProfileModal } from '@/components/auth/ProfileModal';
 
 export function VylixDashboard() {
-  const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions'>('pulse');
+  const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions' | 'chat'>('pulse');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { isOnline } = useNetworkState();
@@ -181,14 +182,16 @@ export function VylixDashboard() {
             onValueChange={(val) => {
               if (val === 'vault' && !isAuthenticated) {
                 promptLogin('access your Private Vault');
+              } else if (val === 'chat' && !isAuthenticated) {
+                promptLogin('access Chat');
               } else {
-                setActiveLayer(val as 'vault' | 'pulse' | 'questions');
+                setActiveLayer(val as 'vault' | 'pulse' | 'questions' | 'chat');
               }
             }}
             className="cp-fade-up flex min-h-0 flex-1 flex-col gap-3 sm:gap-4"
           >
             <div className="flex w-full justify-center cp-fade-in">
-              <TabsList className="grid w-full max-w-none grid-cols-3 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-2xl sm:rounded-2xl sm:p-1.5">
+              <TabsList className="grid w-full max-w-none grid-cols-4 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-3xl sm:rounded-2xl sm:p-1.5">
                 <TabsTrigger
                   value="vault"
                   className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
@@ -204,6 +207,15 @@ export function VylixDashboard() {
                 >
                   <span className="sm:hidden">📝</span>
                   <span className="hidden sm:inline">📝 Questions</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="chat"
+                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  disabled={!isAuthenticated}
+                >
+                  <span className="sm:hidden">💬</span>
+                  <span className="hidden sm:inline">💬 Chat</span>
+                  {!isAuthenticated && <span className="ml-1 hidden sm:inline">🔒</span>}
                 </TabsTrigger>
                 <TabsTrigger
                   value="pulse"
@@ -268,23 +280,27 @@ export function VylixDashboard() {
                       <PastQuestionsView />
                     </div>
                   </TabsContent>
+                  <TabsContent value="chat" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                    {!isAuthenticated ? (
+                      <div className="mx-auto max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-6 py-12 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)]">
+                        <p className="mb-4 text-4xl">🔒</p>
+                        <h3 className="mb-2 text-2xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">Chat Locked</h3>
+                        <p className="mb-6 text-gray-700">
+                          Sign in to message classmates and collaborate on courses.
+                        </p>
+                        <button
+                          onClick={() => promptLogin('access Chat')}
+                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-6 py-3 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                        >
+                          Sign In to Chat
+                        </button>
+                      </div>
+                    ) : (
+                      <CollaborationView />
+                    )}
+                  </TabsContent>
                   <TabsContent value="pulse" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
-                    <div className="space-y-4">
-                      {isAuthenticated && (
-                        <div className="flex justify-end">
-                          <button
-                            onClick={() => setShowUploadModal(true)}
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
-                          >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Post
-                          </button>
-                        </div>
-                      )}
-                      <PublicPulseView isReadOnly={!isAuthenticated} />
-                    </div>
+                    <PublicPulseView isReadOnly={!isAuthenticated} />
                   </TabsContent>
                 </div>
               </ScrollArea>

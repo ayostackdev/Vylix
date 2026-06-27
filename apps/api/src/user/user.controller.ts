@@ -203,6 +203,22 @@ export class UserController {
         }
       }
 
+      if (!user.schoolEmail) {
+        const tokenEmail = userAgent?.tokenEmail;
+        if (tokenEmail && tokenEmail.endsWith('.edu.ng')) {
+          try {
+            user = await this.prisma.user.update({
+              where: { id: userId },
+              data: { schoolEmail: tokenEmail },
+              select,
+            });
+            this.logger.log(`Auto-set schoolEmail from JWT for user ${userId}`);
+          } catch {
+            this.logger.warn(`Failed to auto-set schoolEmail for user ${userId}`);
+          }
+        }
+      }
+
       return { data: user };
     } catch (error) {
       const errorMsg = error instanceof Error ? `${error.message} | ${error.constructor.name} | ${JSON.stringify((error as any).code ?? '')}` : 'Unknown error';
