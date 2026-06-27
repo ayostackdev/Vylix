@@ -16,5 +16,7 @@ export interface StorageProvider {
 
   getPublicUrl(path: string): Promise<string>;
 
+  download(path: string): Promise<{ buffer: Buffer; mimeType: string; fileName: string }>;
+
   delete(path: string): Promise<void>;
 }

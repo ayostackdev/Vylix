@@ -81,8 +81,9 @@ export function PastQuestionsView() {
       }
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
       const res = await fetch(`${apiBaseUrl}/api/materials/${id}/file`, { headers });
-      if (!res.ok) throw new Error('Failed to get file URL');
-      const { url } = await res.json();
+      if (!res.ok) throw new Error('Failed to get file');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
       window.open(url, '_blank', 'noopener,noreferrer');
     } catch {}
   }, []);

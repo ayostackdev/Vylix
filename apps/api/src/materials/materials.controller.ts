@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpRedirectResponse, Param, Post, Query, Redirect, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpRedirectResponse, Param, Post, Query, Redirect, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
@@ -72,9 +73,11 @@ export class MaterialsController {
 
   @Get(':id/file')
   @UseGuards(SupabaseAuthGuard)
-  async getFile(@Param('id') id: string) {
-    const url = await this.materialsService.getFileRedirectUrl(id);
-    return { url };
+  async getFile(@Param('id') id: string, @Res() res: Response) {
+    const { buffer, mimeType, fileName } = await this.materialsService.downloadFile(id);
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.send(buffer);
   }
 
   @Get('my-materials')

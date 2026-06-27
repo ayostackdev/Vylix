@@ -84,6 +84,16 @@ export class AppwriteStorageProvider implements StorageProvider {
     return this.getViewUrl(path);
   }
 
+  async download(path: string): Promise<{ buffer: Buffer; mimeType: string; fileName: string }> {
+    const fileInfo = await this.storage.getFile({ bucketId: this.bucketId, fileId: path });
+    const fileBytes = await this.storage.getFileDownload({ bucketId: this.bucketId, fileId: path });
+    return {
+      buffer: Buffer.from(fileBytes),
+      mimeType: fileInfo.mimeType,
+      fileName: fileInfo.name,
+    };
+  }
+
   async delete(path: string): Promise<void> {
     await this.storage.deleteFile({
       bucketId: this.bucketId,
