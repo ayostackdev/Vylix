@@ -1,5 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpRedirectResponse, Param, Post, Query, Redirect, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import type { Response } from 'express';
+import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
@@ -73,11 +72,12 @@ export class MaterialsController {
 
   @Get(':id/file')
   @UseGuards(SupabaseAuthGuard)
-  async getFile(@Param('id') id: string, @Res() res: Response) {
+  async getFile(@Param('id') id: string): Promise<StreamableFile> {
     const { buffer, mimeType, fileName } = await this.materialsService.downloadFile(id);
-    res.setHeader('Content-Type', mimeType);
-    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
-    res.send(buffer);
+    return new StreamableFile(buffer, {
+      type: mimeType,
+      disposition: `inline; filename="${fileName}"`,
+    });
   }
 
   @Get('my-materials')
