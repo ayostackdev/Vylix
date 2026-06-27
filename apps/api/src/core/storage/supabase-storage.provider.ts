@@ -103,6 +103,22 @@ export class SupabaseStorageProvider implements StorageProvider {
     return `${this.supabaseUrl.replace(/\/$/, '')}/storage/v1/object/public/${this.bucket}/${path}`;
   }
 
+  async download(path: string): Promise<{ buffer: Buffer; mimeType: string; fileName: string }> {
+    const downloadUrl = `${this.supabaseUrl.replace(/\/$/, '')}/storage/v1/object/${this.bucket}/${path}`;
+    const response = await fetch(downloadUrl, {
+      headers: {
+        Authorization: `Bearer ${this.serviceRoleKey}`,
+        apikey: this.serviceRoleKey,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Supabase download failed with status ${response.status}`);
+    }
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const fileName = path.split('/').pop() || 'file';
+    return { buffer, mimeType: response.headers.get('content-type') || 'application/octet-stream', fileName };
+  }
+
   async delete(path: string): Promise<void> {
     const deleteUrl = `${this.supabaseUrl.replace(/\/$/, '')}/storage/v1/object/${this.bucket}/${path}`;
 
