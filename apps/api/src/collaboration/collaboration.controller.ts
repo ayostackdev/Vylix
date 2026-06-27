@@ -136,6 +136,12 @@ export class CollaborationController {
     return this.collaborationService.getUnreadSummary(userId);
   }
 
+  @Get('users/search')
+  async searchUsers(@Req() req: Request, @Query('q') q?: string) {
+    const userId = this.requireUserId(req);
+    return this.collaborationService.searchUsers(userId, q ?? '');
+  }
+
   @Get('notifications')
   async listNotifications(@Req() req: Request) {
     const userId = this.requireUserId(req);

@@ -584,6 +584,31 @@ export class CollaborationService {
     };
   }
 
+  async searchUsers(userId: string, query: string) {
+    if (!query.trim()) return [];
+
+    return this.prisma.user.findMany({
+      where: {
+        id: { not: userId },
+        OR: [
+          { fullName: { contains: query, mode: 'insensitive' } },
+          { matricNumber: { contains: query, mode: 'insensitive' } },
+          { schoolEmail: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+        department: { select: { code: true, name: true } },
+        currentLevel: true,
+        matricNumber: true,
+      },
+      take: 20,
+      orderBy: { fullName: 'asc' },
+    });
+  }
+
   async listNotifications(userId: string) {
     return this.prisma.notification.findMany({
       where: { userId },

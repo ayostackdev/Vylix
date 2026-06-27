@@ -77,6 +77,15 @@ export interface ConversationListItem {
   };
 }
 
+export interface UserSearchResult {
+  id: string;
+  fullName: string;
+  avatarUrl: string | null;
+  department: { code: string; name: string } | null;
+  currentLevel: string | null;
+  matricNumber: string | null;
+}
+
 export interface ConversationDetail {
   id: string;
   type: 'DIRECT' | 'GROUP';
@@ -125,6 +134,16 @@ export function useUnreadSummary() {
     queryKey: ['unread-summary'],
     queryFn: () => authFetch('/api/collaboration/unread-summary') as Promise<UnreadSummary>,
     refetchInterval: 30_000,
+  });
+}
+
+export function useSearchUsers(query: string) {
+  return useQuery({
+    queryKey: ['users', 'search', query],
+    queryFn: () =>
+      authFetch(`/api/collaboration/users/search?q=${encodeURIComponent(query)}`) as Promise<UserSearchResult[]>,
+    enabled: query.trim().length >= 2,
+    staleTime: 30_000,
   });
 }
 
