@@ -25,6 +25,20 @@ const pwaConfig = withPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  runtimeCaching: [
+    {
+      urlPattern: /\/api\/materials\/[^/]+\/file/,
+      handler: 'CacheFirst',
+      method: 'GET',
+      options: {
+        cacheName: 'vault-files',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 60 * 24 * 60 * 60,
+        },
+      },
+    },
+  ],
 });
 
 export default pwaConfig(nextConfig);
