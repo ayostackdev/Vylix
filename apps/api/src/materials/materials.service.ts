@@ -166,7 +166,7 @@ export class MaterialsService {
     const limit = Math.min(params.limit ?? 20, 50);
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: any = { isPastQuestion: true };
 
     if (params.courseCode) {
       const course = await this.prisma.course.findUnique({
@@ -240,8 +240,53 @@ export class MaterialsService {
     return { items, total, page, limit };
   }
 
+  async getMyMaterials(
+    userId: string,
+    params: { page?: number; limit?: number },
+  ) {
+    const page = params.page ?? 1;
+    const limit = Math.min(params.limit ?? 20, 50);
+    const skip = (page - 1) * limit;
+
+    const where = { uploaderId: userId };
+
+    const [items, total] = await Promise.all([
+      this.prisma.material.findMany({
+        where,
+        take: limit,
+        skip,
+        orderBy: { uploadedAt: 'desc' },
+        select: {
+          id: true,
+          fileName: true,
+          fileUrl: true,
+          fileSize: true,
+          processingStatus: true,
+          isPastQuestion: true,
+          uploadedAt: true,
+          topic: {
+            select: {
+              id: true,
+              title: true,
+              course: {
+                select: {
+                  id: true,
+                  code: true,
+                  title: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.material.count({ where }),
+    ]);
+
+    return { items, total, page, limit };
+  }
+
   /**
-   * Get course details with caching
+    * Get course details with caching
    */
   async getCourseWithCache(courseCode: string) {
     const cacheKey = `course:${courseCode}`;

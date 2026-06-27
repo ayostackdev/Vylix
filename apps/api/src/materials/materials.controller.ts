@@ -70,6 +70,23 @@ export class MaterialsController {
     await this.materialsService.deleteMaterial(id, authenticatedUserId);
   }
 
+  @Get('my-materials')
+  @UseGuards(SupabaseAuthGuard)
+  async listMyMaterials(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Req() req: Request
+  ) {
+    const authenticatedUserId = (req as Request & { user?: { id?: string } }).user?.id;
+    if (!authenticatedUserId) {
+      throw new BadRequestException('Authenticated user context is missing.');
+    }
+    return this.materialsService.getMyMaterials(authenticatedUserId, {
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+  }
+
   @Get('past-questions')
   @UseGuards(SupabaseAuthGuard)
   async listPastQuestions(

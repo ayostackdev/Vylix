@@ -40,7 +40,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
       }
 
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const res = await fetch(`${apiBaseUrl}/api/materials/past-questions?limit=50`, { headers });
+      const res = await fetch(`${apiBaseUrl}/api/materials/my-materials?limit=50`, { headers });
       if (!res.ok) throw new Error('Failed to fetch vault materials');
       const json = await res.json();
       setItems(json.items ?? []);
