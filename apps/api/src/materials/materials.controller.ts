@@ -73,9 +73,9 @@ export class MaterialsController {
   @Get('my-materials')
   @UseGuards(SupabaseAuthGuard)
   async listMyMaterials(
+    @Req() req: Request,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Req() req: Request
   ) {
     const authenticatedUserId = (req as Request & { user?: { id?: string } }).user?.id;
     if (!authenticatedUserId) {
