@@ -4,12 +4,14 @@ import { useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { SkeletonRow } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/auth-context';
 import { useConversations } from '@/queries/use-collaboration';
 
 interface ConversationListProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onCreateNew: () => void;
+  onClassmates: () => void;
 }
 
 function conversationTitle(conv: {
@@ -39,11 +41,10 @@ function conversationAvatar(conv: {
   return { src: undefined, fallback: '#' };
 }
 
-export function ConversationList({ selectedId, onSelect, onCreateNew }: ConversationListProps) {
+export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmates }: ConversationListProps) {
+  const { user } = useAuth();
   const { data: conversations, isLoading } = useConversations();
-  const currentUserId = typeof window !== 'undefined'
-    ? (document.cookie.match(/sb-user-id=([^;]+)/)?.[1] ?? '')
-    : '';
+  const currentUserId = user?.id ?? '';
 
   const sorted = useMemo(() => {
     if (!conversations) return [];
@@ -56,15 +57,26 @@ export function ConversationList({ selectedId, onSelect, onCreateNew }: Conversa
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-blue-100 px-4 py-3">
         <h3 className="cp-card-title text-gray-900">Messages</h3>
-        <button
-          onClick={onCreateNew}
-          className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-3 py-1.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
-        >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          New
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onClassmates}
+            className="inline-flex items-center gap-1 rounded-xl border border-blue-200 bg-white px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50 transition-all"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Classmates
+          </button>
+          <button
+            onClick={onCreateNew}
+            className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-3 py-1.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">

@@ -147,6 +147,15 @@ export function useSearchUsers(query: string) {
   });
 }
 
+export function useClassmates() {
+  return useQuery({
+    queryKey: ['users', 'classmates'],
+    queryFn: () =>
+      authFetch('/api/collaboration/users/classmates') as Promise<UserSearchResult[]>,
+    staleTime: 60_000,
+  });
+}
+
 export function useCreateConversation() {
   const qc = useQueryClient();
   return useMutation({
@@ -164,7 +173,7 @@ export function useCreateConversation() {
   });
 }
 
-export function useSendMessage() {
+export function useSendMessage(userId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -178,9 +187,47 @@ export function useSendMessage() {
         method: 'POST',
         body: JSON.stringify({ content }),
       }) as Promise<Message>,
+    onMutate: async ({ conversationId, content }) => {
+      await qc.cancelQueries({ queryKey: ['messages', conversationId] });
+
+      const previous = qc.getQueryData<Message[]>(['messages', conversationId]);
+
+      const optimistic: Message = {
+        id: `optimistic-${Date.now()}`,
+        conversationId,
+        senderId: userId ?? '',
+        content,
+        metadata: null,
+        editedAt: null,
+        deletedAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        sender: {
+          id: userId ?? '',
+          fullName: '',
+          avatarUrl: null,
+          departmentId: null,
+        },
+        receipts: [],
+      };
+
+      qc.setQueryData<Message[]>(['messages', conversationId], (old) =>
+        old ? [...old, optimistic] : [optimistic]
+      );
+
+      return { previous };
+    },
     onSuccess: (data) => {
+      qc.setQueryData<Message[]>(['messages', data.conversationId], (old) =>
+        old ? old.map((m) => (m.id.startsWith('optimistic-') ? data : m)) : [data]
+      );
       qc.invalidateQueries({ queryKey: ['messages', data.conversationId] });
       qc.invalidateQueries({ queryKey: ['conversations'] });
+    },
+    onError: (_err, { conversationId }, context) => {
+      if (context?.previous) {
+        qc.setQueryData(['messages', conversationId], context.previous);
+      }
     },
   });
 }

@@ -13,12 +13,14 @@ import {
   type Message,
 } from '@/queries/use-collaboration';
 import { useChatSocket } from '@/hooks/useChatSocket';
+import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ConversationViewProps {
   conversationId: string;
   title: string;
   onBack: () => void;
+  otherUser?: { id: string; fullName: string; avatarUrl: string | null };
 }
 
 function MessageBubble({
@@ -140,17 +142,20 @@ function MessageBubble({
   );
 }
 
-export function ConversationView({ conversationId, title, onBack }: ConversationViewProps) {
+export function ConversationView({ conversationId, title, onBack, otherUser }: ConversationViewProps) {
   const { user } = useAuth();
   const { data: messages, isLoading } = useMessages(conversationId);
-  const sendMessage = useSendMessage();
+  const sendMessage = useSendMessage(user?.id);
   const editMessage = useEditMessage();
   const deleteMessage = useDeleteMessage();
+
+  useRealtimeMessages(conversationId, user?.id);
   const markRead = useMarkRead();
   const sendTyping = useSendTyping();
-  const { typingUsers, connected } = useChatSocket({
+  const { typingUsers, connected, otherOnline } = useChatSocket({
     conversationId,
     userId: user?.id ?? '',
+    otherUserId: otherUser?.id,
     enabled: !!user,
   });
 
@@ -208,18 +213,34 @@ export function ConversationView({ conversationId, title, onBack }: Conversation
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
+        {otherUser && (
+          <Avatar className="h-9 w-9 shrink-0 shadow-sm ring-2 ring-blue-100">
+            <AvatarImage src={otherUser.avatarUrl ?? undefined} />
+            <AvatarFallback className="bg-green-50 text-sm font-bold text-gray-900">
+              {otherUser.fullName.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        )}
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-bold text-gray-900">{title}</h3>
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-block h-2 w-2 rounded-full ${
-                connected ? 'animate-pulse bg-emerald-500' : 'bg-gray-400'
-              }`}
-            />
-            <span className="text-[10px] font-medium text-gray-600">
-              {connected ? 'Connected' : 'Reconnecting...'}
-            </span>
-          </div>
+          {otherUser && (
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-block h-2 w-2 rounded-full ${
+                  otherOnline ? 'animate-pulse bg-emerald-500' : 'bg-gray-300'
+                }`}
+              />
+              <span className="text-[10px] font-medium text-gray-500">
+                {otherOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+          )}
+          {!otherUser && connected && (
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-[10px] font-medium text-gray-500">Connected</span>
+            </div>
+          )}
         </div>
       </div>
 

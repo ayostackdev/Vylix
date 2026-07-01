@@ -101,24 +101,6 @@ export class CollaborationService {
     return this.cacheService.getOrSet(
       cacheKey,
       async () => {
-        // Fetch unread counts in a single query instead of N+1
-        const unreadCounts = await this.prisma.message.groupBy({
-          by: ['conversationId'],
-          where: {
-            deletedAt: null,
-            conversation: {
-              members: {
-                some: { userId }
-              }
-            }
-          },
-          _count: true
-        });
-
-        const unreadCountMap = new Map(
-          unreadCounts.map(item => [item.conversationId, item._count])
-        );
-
         const memberships = await this.prisma.conversationMember.findMany({
           where: { userId },
           select: {
@@ -167,21 +149,31 @@ export class CollaborationService {
           orderBy: { joinedAt: 'desc' }
         });
 
-        return memberships.map(membership => {
-          const unreadCount = membership.lastReadAt
-            ? (unreadCountMap.get(membership.conversation.id) ?? 0)
-            : 0;
+        const enriched = await Promise.all(
+          memberships.map(async (membership) => {
+            const lastReadAt = membership.lastReadAt;
+            const unreadCount = await this.prisma.message.count({
+              where: {
+                conversationId: membership.conversation.id,
+                deletedAt: null,
+                senderId: { not: userId },
+                createdAt: lastReadAt ? { gt: lastReadAt } : undefined,
+              },
+            });
 
-          return {
-            ...membership.conversation,
-            membership: {
-              role: membership.role,
-              lastReadAt: membership.lastReadAt,
-              joinedAt: membership.joinedAt,
-              unreadCount
-            }
-          };
-        });
+            return {
+              ...membership.conversation,
+              membership: {
+                role: membership.role,
+                lastReadAt: membership.lastReadAt,
+                joinedAt: membership.joinedAt,
+                unreadCount,
+              },
+            };
+          })
+        );
+
+        return enriched;
       },
       60 // Cache for 1 minute (conversations change frequently)
     );
@@ -318,7 +310,8 @@ export class CollaborationService {
         senderId: userId,
         senderName: message.sender.fullName,
         memberCount: conversation.members.length,
-        unreadCount: await this.getUnreadCountForConversation(userId, conversationId, membership.lastReadAt ?? null)
+        unreadCount: await this.getUnreadCountForConversation(userId, conversationId, membership.lastReadAt ?? null),
+        fullMessage: message,
       }
     });
 
@@ -410,7 +403,8 @@ export class CollaborationService {
       payload: {
         conversationId: message.conversationId,
         messageId,
-        senderId: userId
+        senderId: userId,
+        fullMessage: updated,
       }
     });
 
@@ -605,6 +599,35 @@ export class CollaborationService {
         matricNumber: true,
       },
       take: 20,
+      orderBy: { fullName: 'asc' },
+    });
+  }
+
+  async searchClassmates(userId: string) {
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { departmentId: true, currentLevel: true },
+    });
+
+    if (!currentUser?.departmentId || !currentUser?.currentLevel) {
+      return [];
+    }
+
+    return this.prisma.user.findMany({
+      where: {
+        id: { not: userId },
+        departmentId: currentUser.departmentId,
+        currentLevel: currentUser.currentLevel,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+        department: { select: { code: true, name: true } },
+        currentLevel: true,
+        matricNumber: true,
+      },
+      take: 50,
       orderBy: { fullName: 'asc' },
     });
   }

@@ -7,6 +7,7 @@ interface UseChatSocketOptions {
   conversationId: string | null;
   userId: string;
   enabled?: boolean;
+  otherUserId?: string | null;
 }
 
 export interface TypingUser {
@@ -14,16 +15,20 @@ export interface TypingUser {
   isTyping: boolean;
 }
 
-export function useChatSocket({ conversationId, userId, enabled = true }: UseChatSocketOptions) {
+export function useChatSocket({ conversationId, userId, enabled = true, otherUserId }: UseChatSocketOptions) {
   const [connected, setConnected] = useState(false);
+  const [otherOnline, setOtherOnline] = useState(false);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const typingTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   useEffect(() => {
     if (!enabled || !conversationId) {
       setConnected(false);
+      setOtherOnline(false);
       return;
     }
+
+    setOtherOnline(false);
 
     const socket = getRealtimeSocket();
     if (!socket) return;
@@ -43,6 +48,11 @@ export function useChatSocket({ conversationId, userId, enabled = true }: UseCha
 
     const handleEvent = (event: RealtimeEvent) => {
       if (event.roomType !== 'conversation' || event.roomKey !== conversationId) return;
+
+      if (event.kind === 'presence' && otherUserId && event.actorId === otherUserId) {
+        setOtherOnline(event.title === 'User joined');
+      }
+
       if (event.kind === 'typing' && event.actorId !== userId) {
         const payload = event.payload as { isTyping?: boolean; userId?: string } | undefined;
         const typingUserId = payload?.userId ?? event.actorId;
@@ -101,5 +111,5 @@ export function useChatSocket({ conversationId, userId, enabled = true }: UseCha
     };
   }, [conversationId, userId, enabled]);
 
-  return { connected, typingUsers };
+  return { connected, otherOnline, typingUsers };
 }

@@ -5,6 +5,7 @@ import { useAuth } from '@/context/auth-context';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { ConversationView } from '@/components/chat/ConversationView';
 import { NewConversationModal } from '@/components/chat/NewConversationModal';
+import { ClassmateListModal } from '@/components/chat/ClassmateListModal';
 import { useConversations, type ConversationDetail } from '@/queries/use-collaboration';
 
 export function CollaborationView() {
@@ -12,6 +13,7 @@ export function CollaborationView() {
   const { data: conversations } = useConversations();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [showClassmates, setShowClassmates] = useState(false);
   const [showMobileList, setShowMobileList] = useState(true);
 
   const selectedConv = useMemo(() => {
@@ -30,6 +32,14 @@ export function CollaborationView() {
       return other?.user.fullName ?? 'Unknown';
     }
     return conv.members.map((m) => m.user.fullName).join(', ');
+  }
+
+  function otherParticipant(conv: {
+    type: 'DIRECT' | 'GROUP';
+    members: { role: string; user: { id: string; fullName: string; avatarUrl: string | null } }[];
+  }): { id: string; fullName: string; avatarUrl: string | null } | undefined {
+    if (conv.type !== 'DIRECT') return undefined;
+    return conv.members.find((m) => m.user.id !== user?.id)?.user;
   }
 
   const handleSelect = (id: string) => {
@@ -54,6 +64,7 @@ export function CollaborationView() {
             selectedId={selectedId}
             onSelect={handleSelect}
             onCreateNew={() => setShowNewModal(true)}
+            onClassmates={() => setShowClassmates(true)}
           />
         </div>
 
@@ -62,6 +73,7 @@ export function CollaborationView() {
             <ConversationView
               conversationId={selectedConv.id}
               title={conversationTitle(selectedConv)}
+              otherUser={otherParticipant(selectedConv)}
               onBack={handleBack}
             />
           ) : (
@@ -81,6 +93,12 @@ export function CollaborationView() {
       <NewConversationModal
         isOpen={showNewModal}
         onClose={() => setShowNewModal(false)}
+        onCreated={handleCreated}
+      />
+
+      <ClassmateListModal
+        isOpen={showClassmates}
+        onClose={() => setShowClassmates(false)}
         onCreated={handleCreated}
       />
     </>

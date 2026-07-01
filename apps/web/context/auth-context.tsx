@@ -35,6 +35,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  updateAvatar: (url: string) => void;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
   promptLogin: (action: string) => void;
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           prev && prev.id === userId
             ? {
                 ...prev,
+                avatarUrl: profile.avatarUrl ?? prev.avatarUrl,
                 status: profile.status,
                 entryYear: profile.entryYear,
                 matricNumber: profile.matricNumber,
@@ -231,6 +233,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabaseClient, fetchProfile]);
 
+  const updateAvatar = useCallback((url: string) => {
+    setUser((prev) => prev ? { ...prev, avatarUrl: url } : prev);
+  }, []);
+
   const signInWithGoogle = useCallback(async () => {
     window.location.href = `${window.location.origin}/api/auth/google`;
   }, []);
@@ -248,6 +254,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithGoogle,
     logout,
     refreshProfile,
+    updateAvatar,
     showLoginModal,
     setShowLoginModal,
     promptLogin,

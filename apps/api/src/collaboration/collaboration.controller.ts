@@ -142,6 +142,12 @@ export class CollaborationController {
     return this.collaborationService.searchUsers(userId, q ?? '');
   }
 
+  @Get('users/classmates')
+  async getClassmates(@Req() req: Request) {
+    const userId = this.requireUserId(req);
+    return this.collaborationService.searchClassmates(userId);
+  }
+
   @Get('notifications')
   async listNotifications(@Req() req: Request) {
     const userId = this.requireUserId(req);

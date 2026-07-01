@@ -24,8 +24,9 @@ export interface ProfileModalProps {
 }
 
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
-  const { user, refreshProfile, logout } = useAuth();
+  const { user, refreshProfile, logout, updateAvatar } = useAuth();
   const supabase = getSupabaseBrowserClient();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [colleges, setColleges] = useState<College[]>([]);
@@ -34,6 +35,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const [selectedDeptId, setSelectedDeptId] = useState('');
   const [currentLevel, setCurrentLevel] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
   const fetchColleges = useCallback(async () => {
@@ -85,6 +87,52 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     setError('');
     setIsEditing(true);
   };
+
+  const handleAvatarUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Accepted formats: JPEG, PNG, GIF, WebP');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5MB');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No session');
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const res = await fetch('/api/user/avatar', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to upload avatar');
+      }
+
+      const json = await res.json();
+      updateAvatar(json.data.avatarUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload avatar');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }, [supabase, updateAvatar]);
 
   const cancelEdit = () => {
     setIsEditing(false);
@@ -138,12 +186,39 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 overflow-hidden animate-fade-in">
         <div className="bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-6 text-center">
           <div className="flex justify-center mb-3">
-            <Avatar className="h-20 w-20 ring-4 ring-white/60 shadow-lg">
-              <AvatarImage src={user.avatarUrl ?? undefined} alt={user.fullName} />
-              <AvatarFallback className="bg-white text-2xl font-black text-gray-900">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="relative group"
+              title="Change photo"
+            >
+              <Avatar className="h-20 w-20 ring-4 ring-white/60 shadow-lg">
+                <AvatarImage src={user.avatarUrl ?? undefined} alt={user.fullName} />
+                <AvatarFallback className="bg-white text-2xl font-black text-gray-900">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 group-hover:bg-black/40 transition-colors">
+                {uploading ? (
+                  <svg className="animate-spin h-6 w-6 text-white" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                )}
+              </div>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
           </div>
           <h2 className="text-xl font-bold text-white">{user.fullName}</h2>
           <p className="text-sm text-white/80 mt-1">{user.email}</p>

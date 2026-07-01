@@ -12,7 +12,10 @@ import {
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Prisma } from '@prisma/client';
 import type { Request } from 'express';
 import { SupabaseAuthGuard } from '../core/guards/auth.guard';
@@ -21,6 +24,9 @@ import { StreakService } from '../core/services/streak.service';
 import { PrismaService } from '../core/prisma/prisma.service';
 import { Public } from '../core/decorators/public.decorator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { STORAGE_PROVIDER_TOKEN, StorageProvider } from '../core/storage/storage-provider.interface';
+import { Inject } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 
 const BACKUP_LINK_POINTS = 50;
 
@@ -61,7 +67,8 @@ export class UserController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailLinkingService: EmailLinkingService,
-    private readonly streakService: StreakService
+    private readonly streakService: StreakService,
+    @Inject(STORAGE_PROVIDER_TOKEN) private readonly storageProvider: StorageProvider
   ) {}
 
   private requireUserId(req: Request): string {
@@ -70,6 +77,46 @@ export class UserController {
       throw new UnauthorizedException('Authentication required');
     }
     return user.id;
+  }
+
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(
+    @UploadedFile() file: { buffer: Buffer; originalname: string; mimetype: string; size: number } | undefined,
+    @Req() req: Request
+  ) {
+    if (!file) {
+      throw new BadRequestException('An image file is required');
+    }
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Invalid file type. Accepted: JPEG, PNG, GIF, WebP');
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      throw new BadRequestException('File too large. Maximum size is 5MB');
+    }
+
+    const userId = this.requireUserId(req);
+    const ext = file.originalname.split('.').pop() || 'jpg';
+    const objectPath = `avatars/${userId}/${randomUUID()}.${ext}`;
+
+    const stored = await this.storageProvider.upload(file, objectPath);
+
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: stored.fileUrl },
+      select: { avatarUrl: true },
+    });
+
+    this.logger.log(`User ${userId} updated avatar`);
+
+    return {
+      success: true,
+      data: { avatarUrl: updated.avatarUrl },
+    };
   }
 
   @Post('link-backup-email')

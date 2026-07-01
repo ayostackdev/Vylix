@@ -8,8 +8,6 @@ import { ProfileBackupBanner } from '@/components/profile/ProfileBackupBanner';
 import { ChatPanel } from '@/components/chat/ChatPanel';
 import { PdfViewer } from './PdfViewer';
 
-const CACHE_NAME = 'vault-files';
-
 interface VaultMaterial {
   id: string;
   fileName: string;
@@ -20,37 +18,9 @@ interface VaultMaterial {
   topic: { title: string } | null;
 }
 
-function cacheRequestUrl(id: string): string {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-  return `${apiBaseUrl}/api/materials/${id}/file`;
-}
-
-async function getCachedIds(): Promise<Set<string>> {
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    const requests = await cache.keys();
-    const ids = new Set<string>();
-    for (const req of requests) {
-      const match = req.url.match(/\/materials\/([^/]+)\/file/);
-      if (match) ids.add(match[1]);
-    }
-    return ids;
-  } catch {
-    return new Set();
-  }
-}
-
-async function removeFromCache(id: string): Promise<void> {
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.delete(cacheRequestUrl(id));
-  } catch {}
-}
-
 export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
   const [items, setItems] = useState<VaultMaterial[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cachedIds, setCachedIds] = useState<Set<string>>(new Set());
   const [chatDocument, setChatDocument] = useState<{ id: string; title: string } | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerTitle, setViewerTitle] = useState('');
@@ -63,11 +33,6 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
     handleDismissed,
     handleSuccess,
   } = useBackupEmailPrompt();
-
-  const refreshCache = useCallback(async () => {
-    const ids = await getCachedIds();
-    setCachedIds(ids);
-  }, []);
 
   const handleDelete = useCallback(async (id: string) => {
     setDeletingId(id);
@@ -86,8 +51,6 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
 
       setItems((prev) => prev.filter((item) => item.id !== id));
       setConfirmDeleteId(null);
-      await removeFromCache(id);
-      setCachedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
     } catch {}
     setDeletingId(null);
   }, []);
@@ -95,24 +58,13 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
   const openFile = useCallback(async (id: string, title: string) => {
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const url = `${apiBaseUrl}/api/materials/${id}/file`;
-
-      const cache = await caches.open(CACHE_NAME);
-      const cachedRes = await cache.match(url);
-      if (cachedRes) {
-        const blob = await cachedRes.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        setViewerUrl(blobUrl);
-        setViewerTitle(title);
-        return;
-      }
-
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       const headers: Record<string, string> = {};
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
+      const url = `${apiBaseUrl}/api/materials/${id}/file`;
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error('Failed to get file');
       const blob = await res.blob();
@@ -121,29 +73,6 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
       setViewerTitle(title);
     } catch {}
   }, []);
-
-  const toggleOffline = useCallback(async (id: string) => {
-    if (cachedIds.has(id)) {
-      await removeFromCache(id);
-      setCachedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
-    } else {
-      try {
-        const supabase = getSupabaseBrowserClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        const headers: Record<string, string> = {};
-        if (session?.access_token) {
-          headers['Authorization'] = `Bearer ${session.access_token}`;
-        }
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-        const url = `${apiBaseUrl}/api/materials/${id}/file`;
-        const res = await fetch(url, { headers });
-        if (!res.ok) throw new Error('Failed to fetch file');
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put(new Request(url), res.clone());
-        setCachedIds((prev) => { const next = new Set(prev); next.add(id); return next; });
-      } catch {}
-    }
-  }, [cachedIds]);
 
   const fetchVault = useCallback(async () => {
     setLoading(true);
@@ -169,9 +98,8 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
 
   useEffect(() => {
     fetchVault();
-    refreshCache();
     checkAfterSave();
-  }, [fetchVault, refreshCache, checkAfterSave, refreshKey]);
+  }, [fetchVault, checkAfterSave, refreshKey]);
 
   useEffect(() => {
     return () => {
@@ -183,7 +111,6 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
   const sizeMb = totalSize > 0 ? `${(totalSize / (1024 * 1024)).toFixed(1)} MB` : '0 MB';
   const stats = [
     { label: 'Saved PDFs', value: String(items.length) },
-    { label: 'Available Offline', value: String(cachedIds.size) },
     { label: 'Space Used', value: sizeMb },
   ];
 
@@ -202,18 +129,14 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
               Private Vault
             </h2>
             <p className="cp-body max-w-2xl sm:text-base">
-              Your personal offline library for zero-interruption study sessions.
-              Materials cached and ready when campus network drops.
+              Your personal library for zero-interruption study sessions.
+              Materials ready when campus network drops.
             </p>
           </div>
-          <span className="inline-flex rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
-            <span className="inline-flex rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
-              Offline-ready
-            </span>
-          </span>
+
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
           {stats.map((stat) => (
             <article
               key={stat.label}
@@ -239,7 +162,6 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
               <p className="text-sm text-slate-400">No materials yet. Upload from the Past Questions tab.</p>
             ) : (
               items.map((item) => {
-                const isCached = cachedIds.has(item.id);
                 return (
                   <div
                     key={item.id}
@@ -261,16 +183,6 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
                         className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
                       >
                         Chat
-                      </button>
-                      <button
-                        onClick={() => toggleOffline(item.id)}
-                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
-                          isCached
-                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                            : 'border-sky-200 bg-white text-sky-700 hover:bg-sky-50'
-                        }`}
-                      >
-                        {isCached ? 'Cached' : 'Cache'}
                       </button>
                       {confirmDeleteId === item.id ? (
                         <div className="flex items-center gap-1">
