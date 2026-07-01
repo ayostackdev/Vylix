@@ -231,22 +231,41 @@ export function VylixDashboard() {
 
             <section className="flex min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-blue-100 bg-white shadow-[0_18px_60px_rgba(59,130,246,0.08)]">
               <ScrollArea className="h-full w-full">
-                <TabsContent value="vault" className="cp-fade-up m-0 p-3 sm:p-6 lg:p-8">
-                  {!isAuthenticated ? (
-                    <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
-                      <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
-                      <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Private Vault Locked</h3>
-                      <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
-                        Sign in to access your encrypted document vault and store PDFs offline.
-                      </p>
-                      <button
-                        onClick={() => promptLogin('access your Private Vault')}
-                        className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
-                      >
-                        Sign In to Access Vault
-                      </button>
-                    </div>
-                  ) : (
+                <div className="h-full">
+                  <TabsContent value="vault" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                    {!isAuthenticated ? (
+                      <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
+                        <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
+                        <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Private Vault Locked</h3>
+                        <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
+                          Sign in to access your encrypted document vault and store PDFs offline.
+                        </p>
+                        <button
+                          onClick={() => promptLogin('access your Private Vault')}
+                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
+                        >
+                          Sign In to Access Vault
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => setShowUploadModal(true)}
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Upload
+                          </button>
+                        </div>
+                        <PrivateVaultView refreshKey={refreshKey} />
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="questions" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
                     <div className="space-y-4">
                       <div className="flex justify-end">
                         <button
@@ -256,52 +275,35 @@ export function VylixDashboard() {
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                           </svg>
-                          Upload
+                          Upload Past Question
                         </button>
                       </div>
-                      <PrivateVaultView refreshKey={refreshKey} />
+                      <PastQuestionsView key={refreshKey} />
                     </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="questions" className="cp-fade-up m-0 p-3 sm:p-6 lg:p-8">
-                  <div className="space-y-4">
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => setShowUploadModal(true)}
-                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Upload Past Question
-                      </button>
-                    </div>
-                    <PastQuestionsView key={refreshKey} />
-                  </div>
-                </TabsContent>
-                <TabsContent value="chat" className="cp-fade-up m-0 p-3 sm:p-6 lg:p-8">
-                  {!isAuthenticated ? (
-                    <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
-                      <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
-                      <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Chat Locked</h3>
-                      <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
-                        Sign in to message classmates and collaborate on courses.
-                      </p>
-                      <button
-                        onClick={() => promptLogin('access Chat')}
-                        className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
-                      >
-                        Sign In to Chat
-                      </button>
-                    </div>
-                  ) : (
-                    <CollaborationView />
-                  )}
-                </TabsContent>
-                <TabsContent value="pulse" className="cp-fade-up m-0 p-3 sm:p-6 lg:p-8">
-                  <PublicPulseView isReadOnly={!isAuthenticated} />
-                </TabsContent>
+                  </TabsContent>
+                  <TabsContent value="chat" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                    {!isAuthenticated ? (
+                      <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
+                        <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
+                        <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Chat Locked</h3>
+                        <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
+                          Sign in to message classmates and collaborate on courses.
+                        </p>
+                        <button
+                          onClick={() => promptLogin('access Chat')}
+                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
+                        >
+                          Sign In to Chat
+                        </button>
+                      </div>
+                    ) : (
+                      <CollaborationView />
+                    )}
+                  </TabsContent>
+                  <TabsContent value="pulse" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                    <PublicPulseView isReadOnly={!isAuthenticated} />
+                  </TabsContent>
+                </div>
               </ScrollArea>
             </section>
           </Tabs>
