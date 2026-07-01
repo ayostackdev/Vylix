@@ -227,11 +227,11 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
 
         {viewerUrl && (
           <div className="fixed inset-0 z-50 flex flex-col bg-black/90 backdrop-blur-sm">
-            <div className="flex items-center justify-between bg-black/80 px-4 py-3">
-              <p className="truncate text-sm font-semibold text-white max-w-[70%]">{viewerTitle}</p>
+            <div className="flex items-center justify-between gap-2 bg-black/80 px-3 py-2 sm:px-4 sm:py-3">
+              <p className="min-w-0 truncate text-xs font-semibold text-white sm:text-sm">{viewerTitle}</p>
               <button
                 onClick={() => { setViewerUrl(null); setViewerTitle(''); }}
-                className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-bold text-white hover:bg-white/20 transition-colors"
+                className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white hover:bg-white/20 transition-colors sm:px-4 sm:py-1.5 sm:text-sm"
               >
                 Close
               </button>

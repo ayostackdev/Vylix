@@ -42,6 +42,7 @@ body {
   color: var(--text-primary);
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #f0f4f8 100%);
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-font-smoothing: antialiased;

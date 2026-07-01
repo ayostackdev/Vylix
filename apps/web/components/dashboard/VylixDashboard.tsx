@@ -54,36 +54,36 @@ export function VylixDashboard() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/50 to-transparent" />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-1 min-h-0 flex-col gap-3 overflow-visible md:gap-6">
-        <header className="sticky top-0 z-50 w-full border-b border-blue-100 bg-white/80 p-4 backdrop-blur">
-          <div className="cp-fade-up flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0 space-y-4">
+        <header className="sticky top-0 z-50 w-full border-b border-blue-100 bg-white/80 p-3 backdrop-blur sm:p-4">
+          <div className="cp-fade-up flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 space-y-3 sm:space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-2 py-0.5 font-bold text-[10px] uppercase tracking-wider text-gray-900 sm:px-3 sm:py-1 sm:text-[11px]">
                   Academic Hub
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   Core Edition
                 </span>
               </div>
 
-              <div className="space-y-2">
-                <h1 className="text-[clamp(2.2rem,6vw,4.2rem)] leading-[1.1] tracking-[-0.04em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent mb-4">
+              <div className="space-y-1 sm:space-y-2">
+                <h1 className="text-[clamp(1.8rem,6vw,4.2rem)] leading-[1.1] tracking-[-0.04em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:mb-4">
                   Vylix
                 </h1>
-                <p className="cp-body max-w-2xl sm:text-base">
+                <p className="cp-body max-w-2xl text-sm sm:text-base">
                   A polished academic workspace that keeps your vault, pulse feed, and student identity in one calm, fast place.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 lg:items-end">
-              <div className="flex flex-wrap items-center gap-2 text-sm text-gray-800 lg:justify-end">
+            <div className="flex flex-col gap-2 sm:gap-3 lg:items-end">
+              <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-800 sm:gap-2 sm:text-sm lg:justify-end">
                 <span className="rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
-                  <span className="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-gray-900 sm:text-xs">
+                  <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-900 sm:px-3 sm:py-1 sm:text-xs">
                     {isAuthenticated ? 'Private + Public Learning' : 'Browse Public Content'}
                   </span>
                 </span>
                 {!isOnline ? (
-                  <Badge variant="destructive" className="px-3 py-1 text-[11px] sm:text-xs">
+                  <Badge variant="destructive" className="px-2 py-0.5 text-[10px] sm:px-3 sm:py-1 sm:text-xs">
                     <span className="relative flex h-1.5 w-1.5 mr-1">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
                       <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-orange-500" />
@@ -91,9 +91,9 @@ export function VylixDashboard() {
                     Offline Mode Active
                   </Badge>
                 ) : isAlumni ? (
-                  <span className="cp-pill inline-flex items-center rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-100/70 sm:text-xs">🎓 Alumni — Read Only</span>
+                  <span className="cp-pill inline-flex items-center rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 ring-1 ring-purple-100/70 sm:px-3 sm:py-1 sm:text-xs">🎓 Alumni — Read Only</span>
                 ) : isAuthenticated ? (
-                  <Badge variant="live" className="px-3 py-1 text-[11px] sm:text-xs">
+                  <Badge variant="live" className="px-2 py-0.5 text-[10px] sm:px-3 sm:py-1 sm:text-xs">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -101,12 +101,12 @@ export function VylixDashboard() {
                     Live & Connected
                   </Badge>
                 ) : (
-                  <Badge variant="default" className="px-3 py-1 text-[11px] sm:text-xs">Browse Only</Badge>
+                  <Badge variant="default" className="px-2 py-0.5 text-[10px] sm:px-3 sm:py-1 sm:text-xs">Browse Only</Badge>
                 )}
               </div>
 
               <div
-                className="flex items-center gap-4 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-4 py-3 shadow-sm cursor-pointer transition-all hover:bg-blue-100/70 active:scale-[0.98]"
+                className="flex items-center gap-3 rounded-[1.25rem] border border-blue-100 bg-blue-50 px-3 py-2 shadow-sm cursor-pointer transition-all hover:bg-blue-100/70 active:scale-[0.98] sm:gap-4 sm:rounded-[1.5rem] sm:px-4 sm:py-3"
                 onClick={() => {
                   if (!isAuthenticated) {
                     promptLogin('view your profile');
@@ -127,14 +127,14 @@ export function VylixDashboard() {
                   }
                 }}
               >
-                <Avatar className="h-14 w-14 shadow-sm ring-4 ring-blue-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[2px] [&>div]:rounded-full">
+                <Avatar className="h-10 w-10 shadow-sm ring-4 ring-blue-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[2px] [&>div]:rounded-full">
                   <AvatarImage src={user?.avatarUrl ?? undefined} alt="Student profile photo" />
                   <AvatarFallback className="bg-green-50 font-black text-gray-900">{userInitials}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="cp-label">Student profile</p>
-                  <p className="mt-1 cp-card-title text-gray-900">Campus identity</p>
-                  <p className="cp-body text-sm">Clean, secure, and continuity-first</p>
+                  <p className="cp-label text-[10px] sm:text-xs">Student profile</p>
+                  <p className="mt-0.5 cp-card-title text-sm text-gray-900 sm:mt-1">Campus identity</p>
+                  <p className="cp-body text-[11px] sm:text-sm">Clean, secure, and continuity-first</p>
                 </div>
               </div>
             </div>
@@ -195,7 +195,7 @@ export function VylixDashboard() {
               <TabsList className="grid w-full max-w-none grid-cols-4 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-3xl sm:rounded-2xl sm:p-1.5">
                 <TabsTrigger
                   value="vault"
-                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                   disabled={!isAuthenticated}
                 >
                   <span className="sm:hidden">🔐</span>
@@ -204,14 +204,14 @@ export function VylixDashboard() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="questions"
-                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">📝</span>
                   <span className="hidden sm:inline">📝 Questions</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="chat"
-                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                   disabled={!isAuthenticated}
                 >
                   <span className="sm:hidden">💬</span>
@@ -221,7 +221,7 @@ export function VylixDashboard() {
                 <TabsTrigger
                   value="pulse"
                   disabled={!isOnline}
-                  className="rounded-lg px-1 py-2 text-[10px] font-black uppercase tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">✨</span>
                   <span className="hidden sm:inline">✨ Pulse</span>
@@ -234,15 +234,15 @@ export function VylixDashboard() {
                 <div className="flex flex-col">
                   <TabsContent value="vault" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
                     {!isAuthenticated ? (
-                      <div className="mx-auto max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-6 py-12 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)]">
-                        <p className="mb-4 text-4xl">🔒</p>
-                        <h3 className="mb-2 text-2xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">Private Vault Locked</h3>
-                        <p className="mb-6 text-gray-700">
+                      <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
+                        <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
+                        <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Private Vault Locked</h3>
+                        <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
                           Sign in to access your encrypted document vault and store PDFs offline.
                         </p>
                         <button
                           onClick={() => promptLogin('access your Private Vault')}
-                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-6 py-3 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
                         >
                           Sign In to Access Vault
                         </button>
@@ -283,15 +283,15 @@ export function VylixDashboard() {
                   </TabsContent>
                   <TabsContent value="chat" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
                     {!isAuthenticated ? (
-                      <div className="mx-auto max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-6 py-12 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)]">
-                        <p className="mb-4 text-4xl">🔒</p>
-                        <h3 className="mb-2 text-2xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">Chat Locked</h3>
-                        <p className="mb-6 text-gray-700">
+                      <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
+                        <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
+                        <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Chat Locked</h3>
+                        <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
                           Sign in to message classmates and collaborate on courses.
                         </p>
                         <button
                           onClick={() => promptLogin('access Chat')}
-                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-6 py-3 font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
                         >
                           Sign In to Chat
                         </button>
