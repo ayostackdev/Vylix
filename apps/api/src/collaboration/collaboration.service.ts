@@ -511,6 +511,11 @@ export class CollaborationService {
       });
     });
 
+    // Invalidate conversation cache
+    this.cacheService.invalidate(`conversations:user:${userId}`).catch((err) => {
+      this.logger.error(`Failed to invalidate conversation cache: ${err}`);
+    });
+
     this.telemetryGateway.emitConversationEvent(conversationId, {
       kind: 'read',
       title: 'Read receipt',
