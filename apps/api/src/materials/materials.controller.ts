@@ -98,7 +98,6 @@ export class MaterialsController {
   }
 
   @Get('past-questions')
-  @UseGuards(SupabaseAuthGuard)
   async listPastQuestions(
     @Query('courseCode') courseCode?: string,
     @Query('year') year?: string,

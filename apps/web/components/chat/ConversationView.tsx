@@ -244,52 +244,55 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-12 w-full rounded-2xl" />
-            ))}
-          </div>
-        ) : !messages || messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <span className="text-3xl">💬</span>
-              <p className="mt-2 text-sm text-gray-600">No messages yet</p>
-              <p className="text-xs text-gray-500">Send the first message!</p>
+      <div className="flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-3xl px-4 py-4">
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-2xl" />
+              ))}
             </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {messages.map((msg) => (
-              <MessageBubble
-                key={msg.id}
-                message={msg}
-                isOwn={msg.senderId === user?.id}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        )}
+          ) : !messages || messages.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <span className="text-3xl">💬</span>
+                <p className="mt-2 text-sm text-gray-600">No messages yet</p>
+                <p className="text-xs text-gray-500">Send the first message!</p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {messages.map((msg) => (
+                <MessageBubble
+                  key={msg.id}
+                  message={msg}
+                  isOwn={msg.senderId === user?.id}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
 
-        {otherTyping.length > 0 && (
-          <div className="mt-3 text-xs italic text-gray-500 animate-pulse">
-            {otherTyping.join(', ')} {otherTyping.length === 1 ? 'is' : 'are'} typing...
-          </div>
-        )}
+          {otherTyping.length > 0 && (
+            <div className="mt-3 text-xs italic text-gray-500 animate-pulse">
+              {otherTyping.join(', ')} {otherTyping.length === 1 ? 'is' : 'are'} typing...
+            </div>
+          )}
 
-        <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       <div className="border-t border-blue-100 px-4 py-3">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="flex items-center gap-2"
-        >
+        <div className="mx-auto max-w-3xl">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="flex items-center gap-2"
+          >
           <input
             value={input}
             onChange={handleInputChange}
@@ -317,7 +320,8 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
               </svg>
             )}
           </button>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

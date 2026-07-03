@@ -58,7 +58,7 @@ export function CollaborationView() {
 
   return (
     <>
-      <div className="flex h-full overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
+      <div className="flex flex-1 min-h-0 overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
         <div className={`w-full border-r border-blue-100 lg:w-80 lg:block ${showMobileList ? 'block' : 'hidden'}`}>
           <ConversationList
             selectedId={selectedId}

@@ -66,7 +66,7 @@ export function VylixDashboard() {
               </div>
 
               <div className="space-y-1 sm:space-y-2">
-                <h1 className="text-[clamp(1.8rem,6vw,4.2rem)] leading-[1.1] tracking-[-0.04em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:mb-4">
+                <h1 className="text-[clamp(1.8rem,6vw,4.2rem)] leading-[1.1] tracking-[-0.04em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent pb-2 sm:mb-4">
                   Vylix
                 </h1>
                 <p className="cp-body max-w-2xl text-sm sm:text-base">
@@ -229,10 +229,8 @@ export function VylixDashboard() {
               </TabsList>
             </div>
 
-            <section className="flex min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-blue-100 bg-white shadow-[0_18px_60px_rgba(59,130,246,0.08)]">
-              <ScrollArea className="h-full w-full">
-                <div className="h-full">
-                  <TabsContent value="vault" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+            <section className="flex flex-col min-h-0 flex-1 overflow-y-auto rounded-[2rem] border border-blue-100 bg-white shadow-[0_18px_60px_rgba(59,130,246,0.08)]">
+              <TabsContent value="vault" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
                     {!isAuthenticated ? (
                       <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
                         <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
@@ -265,7 +263,7 @@ export function VylixDashboard() {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="questions" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                  <TabsContent value="questions" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
                     <div className="space-y-4">
                       <div className="flex justify-end">
                         <button
@@ -281,30 +279,30 @@ export function VylixDashboard() {
                       <PastQuestionsView key={refreshKey} />
                     </div>
                   </TabsContent>
-                  <TabsContent value="chat" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                  <TabsContent value="chat" className="cp-fade-up m-0 flex flex-col min-h-0 flex-1 p-0">
                     {!isAuthenticated ? (
-                      <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
-                        <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
-                        <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Chat Locked</h3>
-                        <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
-                          Sign in to message classmates and collaborate on courses.
-                        </p>
-                        <button
-                          onClick={() => promptLogin('access Chat')}
-                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
-                        >
-                          Sign In to Chat
-                        </button>
+                      <div className="flex flex-1 items-center justify-center p-3 sm:p-6 lg:p-8">
+                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
+                          <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
+                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Chat Locked</h3>
+                          <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
+                            Sign in to message classmates and collaborate on courses.
+                          </p>
+                          <button
+                            onClick={() => promptLogin('access Chat')}
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
+                          >
+                            Sign In to Chat
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <CollaborationView />
                     )}
                   </TabsContent>
-                  <TabsContent value="pulse" className="cp-fade-up m-0 h-full p-3 sm:p-6 lg:p-8">
+                  <TabsContent value="pulse" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
                     <PublicPulseView isReadOnly={!isAuthenticated} />
                   </TabsContent>
-                </div>
-              </ScrollArea>
             </section>
           </Tabs>
 
