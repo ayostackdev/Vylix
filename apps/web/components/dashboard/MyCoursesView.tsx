@@ -31,6 +31,7 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
   const [streak, setStreak] = useState<StreakData | null>(null);
   const [points, setPoints] = useState(0);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
@@ -46,11 +47,19 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
 
   const fetchCourses = useCallback(async () => {
     if (!isAuthenticated) { setLoading(false); return; }
+    setFetchError(null);
     try {
       const headers = await authHeaders();
       const res = await fetch(`${apiBaseUrl}/api/courses/my`, { headers });
-      if (res.ok) setCourses(await res.json());
-    } catch { /* ignore */ }
+      if (res.ok) {
+        setCourses(await res.json());
+      } else {
+        const text = await res.text().catch(() => '');
+        setFetchError(`Server error (${res.status}${text ? ': ' + text.slice(0, 100) : ''})`);
+      }
+    } catch (err) {
+      setFetchError(err instanceof TypeError ? 'Network error — check your connection' : 'Failed to load courses');
+    }
     setLoading(false);
   }, [isAuthenticated, apiBaseUrl, authHeaders]);
 
@@ -153,6 +162,17 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100" />
           ))}
+        </div>
+      ) : fetchError ? (
+        <div className="rounded-xl border border-red-100 bg-red-50/50 px-4 py-6 text-center">
+          <p className="text-sm font-semibold text-red-700">Could not load courses</p>
+          <p className="mt-1 text-xs text-red-500">{fetchError}</p>
+          <button
+            onClick={() => { setLoading(true); fetchCourses(); }}
+            className="mt-3 inline-flex items-center justify-center rounded-full bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       ) : courses.length === 0 ? (
         <div className="rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-8 text-center">
