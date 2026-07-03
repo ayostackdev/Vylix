@@ -181,13 +181,7 @@ export function VylixDashboard() {
           <Tabs
             value={activeLayer}
             onValueChange={(val) => {
-              if (val === 'vault' && !isAuthenticated) {
-                promptLogin('access your Private Vault');
-              } else if (val === 'chat' && !isAuthenticated) {
-                promptLogin('access Chat');
-              } else {
-                setActiveLayer(val as 'vault' | 'pulse' | 'questions' | 'chat');
-              }
+              setActiveLayer(val as 'vault' | 'pulse' | 'questions' | 'chat');
             }}
             className="cp-fade-up flex min-h-0 flex-1 flex-col gap-3 sm:gap-4"
           >
@@ -196,11 +190,9 @@ export function VylixDashboard() {
                 <TabsTrigger
                   value="vault"
                   className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
-                  disabled={!isAuthenticated}
                 >
                   <span className="sm:hidden">🔐</span>
                   <span className="hidden sm:inline">🔐 Vault</span>
-                  {!isAuthenticated && <span className="ml-1 hidden sm:inline">🔒</span>}
                 </TabsTrigger>
                 <TabsTrigger
                   value="questions"
@@ -212,11 +204,9 @@ export function VylixDashboard() {
                 <TabsTrigger
                   value="chat"
                   className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
-                  disabled={!isAuthenticated}
                 >
                   <span className="sm:hidden">💬</span>
                   <span className="hidden sm:inline">💬 Chat</span>
-                  {!isAuthenticated && <span className="ml-1 hidden sm:inline">🔒</span>}
                 </TabsTrigger>
                 <TabsTrigger
                   value="pulse"
@@ -232,18 +222,34 @@ export function VylixDashboard() {
             <section className="flex flex-col min-h-0 flex-1 overflow-y-auto rounded-[2rem] border border-blue-100 bg-white shadow-[0_18px_60px_rgba(59,130,246,0.08)]">
               <TabsContent value="vault" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
                     {!isAuthenticated ? (
-                      <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
-                        <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
-                        <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Private Vault Locked</h3>
-                        <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
-                          Sign in to access your encrypted document vault and store PDFs offline.
-                        </p>
-                        <button
-                          onClick={() => promptLogin('access your Private Vault')}
-                          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
-                        >
-                          Sign In to Access Vault
-                        </button>
+                      <div className="mx-auto w-full max-w-2xl space-y-6 py-6 sm:py-10">
+                        <div className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
+                          <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">📁</p>
+                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Your Private Document Vault</h3>
+                          <p className="mb-6 text-sm text-gray-600 sm:text-base">
+                            Store past questions, lecture notes, and PDFs. Access them offline. Organised by course — always with you.
+                          </p>
+                          <div className="mb-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">📄</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Save PDFs</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">📚</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">By Course</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">📴</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Offline Access</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => promptLogin('access your Private Vault')}
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                          >
+                            Sign In to Unlock Vault
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -282,17 +288,31 @@ export function VylixDashboard() {
                   <TabsContent value="chat" className="cp-fade-up m-0 flex flex-col min-h-0 flex-1 p-0">
                     {!isAuthenticated ? (
                       <div className="flex flex-1 items-center justify-center p-3 sm:p-6 lg:p-8">
-                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-green-200 bg-white px-4 py-8 text-center shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:px-6 sm:py-12">
-                          <p className="mb-3 text-3xl sm:mb-4 sm:text-4xl">🔒</p>
-                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Chat Locked</h3>
-                          <p className="mb-4 text-sm text-gray-700 sm:mb-6 sm:text-base">
-                            Sign in to message classmates and collaborate on courses.
+                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
+                          <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">💬</p>
+                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Study Together</h3>
+                          <p className="mb-6 text-sm text-gray-600 sm:text-base">
+                            Message classmates, share past questions, form study groups. Real-time chat organised around your courses.
                           </p>
+                          <div className="mb-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">💬</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Real‑time Chat</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">👥</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Study Groups</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">📎</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Share Materials</p>
+                            </div>
+                          </div>
                           <button
                             onClick={() => promptLogin('access Chat')}
-                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg sm:px-6 sm:py-3"
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
                           >
-                            Sign In to Chat
+                            Sign In to Start Chatting
                           </button>
                         </div>
                       </div>
