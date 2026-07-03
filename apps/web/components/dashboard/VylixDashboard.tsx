@@ -179,7 +179,7 @@ export function VylixDashboard() {
             </div>
           )}
 
-          {isAuthenticated && !isAlumni && <MyCoursesView />}
+          {isAuthenticated && !isAlumni && <MyCoursesView onOpenProfile={() => setShowProfileModal(true)} />}
 
           <Tabs
             value={activeLayer}

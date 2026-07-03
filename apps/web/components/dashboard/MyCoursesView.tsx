@@ -20,7 +20,11 @@ interface StreakData {
   streakStartedAt: string | null;
 }
 
-export function MyCoursesView() {
+interface MyCoursesViewProps {
+  onOpenProfile?: () => void;
+}
+
+export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
   const { user, isAuthenticated, promptLogin } = useAuth();
   const [courses, setCourses] = useState<CourseInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +70,7 @@ export function MyCoursesView() {
   useEffect(() => {
     fetchCourses();
     fetchStreak();
-  }, [fetchCourses, fetchStreak]);
+  }, [fetchCourses, fetchStreak, user?.departmentCode]);
 
   const handleCheckIn = async () => {
     if (!isAuthenticated) { promptLogin('track your study streak'); return; }
@@ -130,7 +134,21 @@ export function MyCoursesView() {
         </div>
       </div>
 
-      {loading ? (
+      {!user?.departmentCode && !loading ? (
+        <div className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-50/35 p-6 text-center shadow-sm">
+          <p className="mb-2 text-3xl">🎓</p>
+          <h3 className="mb-1 text-lg font-black text-gray-900">Set Up Your Profile</h3>
+          <p className="mb-4 text-sm text-gray-600">
+            Select your college and department to see your semester courses and past questions.
+          </p>
+          <button
+            onClick={onOpenProfile}
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-5 py-2 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            Open Profile Settings
+          </button>
+        </div>
+      ) : loading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100" />
