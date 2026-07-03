@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { PrivateVaultView } from '@/components/dashboard/PrivateVaultView';
 import { PublicPulseView } from '@/components/dashboard/PublicPulseView';
 import { PastQuestionsView } from '@/components/dashboard/PastQuestionsView';
+import { MyCoursesView } from '@/components/dashboard/MyCoursesView';
 import { UploadMaterialModal } from '@/components/dashboard/UploadMaterialModal';
 import { CollaborationView } from '@/components/chat/CollaborationView';
 import { useNetworkState } from '@/hooks/useNetworkState';
@@ -177,6 +178,8 @@ export function VylixDashboard() {
               </div>
             </div>
           )}
+
+          {isAuthenticated && !isAlumni && <MyCoursesView />}
 
           <Tabs
             value={activeLayer}

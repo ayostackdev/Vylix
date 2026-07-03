@@ -606,6 +606,20 @@ export class UserController {
       throw new InternalServerErrorException('Failed to update profile');
     }
   }
+
+  @Post('check-in')
+  async checkIn(@Req() req: Request) {
+    const userId = this.requireUserId(req);
+    return this.streakService.checkInDaily(userId);
+  }
+
+  @Get('streak')
+  async getStreak(@Req() req: Request) {
+    const userId = this.requireUserId(req);
+    const streak = await this.streakService.getStreakData(userId);
+    const points = await this.streakService.getUserTotalPoints(userId);
+    return { streak, points };
+  }
 }
 
 @Controller('colleges')
