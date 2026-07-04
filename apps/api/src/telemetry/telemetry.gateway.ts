@@ -62,6 +62,7 @@ interface SocketState {
 
 @WebSocketGateway({
   namespace: '/pulse',
+  transports: ['websocket', 'polling'],
   cors: {
     origin: true,
     credentials: true

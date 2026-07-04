@@ -27,6 +27,14 @@ const pwaConfig = withPWA({
   disable: process.env.NODE_ENV === 'development',
   runtimeCaching: [
     {
+      urlPattern: /\/api\//,
+      handler: 'NetworkOnly',
+      method: 'GET',
+      options: {
+        cacheName: 'api-cache',
+      },
+    },
+    {
       urlPattern: /\/api\/materials\/[^/]+\/file/,
       handler: 'CacheFirst',
       method: 'GET',

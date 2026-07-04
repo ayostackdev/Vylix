@@ -27,7 +27,12 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ? Number(process.env.PORT) : 4000);
+  const port = process.env.PORT ? Number(process.env.PORT) : 4000;
+  await app.listen(port).catch((err) => {
+    console.error('FATAL: NestJS failed to start:', err);
+    process.exit(1);
+  });
+  console.log(`NestJS listening on port ${port}`);
 }
 
 void bootstrap();

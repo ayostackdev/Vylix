@@ -11,6 +11,7 @@ import { PastQuestionsView } from '@/components/dashboard/PastQuestionsView';
 import { MyCoursesView } from '@/components/dashboard/MyCoursesView';
 import { UploadMaterialModal } from '@/components/dashboard/UploadMaterialModal';
 import { CollaborationView } from '@/components/chat/CollaborationView';
+import { QnaView } from '@/components/dashboard/QnaView';
 import { useNetworkState } from '@/hooks/useNetworkState';
 import { useAuth } from '@/context/auth-context';
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
@@ -19,7 +20,7 @@ import { LevelUpdateBanner } from '@/components/dashboard/LevelUpdateBanner';
 import { ProfileModal } from '@/components/auth/ProfileModal';
 
 export function VylixDashboard() {
-  const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions' | 'chat'>('pulse');
+  const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions' | 'chat' | 'qna'>('pulse');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -184,12 +185,12 @@ export function VylixDashboard() {
           <Tabs
             value={activeLayer}
             onValueChange={(val) => {
-              setActiveLayer(val as 'vault' | 'pulse' | 'questions' | 'chat');
+              setActiveLayer(val as 'vault' | 'pulse' | 'questions' | 'chat' | 'qna');
             }}
             className="cp-fade-up flex min-h-0 flex-1 flex-col gap-3 sm:gap-4"
           >
             <div className="flex w-full justify-center cp-fade-in">
-              <TabsList className="grid w-full max-w-none grid-cols-4 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-3xl sm:rounded-2xl sm:p-1.5">
+              <TabsList className="grid w-full max-w-none grid-cols-5 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-3xl sm:rounded-2xl sm:p-1.5">
                 <TabsTrigger
                   value="vault"
                   className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
@@ -210,6 +211,13 @@ export function VylixDashboard() {
                 >
                   <span className="sm:hidden">💬</span>
                   <span className="hidden sm:inline">💬 Chat</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="qna"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                >
+                  <span className="sm:hidden">💡</span>
+                  <span className="hidden sm:inline">💡 Q&A</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="pulse"
@@ -321,6 +329,41 @@ export function VylixDashboard() {
                       </div>
                     ) : (
                       <CollaborationView />
+                    )}
+                  </TabsContent>
+                  <TabsContent value="qna" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
+                    {!isAuthenticated ? (
+                      <div className="flex flex-1 items-center justify-center py-12">
+                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-emerald-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
+                          <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">💡</p>
+                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent sm:text-2xl">Community Q&A</h3>
+                          <p className="mb-6 text-sm text-gray-600 sm:text-base">
+                            Ask questions, get answers from classmates, and help each other learn. Organized by course and topic.
+                          </p>
+                          <div className="mb-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">❓</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Ask Questions</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">💬</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Get Answers</p>
+                            </div>
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
+                              <span className="text-xl">🏆</span>
+                              <p className="mt-1 text-xs font-semibold text-gray-800">Earn Points</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => promptLogin('access Q&A')}
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                          >
+                            Sign In to Join
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <QnaView />
                     )}
                   </TabsContent>
                   <TabsContent value="pulse" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
