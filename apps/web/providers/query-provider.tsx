@@ -5,6 +5,7 @@ import { queryClient } from '@/lib/query-client';
 import { indexedDBPersister } from '@/lib/indexeddb-persister';
 import { AuthProvider } from '@/context/auth-context';
 import { ProgressiveGatingProvider, useProgressiveGating } from '@/context/progressive-gating-context';
+import { DriveProvider } from '@/context/drive-context';
 import { LoginModal } from '@/components/auth/LoginModal';
 import { EmailVerificationModal } from '@/components/auth/EmailVerificationModal';
 import { GraduationCelebrationModal } from '@/components/auth/GraduationCelebrationModal';
@@ -33,10 +34,12 @@ export function QueryProvider({ children }: Readonly<{ children: React.ReactNode
     <AuthProvider>
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: indexedDBPersister }}>
         <ProgressiveGatingProvider>
-          {children}
-          <LoginModal />
-          <ProgressiveGatingModals />
-          <InstallPrompt />
+          <DriveProvider>
+            {children}
+            <LoginModal />
+            <ProgressiveGatingModals />
+            <InstallPrompt />
+          </DriveProvider>
         </ProgressiveGatingProvider>
       </PersistQueryClientProvider>
     </AuthProvider>

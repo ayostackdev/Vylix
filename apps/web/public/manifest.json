@@ -1,103 +1,43 @@
 {
-  "name": "Vylix - Academic Operating System",
-  "short_name": "Vylix",
-  "description": "Your department-aware learning platform. Browse materials, host study sessions, and build your academic profile with students in your college.",
+  "name": "Vylix Academic Hub — AI-Powered Study Companion",
+  "short_name": "Vylix Hub",
+  "description": "Clear the clutter, master your course. AI tutor, smart study agent, and offline-ready academic dashboard for university students.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#2563eb",
-  "background_color": "#eff6ff",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
   "screenshots": [
     {
       "src": "/splash.svg",
       "type": "image/svg+xml",
       "sizes": "640x1136",
       "form_factor": "narrow"
-    },
-    {
-      "src": "/splash.svg",
-      "type": "image/svg+xml",
-      "sizes": "640x1136",
-      "form_factor": "wide"
     }
   ],
   "icons": [
-    {
-      "src": "/icons/icon-72x72.png",
-      "type": "image/png",
-      "sizes": "72x72",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "type": "image/png",
-      "sizes": "96x96",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "type": "image/png",
-      "sizes": "128x128",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "type": "image/png",
-      "sizes": "144x144",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "type": "image/png",
-      "sizes": "152x152",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "type": "image/png",
-      "sizes": "384x384",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
+    { "src": "/icons/icon-72x72.png", "type": "image/png", "sizes": "72x72", "purpose": "any" },
+    { "src": "/icons/icon-96x96.png", "type": "image/png", "sizes": "96x96", "purpose": "any" },
+    { "src": "/icons/icon-128x128.png", "type": "image/png", "sizes": "128x128", "purpose": "any" },
+    { "src": "/icons/icon-144x144.png", "type": "image/png", "sizes": "144x144", "purpose": "any" },
+    { "src": "/icons/icon-152x152.png", "type": "image/png", "sizes": "152x152", "purpose": "any" },
+    { "src": "/icons/icon-192x192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icons/icon-384x384.png", "type": "image/png", "sizes": "384x384", "purpose": "any" },
+    { "src": "/icons/icon-512x512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
   ],
   "shortcuts": [
     {
-      "name": "Browse Public Pulse",
-      "short_name": "Public Pulse",
-      "description": "View live collaboration from your department",
-      "url": "/?tab=pulse",
-      "icons": [
-        {
-          "src": "/icons/icon-192x192.png",
-          "type": "image/png",
-          "sizes": "192x192"
-        }
-      ]
+      "name": "AI Professor",
+      "short_name": "Tutor",
+      "description": "Chat with your AI tutor",
+      "url": "/?tab=professor"
     },
     {
-      "name": "Private Vault",
-      "short_name": "Vault",
-      "description": "Access your saved materials and notes",
-      "url": "/?tab=vault",
-      "icons": [
-        {
-          "src": "/icons/icon-192x192.png",
-          "type": "image/png",
-          "sizes": "192x192"
-        }
-      ]
+      "name": "Study Agent",
+      "short_name": "Study",
+      "description": "Run autonomous study preparation",
+      "url": "/?tab=agent"
     }
   ],
   "categories": ["education", "productivity"],

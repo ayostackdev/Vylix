@@ -1,39 +1,12 @@
 {
   "name": "vylix",
   "private": true,
-  "version": "2.0.0",
-  "engines": {
-    "node": "20.x"
-  },
-  "workspaces": [
-    "apps/*"
-  ],
   "scripts": {
     "dev:web": "npm run dev -w @vylix/web",
-    "dev:api": "npm run start:dev -w @vylix/api",
-    "dev:worker": "npm run start:dev:worker -w @vylix/api",
-    "dev:python": "npm run dev -w @vylix/python-service",
-    "build": "npm run build -w @vylix/web && npm run build -w @vylix/api",
-    "heroku:build": "npm run build -w @vylix/api",
-    "heroku:start": "npm run start -w @vylix/api",
-    "heroku:worker": "npm run start:worker -w @vylix/api",
-    "heroku:release": "npm run prisma:deploy -w @vylix/api",
-    "heroku-postbuild": "npm run heroku:build",
-    "lint": "eslint . --ext .ts,.tsx,.js --ignore-pattern node_modules --ignore-pattern dist --ignore-pattern .next",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js --fix --ignore-pattern node_modules --ignore-pattern dist --ignore-pattern .next",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,css,md}\" --ignore-path .prettierignore",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,css,md}\" --ignore-path .prettierignore",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "clean": "node scripts/clean.mjs"
+    "build:web": "npm run build -w @vylix/web",
+    "start:web": "npm run start -w @vylix/web"
   },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.61.0",
-    "@typescript-eslint/parser": "^8.61.0",
-    "eslint": "^10.5.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.6",
-    "prettier": "^3.8.4"
-  }
+  "workspaces": [
+    "apps/web"
+  ]
 }

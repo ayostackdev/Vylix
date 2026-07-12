@@ -238,8 +238,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    window.location.href = `${window.location.origin}/api/auth/google`;
-  }, []);
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+  }, [supabaseClient]);
 
   const promptLogin = useCallback((action: string) => {
     setPendingAction(action);

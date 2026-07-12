@@ -1,0 +1,79 @@
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    app_name: str = "Vylix API"
+    environment: str = "development"
+    port: int = Field(default=4000)
+    api_prefix: str = "/api"
+
+    # Database
+    database_url: str = Field(
+        default="postgresql://postgres:postgres@localhost:5432/vylix"
+    )
+    direct_url: str = Field(
+        default="postgresql://postgres:postgres@localhost:5432/vylix"
+    )
+
+    # Redis
+    redis_url: str = Field(default="redis://localhost:6379/0")
+
+    # Celery
+    celery_broker_url: str = Field(default="redis://localhost:6379/0")
+    celery_result_backend: str = Field(default="redis://localhost:6379/1")
+
+    # CORS
+    cors_origins: str = Field(default="http://localhost:3000")
+
+    # Uploads
+    max_upload_mb: int = Field(default=50, ge=1)
+    upload_dir: Path = Field(default=Path("./storage/uploads"))
+    temp_dir: Path = Field(default=Path("./tmp"))
+
+    # Storage Provider: "supabase" or "appwrite"
+    storage_provider: str = Field(default="supabase")
+
+    # Supabase
+    supabase_url: str = Field(default="")
+    supabase_service_role_key: str = Field(default="")
+    supabase_storage_bucket: str = Field(default="material")
+
+    # Appwrite
+    appwrite_endpoint: str = Field(default="")
+    appwrite_project_id: str = Field(default="")
+    appwrite_api_key: str = Field(default="")
+    appwrite_storage_bucket_id: str = Field(default="")
+
+    # AI
+    gemini_api_key: str | None = Field(default=None)
+
+    # Maintenance
+    maintenance_api_key: str = Field(default="")
+
+    # Google Drive
+    google_client_id: str = Field(default="")
+    google_client_secret: str = Field(default="")
+    google_redirect_uri: str = Field(default="http://localhost:4000/api/google-drive/callback")
+    frontend_url: str = Field(default="http://localhost:3000")
+
+    # Worker
+    materials_worker_concurrency: int = Field(default=5)
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

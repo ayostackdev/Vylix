@@ -1,0 +1,320 @@
+from __future__ import annotations
+
+import json
+from datetime import datetime, timezone, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from pydantic import BaseModel
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import get_settings
+from app.database import get_db
+from app.deps import CurrentUser, get_current_user
+from app.models import (
+    User, UserEmail, UserProfile, UserPrivacy, UserStreak,
+    PointsTransaction, College, Department,
+)
+from app.services.storage import get_storage
+
+settings = get_settings()
+router = APIRouter(prefix="/user", tags=["user"])
+
+ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+MAX_AVATAR_MB = 5
+
+
+class UserProfileOut(BaseModel):
+    id: str
+    full_name: str
+    matric_number: str | None = None
+    entry_year: int | None = None
+    current_level: str | None = None
+    school_email: str | None = None
+    status: str = "STUDENT"
+    college_id: str | None = None
+    department_id: str | None = None
+    bio: str | None = None
+    avatar_url: str | None = None
+    contribution_score: int = 0
+    email_prompt_dismissed_at: str | None = None
+    school_email_prompt_dismissed_at: str | None = None
+    created_at: str | None = None
+    college_name: str | None = None
+    department_name: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class UpdateProfileRequest(BaseModel):
+    matric_number: str | None = None
+    entry_year: int | None = None
+    college_id: str | None = None
+    department_id: str | None = None
+    current_level: str | None = None
+
+
+class StreakOut(BaseModel):
+    current_streak: int = 0
+    longest_streak: int = 0
+    last_activity_at: str | None = None
+    total_points: int = 0
+
+
+class EmailOut(BaseModel):
+    id: str
+    email: str
+    is_primary: bool
+    is_verified: bool
+
+    model_config = {"from_attributes": True}
+
+
+@router.get("/profile", response_model=UserProfileOut)
+async def get_profile(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    u = user.user
+    college_name = None
+    department_name = None
+    if u.college_id:
+        college = await db.get(College, u.college_id)
+        if college:
+            college_name = college.name
+    if u.department_id:
+        dept = await db.get(Department, u.department_id)
+        if dept:
+            department_name = dept.name
+
+    return UserProfileOut(
+        id=u.id, full_name=u.full_name, matric_number=u.matric_number,
+        entry_year=u.entry_year, current_level=u.current_level,
+        school_email=u.school_email, status=u.status.value,
+        college_id=u.college_id, department_id=u.department_id,
+        bio=u.bio, avatar_url=u.avatar_url, contribution_score=u.contribution_score,
+        email_prompt_dismissed_at=str(u.email_prompt_dismissed_at) if u.email_prompt_dismissed_at else None,
+        school_email_prompt_dismissed_at=str(u.school_email_prompt_dismissed_at) if u.school_email_prompt_dismissed_at else None,
+        created_at=str(u.created_at) if u.created_at else None,
+        college_name=college_name, department_name=department_name,
+    )
+
+
+@router.patch("/profile", response_model=UserProfileOut)
+async def update_profile(
+    payload: UpdateProfileRequest,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    u = user.user
+    if payload.matric_number is not None:
+        u.matric_number = payload.matric_number
+    if payload.entry_year is not None:
+        u.entry_year = payload.entry_year
+    if payload.college_id is not None:
+        u.college_id = payload.college_id
+    if payload.department_id is not None:
+        u.department_id = payload.department_id
+    if payload.current_level is not None:
+        u.current_level = payload.current_level
+        u.level_updated_at = datetime.now(timezone.utc)
+
+    await db.flush()
+    return await get_profile(user=user, db=db)
+
+
+@router.post("/avatar")
+async def upload_avatar(
+    file: UploadFile = File(...),
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if file.content_type not in ALLOWED_AVATAR_TYPES:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+
+    data = await file.read()
+    if len(data) > MAX_AVATAR_MB * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large")
+
+    ext = file.filename.split(".")[-1] if file.filename else "jpg"
+    path = f"avatars/{user.id}.{ext}"
+
+    storage = get_storage()
+    url = await storage.upload(settings.supabase_storage_bucket, path, data, file.content_type)
+
+    user.user.avatar_url = url
+    await db.flush()
+    return {"avatar_url": url}
+
+
+@router.post("/link-backup-email")
+async def link_backup_email(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not user.email:
+        raise HTTPException(status_code=400, detail="No email in token")
+
+    existing = await db.execute(
+        select(UserEmail).where(UserEmail.email == user.email)
+    )
+    if existing.scalar_one_or_none():
+        return {"message": "Email already linked"}
+
+    ue = UserEmail(email=user.email, user_id=user.id, is_primary=False, is_verified=True)
+    db.add(ue)
+    user.user.contribution_score += 50
+    db.add(PointsTransaction(user_id=user.id, amount=50, reason="backup_email_linked"))
+    await db.flush()
+    return {"message": "Email linked", "points_earned": 50}
+
+
+@router.post("/dismiss-email-prompt")
+async def dismiss_email_prompt(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user.user.email_prompt_dismissed_at = datetime.now(timezone.utc)
+    await db.flush()
+    return {"message": "Dismissed"}
+
+
+@router.post("/dismiss-school-email-prompt")
+async def dismiss_school_email_prompt(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user.user.school_email_prompt_dismissed_at = datetime.now(timezone.utc)
+    await db.flush()
+    return {"message": "Dismissed"}
+
+
+@router.post("/school-email")
+async def set_school_email(
+    email: str,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not email.endswith(".edu.ng"):
+        raise HTTPException(status_code=400, detail="Must be a .edu.ng email")
+    user.user.school_email = email
+    await db.flush()
+    return {"message": "School email set"}
+
+
+@router.post("/update-level")
+async def update_level(
+    level: str,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    valid = ["100L", "200L", "300L", "400L", "500L", "Spillover"]
+    if level not in valid:
+        raise HTTPException(status_code=400, detail=f"Level must be one of {valid}")
+    user.user.current_level = level
+    user.user.level_updated_at = datetime.now(timezone.utc)
+    await db.flush()
+    return {"message": "Level updated"}
+
+
+@router.post("/graduate")
+async def graduate(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user.user.status = "ALUMNI"
+    user.user.graduated_at = datetime.now(timezone.utc)
+    await db.flush()
+    return {"message": "Graduated"}
+
+
+@router.get("/backup-status")
+async def backup_status(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    dismissed = user.user.email_prompt_dismissed_at
+    if dismissed and (datetime.now(timezone.utc) - dismissed.replace(tzinfo=timezone.utc)) < timedelta(days=14):
+        return {"should_prompt": False}
+    count = await db.execute(
+        select(func.count()).select_from(UserEmail).where(UserEmail.user_id == user.id)
+    )
+    return {"should_prompt": count.scalar() < 2}
+
+
+@router.get("/streak", response_model=StreakOut)
+async def get_streak(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(UserStreak).where(UserStreak.user_id == user.id))
+    streak = result.scalar_one_or_none()
+    pts = await db.execute(
+        select(func.coalesce(func.sum(PointsTransaction.amount), 0))
+        .where(PointsTransaction.user_id == user.id)
+    )
+    total = pts.scalar()
+    return StreakOut(
+        current_streak=streak.current_streak if streak else 0,
+        longest_streak=streak.longest_streak if streak else 0,
+        last_activity_at=str(streak.last_activity_at) if streak else None,
+        total_points=total or 0,
+    )
+
+
+@router.post("/check-in")
+async def check_in(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(UserStreak).where(UserStreak.user_id == user.id))
+    streak = result.scalar_one_or_none()
+    now = datetime.now(timezone.utc)
+
+    if not streak:
+        streak = UserStreak(
+            user_id=user.id, current_streak=1, longest_streak=1,
+            last_activity_at=now, streak_started_at=now,
+        )
+        db.add(streak)
+        user.user.user_streak_id = streak.id
+    else:
+        last = streak.last_activity_at.replace(tzinfo=timezone.utc) if streak.last_activity_at else None
+        if last and (now - last).total_seconds() < 86400:
+            return {"message": "Already checked in today", "streak": streak.current_streak}
+        if last and (now - last).total_seconds() < 172800:
+            streak.current_streak += 1
+        else:
+            streak.current_streak = 1
+            streak.streak_started_at = now
+        streak.longest_streak = max(streak.longest_streak, streak.current_streak)
+        streak.last_activity_at = now
+
+    base = 10
+    bonus = (streak.current_streak // 5) * 5
+    points = base + bonus
+    user.user.contribution_score += points
+    db.add(PointsTransaction(user_id=user.id, amount=points, reason="daily_login", description=f"Day {streak.current_streak} streak"))
+    await db.flush()
+    return {"message": "Checked in", "streak": streak.current_streak, "points_earned": points}
+
+
+@router.get("/export-data")
+async def export_data(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    u = user.user
+    return {
+        "full_name": u.full_name,
+        "email": user.email,
+        "matric_number": u.matric_number,
+        "entry_year": u.entry_year,
+        "current_level": u.current_level,
+        "status": u.status.value,
+        "college_id": u.college_id,
+        "department_id": u.department_id,
+        "bio": u.bio,
+        "contribution_score": u.contribution_score,
+        "created_at": str(u.created_at) if u.created_at else None,
+    }

@@ -1,3 +1,5 @@
+'use client';
+
 import { del, get, set } from 'idb-keyval';
 
 export type VaultMaterial = {

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk, Plus_Jakarta_Sans } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -15,14 +15,23 @@ const bodyFont = Plus_Jakarta_Sans({
   variable: '--font-body'
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
+  themeColor: '#f8fafc',
+};
+
 export const metadata: Metadata = {
-  title: 'Vylix v2.0',
-  description: 'Academic operating system for FUNAAB students.',
+  title: 'Vylix Academic Hub — Your AI-Powered Study Companion',
+  description: 'Clear the clutter, master your course. AI tutor, smart study agent, and offline-ready academic dashboard.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Vylix'
+    title: 'Vylix Academic Hub'
   },
   formatDetection: {
     telephone: false
@@ -43,8 +52,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <head>
         <link rel="apple-touch-startup-image" href="/splash.svg" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${displayFont.variable} ${bodyFont.variable} min-h-dvh overflow-x-hidden overflow-y-auto`}>
+      <body className={`${displayFont.variable} ${bodyFont.variable} min-h-dvh w-full overflow-x-hidden overflow-y-auto`}>
         <QueryProvider>{children}</QueryProvider>
         <Analytics />
         <SpeedInsights />
