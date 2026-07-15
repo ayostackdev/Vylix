@@ -28,6 +28,17 @@ export const metadata: Metadata = {
   title: 'Vylix Academic Hub — Your AI-Powered Study Companion',
   description: 'Clear the clutter, master your course. AI tutor, smart study agent, and offline-ready academic dashboard.',
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'Vylix Academic Hub',
+    description: 'Clear the clutter, master your course. AI-powered study companion for students.',
+    siteName: 'Vylix Academic Hub',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vylix Academic Hub',
+    description: 'Clear the clutter, master your course. AI-powered study companion for students.',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
