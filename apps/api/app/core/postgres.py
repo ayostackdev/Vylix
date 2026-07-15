@@ -13,7 +13,7 @@ settings = get_settings()
 
 @contextmanager
 def get_connection():
-    connection = psycopg.connect(settings.postgres_dsn, row_factory=dict_row)
+    connection = psycopg.connect(settings.database_url, row_factory=dict_row)
     try:
         yield connection
     finally:

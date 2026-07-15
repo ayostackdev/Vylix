@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     supabase_url: str = Field(default="")
     supabase_service_role_key: str = Field(default="")
     supabase_storage_bucket: str = Field(default="material")
+    supabase_jwt_secret: str = Field(default="")
 
     # Appwrite
     appwrite_endpoint: str = Field(default="")

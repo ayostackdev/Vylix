@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     const folders = await folderRes.json()
 
     const foldersWithFiles = await Promise.all(
-      folders.files.map(async (folder: any) => {
+      folders.files.map(async (folder: { id: string; name: string; mimeType: string }) => {
         const fileRes = await fetch(
           `https://www.googleapis.com/drive/v3/files?q='${folder.id}'+in+parents+and+(mimeType='application/pdf'+or+mimeType='application/vnd.google-apps.document')&fields=files(id,name,mimeType,size,modifiedTime)&orderBy=name`,
           { headers: { Authorization: `Bearer ${accessToken}` } }

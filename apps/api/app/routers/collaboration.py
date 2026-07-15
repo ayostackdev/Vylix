@@ -15,16 +15,9 @@ from app.models import (
     Conversation, ConversationMember, Message, MessageReadReceipt,
     Notification, User, ConversationType, ConversationRole,
 )
+from app.schemas import ConversationCreate, MessageCreate
 
 router = APIRouter(prefix="/collaboration", tags=["collaboration"])
-
-
-class ConversationCreate(BaseModel):
-    type: str = "GROUP"
-    title: str | None = None
-    member_ids: list[str] = []
-    department_id: str | None = None
-    topic_id: str | None = None
 
 
 class ConversationOut(BaseModel):
@@ -38,11 +31,6 @@ class ConversationOut(BaseModel):
     last_message: str | None = None
 
     model_config = {"from_attributes": True}
-
-
-class MessageCreate(BaseModel):
-    content: str
-    metadata: dict | None = None
 
 
 class MessageOut(BaseModel):
@@ -180,7 +168,7 @@ async def list_messages(
     return [
         MessageOut(
             id=m.id, conversation_id=m.conversation_id, sender_id=m.sender_id,
-            content=m.content, metadata=m.metadata, edited_at=str(m.edited_at) if m.edited_at else None,
+            content=m.content, metadata=m.meta, edited_at=str(m.edited_at) if m.edited_at else None,
             deleted_at=str(m.deleted_at) if m.deleted_at else None,
             created_at=str(m.created_at) if m.created_at else None,
         )
@@ -206,7 +194,7 @@ async def send_message(
 
     msg = Message(
         id=str(uuid.uuid4()), conversation_id=conv_id,
-        sender_id=user.id, content=payload.content, metadata=payload.metadata,
+        sender_id=user.id, content=payload.content, meta=payload.metadata,
     )
     db.add(msg)
 
@@ -228,7 +216,7 @@ async def send_message(
     await db.flush()
     return MessageOut(
         id=msg.id, conversation_id=msg.conversation_id, sender_id=msg.sender_id,
-        content=msg.content, metadata=msg.metadata,
+        content=msg.content, metadata=msg.meta,
         created_at=str(msg.created_at) if msg.created_at else None,
     )
 
@@ -404,3 +392,25 @@ async def mark_notification_read(
     notif.read_at = datetime.now(timezone.utc)
     await db.flush()
     return {"message": "Marked read"}
+
+
+class TypingPayload(BaseModel):
+    is_typing: bool = False
+
+
+@router.post("/conversations/{conv_id}/typing")
+async def send_typing_indicator(
+    conv_id: str,
+    payload: TypingPayload,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    member = await db.execute(
+        select(ConversationMember).where(
+            ConversationMember.conversation_id == conv_id,
+            ConversationMember.user_id == user.id,
+        )
+    )
+    if not member.scalar_one_or_none():
+        raise HTTPException(status_code=403, detail="Not a member of this conversation")
+    return {"conversation_id": conv_id, "user_id": user.id, "is_typing": payload.is_typing}

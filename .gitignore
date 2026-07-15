@@ -11,3 +11,7 @@ docker-data/
 .docker/
 *.log
 .vercel
+__pycache__/
+*.pyc
+venv/
+tmp/

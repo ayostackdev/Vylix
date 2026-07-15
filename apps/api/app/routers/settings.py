@@ -12,6 +12,7 @@ from app.deps import CurrentUser, get_current_user
 from app.models import (
     UserPrivacy, UserProfile, User, UserBadge, Badge, BadgeRarity,
 )
+from app.schemas import ContributionLeaderboardEntry
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
@@ -56,13 +57,6 @@ class BadgeOut(BaseModel):
 class UserBadgeOut(BaseModel):
     badge: BadgeOut
     earned_at: str | None = None
-
-
-class LeaderboardEntry(BaseModel):
-    user_id: str
-    full_name: str
-    avatar_url: str | None = None
-    contribution_score: int = 0
 
 
 @router.get("/privacy/{user_id}", response_model=PrivacyOut)
@@ -239,7 +233,7 @@ async def all_badges(db: AsyncSession = Depends(get_db)):
     ]
 
 
-@router.get("/leaderboard", response_model=list[LeaderboardEntry])
+@router.get("/leaderboard", response_model=list[ContributionLeaderboardEntry])
 async def leaderboard(
     db: AsyncSession = Depends(get_db),
 ):
@@ -249,6 +243,6 @@ async def leaderboard(
         .limit(50)
     )
     return [
-        LeaderboardEntry(user_id=uid, full_name=fn, avatar_url=av, contribution_score=cs)
+        ContributionLeaderboardEntry(user_id=uid, full_name=fn, avatar_url=av, contribution_score=cs)
         for uid, fn, av, cs in result.all()
     ]

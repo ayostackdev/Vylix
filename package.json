@@ -4,7 +4,9 @@
   "scripts": {
     "dev:web": "npm run dev -w @vylix/web",
     "build:web": "npm run build -w @vylix/web",
-    "start:web": "npm run start -w @vylix/web"
+    "start:web": "npm run start -w @vylix/web",
+    "test:web": "npm run test -w @vylix/web",
+    "test:api": "cd apps/api && pytest"
   },
   "workspaces": [
     "apps/web"

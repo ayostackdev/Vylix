@@ -37,9 +37,8 @@ class SupabaseStorage(StorageProvider):
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{self.base_url}/object/{bucket}/{path}",
-                headers=self.headers,
-                content=data,
                 headers={**self.headers, "Content-Type": content_type},
+                content=data,
             )
             resp.raise_for_status()
         return f"{settings.supabase_url}/storage/v1/object/public/{bucket}/{path}"

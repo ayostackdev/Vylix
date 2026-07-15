@@ -18,6 +18,7 @@ import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
 import { SchoolEmailBanner } from '@/components/auth/SchoolEmailBanner';
 import { LevelUpdateBanner } from '@/components/dashboard/LevelUpdateBanner';
 import { ProfileModal } from '@/components/auth/ProfileModal';
+import { StreakBanner, PointsCounter, LeaderboardPanel, BadgeShowcase } from '@/components/gamification';
 
 export function VylixDashboard() {
   const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions' | 'chat' | 'qna'>('pulse');
@@ -69,7 +70,7 @@ export function VylixDashboard() {
 
               <div className="space-y-1 sm:space-y-2">
                 <h1 className="text-[clamp(1.8rem,6vw,4.2rem)] leading-[1.1] tracking-[-0.04em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent pb-2 sm:mb-4">
-                  Vylix
+                  Vylix Academic Hub
                 </h1>
                 <p className="cp-body max-w-2xl text-sm sm:text-base">
                   A polished academic workspace that keeps your vault, pulse feed, and student identity in one calm, fast place.
@@ -182,7 +183,19 @@ export function VylixDashboard() {
 
           {isAuthenticated && !isAlumni && <MyCoursesView onOpenProfile={() => setShowProfileModal(true)} />}
 
-          <Tabs
+          {isAuthenticated && !isAlumni && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="sm:col-span-2">
+                <StreakBanner />
+              </div>
+              <PointsCounter />
+              <BadgeShowcase />
+            </div>
+          )}
+
+          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+            <div className="min-w-0">
+              <Tabs
             value={activeLayer}
             onValueChange={(val) => {
               setActiveLayer(val as 'vault' | 'pulse' | 'questions' | 'chat' | 'qna');
@@ -371,15 +384,23 @@ export function VylixDashboard() {
                   </TabsContent>
             </section>
           </Tabs>
+            </div>
+
+            {isAuthenticated && !isAlumni && (
+              <aside className="hidden lg:flex flex-col gap-4">
+                <LeaderboardPanel />
+              </aside>
+            )}
+          </div>
 
           <footer className="mt-auto border-t border-blue-100 bg-gradient-to-r from-blue-50/80 to-emerald-50/35 px-3 py-3 backdrop-blur-sm sm:px-6 sm:py-4">
             <div className="flex items-center justify-between gap-3 text-left">
               <div>
                 <p className="font-bold text-[10px] uppercase tracking-wider bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">
-                  Vylix Academic
+                  Vylix Academic Hub
                 </p>
                 <p className="mt-0.5 cp-body text-[11px] sm:text-xs">
-                  © 2026 Vylix
+                  © 2026 Vylix Academic Hub
                 </p>
               </div>
 

@@ -2,15 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { quizDb, PAST_QUESTIONS, type QuizQuestion, type TopicPerformance } from '@/lib/quiz-store'
+import { useAuth } from '@/context/auth-context'
 import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface PracticeTabProps {
   selectedDoc: DocumentInfo | null
+  isReadOnly?: boolean
 }
 
 type PracticeView = 'select' | 'quiz' | 'result' | 'performance'
 
-export function PracticeTab({ selectedDoc }: PracticeTabProps) {
+export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProps) {
+  const { promptLogin } = useAuth()
   const [view, setView] = useState<PracticeView>('select')
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -76,10 +79,25 @@ export function PracticeTab({ selectedDoc }: PracticeTabProps) {
   return (
     <div className="flex flex-col h-full bg-white">
       <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
-        <h3 className="text-sm font-semibold text-gray-900 tracking-tight">Practice</h3>
-        <p className="text-xs text-gray-400">
-          {view === 'select' ? 'Choose a course to practice' : `${currentIndex + 1} of ${total}`}
-        </p>
+        <div className="flex items-center gap-2">
+          {view !== 'select' && (
+            <button
+              onClick={() => { if (view === 'quiz' && !confirm('Quit this quiz? Your progress will be lost.')) return; setView('select'); quizDb.getWeakTopics().then(setWeakTopics) }}
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+              aria-label="Back to courses"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 tracking-tight">Practice</h3>
+            <p className="text-xs text-gray-400">
+              {view === 'select' ? 'Choose a course to practice' : `${currentIndex + 1} of ${total}`}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
@@ -89,7 +107,7 @@ export function PracticeTab({ selectedDoc }: PracticeTabProps) {
 
             {selectedDoc && (
               <button
-                onClick={() => startQuiz(selectedDoc.courseId)}
+                onClick={() => isReadOnly ? promptLogin('take quizzes') : startQuiz(selectedDoc.courseId)}
                 className="w-full text-left p-3 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
               >
                 <p className="font-medium text-sm text-blue-800">{selectedDoc.courseCode}</p>
@@ -102,7 +120,7 @@ export function PracticeTab({ selectedDoc }: PracticeTabProps) {
               return (
                 <button
                   key={courseId}
-                  onClick={() => startQuiz(courseId)}
+                  onClick={() => isReadOnly ? promptLogin('take quizzes') : startQuiz(courseId)}
                   className={`w-full text-left p-3 rounded-xl border transition-colors ${
                     isSelected
                       ? 'bg-blue-50 border-blue-200'
@@ -191,6 +209,13 @@ export function PracticeTab({ selectedDoc }: PracticeTabProps) {
                 {currentIndex < total - 1 ? 'Next Question →' : 'See Results'}
               </button>
             )}
+
+            <button
+              onClick={() => { if (confirm('Quit this quiz? Your progress will be lost.')) { setView('select'); quizDb.getWeakTopics().then(setWeakTopics) } }}
+              className="w-full py-2 rounded-xl bg-gray-50 text-gray-500 text-xs font-medium hover:bg-gray-100 transition-all"
+            >
+              Quit Quiz
+            </button>
 
             <div className="flex justify-center gap-1">
               {questions.map((_, i) => (

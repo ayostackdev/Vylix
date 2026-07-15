@@ -6,6 +6,7 @@ import { AIProfessorTab } from './tabs/AIProfessorTab'
 import { StudyAgentTab } from './tabs/StudyAgentTab'
 import { PracticeTab } from './tabs/PracticeTab'
 import { OfflineVaultTab } from './tabs/OfflineVaultTab'
+import { useAuth } from '@/context/auth-context'
 import type { DocumentInfo } from './ThreePanelLayout'
 
 type TabId = 'professor' | 'practice' | 'vault' | 'agent'
@@ -14,9 +15,11 @@ interface InteractiveSidebarProps {
   selectedDoc: DocumentInfo | null
   isOpen?: boolean
   onOpenChange?: (open: boolean) => void
+  isReadOnly?: boolean
 }
 
-export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpenChange }: InteractiveSidebarProps) {
+export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpenChange, isReadOnly = false }: InteractiveSidebarProps) {
+  const { promptLogin } = useAuth()
   const [internalOpen, setInternalOpen] = useState(false)
   const isOpen = controlledOpen ?? internalOpen
   const setIsOpen = onOpenChange ?? setInternalOpen
@@ -153,11 +156,29 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
             </div>
           </Tabs.List>
 
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <Tabs.Content value="professor" className="h-full"><AIProfessorTab selectedDoc={selectedDoc} /></Tabs.Content>
-            <Tabs.Content value="practice" className="h-full"><PracticeTab selectedDoc={selectedDoc} /></Tabs.Content>
-            <Tabs.Content value="vault" className="h-full"><OfflineVaultTab selectedDoc={selectedDoc} /></Tabs.Content>
-            <Tabs.Content value="agent" className="h-full"><StudyAgentTab selectedDoc={selectedDoc} /></Tabs.Content>
+          <div className="flex-1 min-h-0 overflow-hidden relative">
+            <Tabs.Content value="professor" className="h-full"><AIProfessorTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
+            <Tabs.Content value="practice" className="h-full"><PracticeTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
+            <Tabs.Content value="vault" className="h-full"><OfflineVaultTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
+            <Tabs.Content value="agent" className="h-full"><StudyAgentTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
+
+            {/* Read-only overlay */}
+            {isReadOnly && (
+              <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
+                <div className="h-24 bg-gradient-to-t from-white via-white/95 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pointer-events-auto">
+                  <button
+                    onClick={() => promptLogin('unlock AI tools')}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    Sign In to Use AI Tools
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </Tabs.Root>
       </aside>

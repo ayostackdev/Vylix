@@ -8,6 +8,7 @@ import type { DocumentInfo } from './ThreePanelLayout'
 import { PdfViewerInline } from './PdfViewerInline'
 import { DriveSyncBanner } from './DriveSyncBanner'
 import { useDrive } from '@/context/drive-context'
+import { useAuth } from '@/context/auth-context'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
@@ -25,6 +26,7 @@ interface MainContentPanelProps {
   selectedCourseId: string | null
   selectedDoc: DocumentInfo | null
   onSelectDoc: (doc: DocumentInfo | null) => void
+  isReadOnly?: boolean
 }
 
 function formatFileSize(bytes: number): string {
@@ -39,8 +41,9 @@ function formatDate(dateStr: string | null): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }: MainContentPanelProps) {
-  const { connectDrive, driveConnected } = useDrive()
+export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, isReadOnly = false }: MainContentPanelProps) {
+  const { connectDrive, driveConnected, driveError, clearError } = useDrive()
+  const { promptLogin } = useAuth()
   const [documents, setDocuments] = useState<Material[]>([])
   const [loading, setLoading] = useState(true)
   const [viewerUrl, setViewerUrl] = useState<string | null>(null)
@@ -146,7 +149,18 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }:
     <main className="flex-1 flex flex-col min-w-0 h-full">
       {/* Premium header */}
       <header className="header-premium flex items-center justify-between gap-2 px-3 sm:px-5 py-2.5 sm:py-3 shrink-0">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 flex items-center gap-2">
+          {selectedDoc && (
+            <button
+              onClick={() => onSelectDoc(null)}
+              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+              aria-label="Back to documents"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
           <h1 className="text-xs sm:text-base font-bold text-gray-900 truncate tracking-tight">
             {selectedDoc ? selectedDoc.name : (course ? `${course.code} — ${course.title}` : 'All Documents')}
           </h1>
@@ -166,11 +180,22 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }:
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {selectedDoc && (
             <button
-              onClick={handleSaveOffline}
+              onClick={() => isReadOnly ? promptLogin('save documents offline') : handleSaveOffline()}
               disabled={saving || saved}
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-700 font-semibold hover:bg-white hover:border-gray-300 hover:shadow-sm disabled:opacity-50 transition-all duration-200"
+              className={`hidden sm:inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border font-semibold transition-all duration-200 ${
+                isReadOnly
+                  ? 'bg-gray-50/60 border-gray-200/60 text-gray-400 cursor-not-allowed hover:bg-amber-50/60 hover:border-amber-200/60 hover:text-amber-600'
+                  : 'bg-gray-50/80 border-gray-200/80 text-gray-700 hover:bg-white hover:border-gray-300 hover:shadow-sm disabled:opacity-50'
+              }`}
             >
-              {saved ? (
+              {isReadOnly ? (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Save Offline
+                </>
+              ) : saved ? (
                 <>
                   <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -192,8 +217,16 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }:
               )}
             </button>
           )}
-          <label className={`inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-2 rounded-xl bg-gray-50/80 border border-gray-200/80 text-gray-700 font-semibold hover:bg-white hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all duration-200 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-            {uploading ? (
+          <label className={`inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2.5 sm:px-3 py-2 rounded-xl border font-semibold transition-all duration-200 ${
+            isReadOnly
+              ? 'bg-gray-50/60 border-gray-200/60 text-gray-400 cursor-not-allowed hover:bg-amber-50/60 hover:border-amber-200/60 hover:text-amber-600'
+              : 'bg-gray-50/80 border-gray-200/80 text-gray-700 hover:bg-white hover:border-gray-300 hover:shadow-sm cursor-pointer'
+          } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+            {isReadOnly ? (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            ) : uploading ? (
               <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -208,14 +241,20 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }:
             <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
           </label>
           <button
-            onClick={connectDrive}
-            className={`inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2 sm:px-3 py-2 rounded-xl font-semibold btn-glow hover:shadow-lg min-h-[36px] sm:min-h-[38px] transition-all duration-200 ${
-              driveConnected
-                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 hover:bg-emerald-100'
-                : 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white hover:shadow-lg'
+            onClick={() => isReadOnly ? promptLogin('connect Google Drive') : connectDrive()}
+            className={`inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2 sm:px-3 py-2 rounded-xl font-semibold min-h-[36px] sm:min-h-[38px] transition-all duration-200 ${
+              isReadOnly
+                ? 'bg-gray-50/60 border border-gray-200/60 text-gray-400 cursor-not-allowed hover:bg-amber-50/60 hover:border-amber-200/60 hover:text-amber-600'
+                : driveConnected
+                  ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60 hover:bg-emerald-100 btn-glow hover:shadow-lg'
+                  : 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white hover:shadow-lg btn-glow'
             }`}
           >
-            {driveConnected ? (
+            {isReadOnly ? (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            ) : driveConnected ? (
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -229,6 +268,21 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }:
           </button>
         </div>
       </header>
+
+      {/* Drive connection error */}
+      {driveError && (
+        <div className="mx-3 sm:mx-5 mt-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200/60 text-xs text-red-700 font-medium">
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <span className="flex-1">{driveError}</span>
+          <button onClick={clearError} className="text-red-400 hover:text-red-600 transition-colors">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5">
@@ -288,21 +342,41 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }:
                 <div className="flex flex-col sm:flex-row items-center gap-3">
                   {!driveConnected && (
                     <button
-                      onClick={connectDrive}
-                      className="inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold btn-glow hover:shadow-lg hover:shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                      onClick={() => isReadOnly ? promptLogin('connect Google Drive') : connectDrive()}
+                      className={`inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl font-bold transition-all duration-200 ${
+                        isReadOnly
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-amber-50 hover:text-amber-600 hover:shadow-sm'
+                          : 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white btn-glow hover:shadow-lg hover:shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98]'
+                      }`}
                     >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M7.71 3.5L1.15 15l3.43 6h13.72l3.42-6L15.29 3.5H7.71zm4.58 2.28l4.14 7.22H4.71l4.14-7.22h3.44z" opacity="0.9" />
-                      </svg>
-                      Connect Google Drive
+                      {isReadOnly ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M7.71 3.5L1.15 15l3.43 6h13.72l3.42-6L15.29 3.5H7.71zm4.58 2.28l4.14 7.22H4.71l4.14-7.22h3.44z" opacity="0.9" />
+                        </svg>
+                      )}
+                      {isReadOnly ? 'Sign in to Connect Drive' : 'Connect Google Drive'}
                     </button>
                   )}
-                  <label className="inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 hover:shadow-sm cursor-pointer transition-all duration-200">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                    Upload PDF
-                    <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
+                  <label className={`inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl font-bold transition-all duration-200 ${
+                    isReadOnly
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-amber-50 hover:text-amber-600 hover:shadow-sm'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm cursor-pointer'
+                  }`}>
+                    {isReadOnly ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                    )}
+                    {isReadOnly ? 'Sign in to Upload' : 'Upload PDF'}
+                    {!isReadOnly && <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} />}
                   </label>
                 </div>
               </div>
@@ -352,15 +426,23 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc }:
                 ))}
 
                 {/* Upload placeholder card */}
-                <label className="doc-card group cursor-pointer border-dashed !border-gray-200 hover:!border-blue-300">
+                <label className={`doc-card group border-dashed !border-gray-200 hover:!border-blue-300 ${isReadOnly ? 'pointer-events-none' : 'cursor-pointer'}`}>
                   <div className="p-3.5 sm:p-4 flex flex-col items-center justify-center min-h-[140px]">
-                    <div className="w-10 h-10 rounded-2xl bg-gray-50 group-hover:bg-blue-50 flex items-center justify-center mb-2 transition-colors duration-200">
-                      <svg className="w-5 h-5 text-gray-300 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-2 transition-colors duration-200 ${isReadOnly ? 'bg-amber-50' : 'bg-gray-50 group-hover:bg-blue-50'}`}>
+                      {isReadOnly ? (
+                        <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-gray-300 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      )}
                     </div>
-                    <p className="text-[11px] font-semibold text-gray-400 group-hover:text-blue-500 transition-colors">Upload PDF</p>
-                    <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
+                    <p className={`text-[11px] font-semibold transition-colors ${isReadOnly ? 'text-amber-400' : 'text-gray-400 group-hover:text-blue-500'}`}>
+                      {isReadOnly ? 'Sign in to Upload' : 'Upload PDF'}
+                    </p>
+                    {!isReadOnly && <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} />}
                   </div>
                 </label>
               </div>

@@ -4,6 +4,7 @@ import base64
 import json
 from dataclasses import dataclass
 
+import jwt
 import httpx
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -27,18 +28,47 @@ class CurrentUser:
 
 
 def _decode_jwt_payload(token: str) -> dict:
-    """Decode JWT payload without signature verification (Supabase handles verification)."""
-    try:
-        parts = token.split(".")
-        if len(parts) != 3:
-            raise HTTPException(status_code=401, detail="Invalid token format")
-        payload = parts[1]
-        padding = 4 - len(payload) % 4
-        payload += "=" * padding
-        decoded = base64.urlsafe_b64decode(payload)
-        return json.loads(decoded)
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    """Decode and verify JWT signature using the Supabase JWT secret.
+
+    Falls back to unsigned decode only when SUPABASE_JWT_SECRET is not configured
+    (local dev convenience), but logs a warning.
+    """
+    jwt_secret = settings.supabase_jwt_secret
+
+    if jwt_secret:
+        try:
+            payload = jwt.decode(
+                token,
+                jwt_secret,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
+            return payload
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="Token has expired")
+        except jwt.InvalidAudienceError:
+            raise HTTPException(status_code=401, detail="Invalid token audience")
+        except jwt.InvalidSignatureError:
+            raise HTTPException(status_code=401, detail="Invalid token signature")
+        except jwt.DecodeError:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    else:
+        import logging
+        logging.warning(
+            "SUPABASE_JWT_SECRET is not set — skipping JWT signature verification. "
+            "This is insecure and should only be used in local development."
+        )
+        try:
+            parts = token.split(".")
+            if len(parts) != 3:
+                raise HTTPException(status_code=401, detail="Invalid token format")
+            payload_segment = parts[1]
+            padding = 4 - len(payload_segment) % 4
+            payload_segment += "=" * padding
+            decoded = base64.urlsafe_b64decode(payload_segment)
+            return json.loads(decoded)
+        except Exception:
+            raise HTTPException(status_code=401, detail="Invalid token")
 
 
 async def get_current_user(

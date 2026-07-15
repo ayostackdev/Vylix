@@ -130,7 +130,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           <div className="inline-flex items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 mb-4 shadow-2xl shadow-blue-500/10 premium-fade-in">
             <span className="text-3xl sm:text-4xl font-black text-gradient" style={{ WebkitTextFillColor: 'transparent', background: 'linear-gradient(135deg, #60a5fa, #34d399)', WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>V</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight premium-slide-up">Vylix</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight premium-slide-up">Vylix Academic Hub</h1>
           <p className="text-xs sm:text-sm text-white/40 mt-1.5 font-medium premium-slide-up" style={{ animationDelay: '100ms' }}>Clear the clutter, master your course.</p>
         </div>
 
@@ -174,7 +174,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5">
                 <span className="text-3xl">📚</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2.5 tracking-tight">Welcome to Vylix</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2.5 tracking-tight">Welcome to Vylix Academic Hub</h2>
               <p className="text-xs sm:text-sm text-white/50 mb-8 leading-relaxed max-w-xs mx-auto">
                 Your AI-powered study companion. Upload materials, get smart summaries, practice with past questions, and track your progress.
               </p>

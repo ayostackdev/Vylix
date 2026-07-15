@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { MainSidebar } from './MainSidebar'
 import { MainContentPanel } from './MainContentPanel'
 import { InteractiveSidebar } from './InteractiveSidebar'
+import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode'
+import { useAuth } from '@/context/auth-context'
 
 export interface DocumentInfo {
   id: string
@@ -13,6 +15,7 @@ export interface DocumentInfo {
 }
 
 export function ThreePanelLayout() {
+  const { isAuthenticated, promptLogin } = useAuth()
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
   const [selectedDoc, setSelectedDoc] = useState<DocumentInfo | null>(null)
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
@@ -22,34 +25,75 @@ export function ThreePanelLayout() {
   return (
     <div className="flex h-dvh w-full overflow-hidden premium-bg">
       {/* Mobile premium header */}
-      <header className="fixed top-0 left-0 right-0 z-30 header-premium pt-[env(safe-area-inset-top)] md:hidden">
+      <header className={`fixed left-0 right-0 z-30 header-premium pt-[env(safe-area-inset-top)] md:hidden ${!isAuthenticated ? 'top-[52px]' : 'top-0'}`}>
         <div className="flex items-center justify-between px-3 py-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <button
-              onClick={() => { setShowMobileSidebar(!showMobileSidebar); setMobileNav('courses') }}
-              className="p-2 rounded-xl hover:bg-gray-100/80 active:bg-gray-200/60 shrink-0 transition-colors"
-              aria-label="Toggle course list"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            {selectedCourseId ? (
+              <button
+                onClick={() => { setSelectedCourseId(null); setSelectedDoc(null) }}
+                className="p-2 rounded-xl hover:bg-gray-100/80 active:bg-gray-200/60 shrink-0 transition-colors"
+                aria-label="Back to all courses"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={() => { setShowMobileSidebar(!showMobileSidebar); setMobileNav('courses') }}
+                className="p-2 rounded-xl hover:bg-gray-100/80 active:bg-gray-200/60 shrink-0 transition-colors"
+                aria-label="Toggle course list"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            )}
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center shadow-md shadow-blue-500/20">
                 <span className="text-white text-[11px] font-black">V</span>
               </div>
               <span className="text-sm font-bold tracking-tight">
-                <span className="text-gradient">Vylix Hub</span>
+                <span className="text-gradient">Vylix Academic Hub</span>
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {!isAuthenticated && (
+              <button
+                onClick={() => promptLogin('unlock all features')}
+                className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-sm shadow-blue-500/20 active:scale-95 transition-all"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                Sign In
+              </button>
+            )}
             <div className="avatar-premium w-8 h-8 rounded-full flex items-center justify-center text-white text-[11px] font-bold">
               U
             </div>
           </div>
         </div>
       </header>
+
+      {/* Read-only banner for unauthenticated users - desktop */}
+      {!isAuthenticated && (
+        <div className="hidden md:block fixed top-0 left-[240px] xl:left-[280px] right-0 z-40">
+          <div className="px-4 pt-3 pb-1">
+            <ReadOnlyBanner action="upload, chat with AI, and save documents offline" />
+          </div>
+        </div>
+      )}
+
+      {/* Read-only banner for unauthenticated users - mobile */}
+      {!isAuthenticated && (
+        <div className="md:hidden fixed top-0 left-0 right-0 z-40">
+          <div className="px-3 pt-2 pb-1">
+            <ReadOnlyBanner action="upload, chat with AI, and save documents offline" />
+          </div>
+        </div>
+      )}
 
       {/* Mobile course drawer */}
       {showMobileSidebar && (
@@ -89,16 +133,17 @@ export function ThreePanelLayout() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 pt-[max(3.25rem,env(safe-area-inset-top)+2.5rem)] pb-[max(4rem,env(safe-area-inset-bottom)+3.5rem)] md:pt-0 md:pb-0">
+      <div className={`flex-1 flex flex-col min-w-0 pt-[max(3.25rem,env(safe-area-inset-top)+2.5rem)] pb-[max(4rem,env(safe-area-inset-bottom)+3.5rem)] md:pt-0 md:pb-0 ${!isAuthenticated ? 'md:mt-[68px]' : ''}`}>
         <MainContentPanel
           selectedCourseId={selectedCourseId}
           selectedDoc={selectedDoc}
           onSelectDoc={setSelectedDoc}
+          isReadOnly={!isAuthenticated}
         />
       </div>
 
       {/* Interactive sidebar */}
-      <InteractiveSidebar selectedDoc={selectedDoc} isOpen={showTools} onOpenChange={setShowTools} />
+      <InteractiveSidebar selectedDoc={selectedDoc} isOpen={showTools} onOpenChange={setShowTools} isReadOnly={!isAuthenticated} />
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 bottom-nav pb-[env(safe-area-inset-bottom)] md:hidden safe-bottom">

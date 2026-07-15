@@ -12,35 +12,9 @@ from app.deps import CurrentUser, get_current_user
 from app.models import (
     UserStreak, PointsTransaction, User, Badge, UserBadge,
 )
+from app.schemas import StreakOut, PointsOut, TransactionOut, LeaderboardEntry
 
 router = APIRouter(prefix="/gamification", tags=["gamification"])
-
-
-class StreakOut(BaseModel):
-    current_streak: int = 0
-    longest_streak: int = 0
-    last_activity_at: str | None = None
-
-
-class PointsOut(BaseModel):
-    total_points: int = 0
-
-
-class TransactionOut(BaseModel):
-    id: str
-    amount: int
-    reason: str
-    description: str | None = None
-    created_at: str | None = None
-
-    model_config = {"from_attributes": True}
-
-
-class LeaderboardEntry(BaseModel):
-    user_id: str
-    full_name: str
-    avatar_url: str | None = None
-    value: int
 
 
 @router.post("/check-in")
@@ -149,3 +123,60 @@ async def points_leaderboard(
         LeaderboardEntry(user_id=uid, full_name=fn, avatar_url=av, value=cs)
         for uid, fn, av, cs in result.all()
     ]
+
+
+class BadgeOut(BaseModel):
+    id: str
+    code: str
+    name: str
+    description: str
+    icon: str
+    rarity: str
+    earned_at: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+@router.get("/badges", response_model=list[BadgeOut])
+async def get_user_badges(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Badge, UserBadge.earned_at)
+        .join(UserBadge, UserBadge.badge_id == Badge.id)
+        .where(UserBadge.user_id == user.id)
+        .order_by(UserBadge.earned_at.desc())
+    )
+    return [
+        BadgeOut(
+            id=b.id, code=b.code, name=b.name, description=b.description,
+            icon=b.icon, rarity=b.rarity.value,
+            earned_at=str(earned) if earned else None,
+        )
+        for b, earned in result.all()
+    ]
+
+
+@router.get("/streak-and-points")
+async def get_streak_and_points(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    streak_result = await db.execute(
+        select(UserStreak).where(UserStreak.user_id == user.id)
+    )
+    streak = streak_result.scalar_one_or_none()
+
+    points_result = await db.execute(
+        select(func.coalesce(func.sum(PointsTransaction.amount), 0))
+        .where(PointsTransaction.user_id == user.id)
+    )
+    total_points = points_result.scalar() or 0
+
+    return {
+        "current_streak": streak.current_streak if streak else 0,
+        "longest_streak": streak.longest_streak if streak else 0,
+        "total_points": total_points,
+        "last_activity_at": str(streak.last_activity_at) if streak and streak.last_activity_at else None,
+    }

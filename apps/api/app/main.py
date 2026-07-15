@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.routers import (
     health, colleges, courses, topics, user, materials,
-    qna, gamification, settings, collaboration, maintenance,
-    documents, analytics, insights, uploads, ws, google_drive,
+    qna, gamification, settings as settings_router, collaboration, maintenance,
+    documents, analytics, insights, uploads, ws, google_drive, study_agent,
 )
 
 settings = get_settings()
@@ -29,10 +29,13 @@ app.include_router(user.router, prefix=settings.api_prefix)
 app.include_router(materials.router, prefix=settings.api_prefix)
 app.include_router(qna.router, prefix=settings.api_prefix)
 app.include_router(gamification.router, prefix=settings.api_prefix)
-app.include_router(settings.router, prefix=settings.api_prefix)
+app.include_router(settings_router.router, prefix=settings.api_prefix)
 app.include_router(collaboration.router, prefix=settings.api_prefix)
 app.include_router(maintenance.router, prefix=settings.api_prefix)
 app.include_router(google_drive.router, prefix=settings.api_prefix)
+
+# Study Agent router
+app.include_router(study_agent.router, prefix=settings.api_prefix)
 
 # AI/ML routers (from python-service)
 app.include_router(documents.router, prefix=settings.api_prefix)

@@ -58,9 +58,9 @@ export function InstallPrompt() {
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 text-2xl">📱</div>
           <div className="flex-1">
-            <h3 className="font-black mb-1 bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">Install Vylix</h3>
+            <h3 className="font-black mb-1 bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent">Install Vylix Academic Hub</h3>
             <p className="text-sm text-gray-700 mb-4">
-              Get faster access and offline support. Add Vylix to your home screen for the best experience.
+              Get faster access and offline support. Add Vylix Academic Hub to your home screen for the best experience.
             </p>
             <div className="flex gap-2">
               <button

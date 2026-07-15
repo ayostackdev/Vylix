@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { useStreakAndPoints, useUserBadges } from '@/queries/use-gamification';
 
 interface College {
   id: string;
@@ -23,10 +24,19 @@ export interface ProfileModalProps {
   onClose: () => void;
 }
 
+const RARITY_COLORS: Record<string, string> = {
+  COMMON: 'bg-gray-100 border-gray-200 text-gray-600',
+  RARE: 'bg-blue-50 border-blue-200 text-blue-600',
+  EPIC: 'bg-purple-50 border-purple-200 text-purple-600',
+  LEGENDARY: 'bg-amber-50 border-amber-200 text-amber-600',
+};
+
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { user, refreshProfile, logout, updateAvatar } = useAuth();
   const supabase = getSupabaseBrowserClient();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { data: stats } = useStreakAndPoints();
+  const { data: badges } = useUserBadges();
 
   const [isEditing, setIsEditing] = useState(false);
   const [colleges, setColleges] = useState<College[]>([]);
@@ -147,12 +157,10 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
 
-      const body: Record<string, any> = {};
+      const body: Record<string, unknown> = {};
       if (currentLevel) body.currentLevel = currentLevel;
       if (selectedCollegeId) body.collegeId = selectedCollegeId;
       if (selectedDeptId) body.departmentId = selectedDeptId;
-
-      console.log('[ProfileModal] Saving body:', JSON.stringify(body));
 
       const res = await fetch('/api/user/profile', {
         method: 'PATCH',
@@ -180,11 +188,16 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   if (!isOpen || !user) return null;
 
   const initials = user.fullName?.charAt(0) ?? 'CS';
+  const points = stats?.total_points ?? 0;
+  const streak = stats?.current_streak ?? 0;
+  const level = points >= 1000 ? 'Platinum' : points >= 500 ? 'Gold' : points >= 200 ? 'Silver' : 'Bronze';
+  const levelColor = points >= 1000 ? 'from-violet-500 to-purple-500' : points >= 500 ? 'from-yellow-500 to-amber-500' : points >= 200 ? 'from-gray-400 to-gray-500' : 'from-orange-400 to-orange-500';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 overflow-hidden animate-fade-in">
-        <div className="bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-6 text-center">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 overflow-hidden animate-fade-in max-h-[90vh] flex flex-col">
+        {/* Header with gradient */}
+        <div className="bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-6 text-center shrink-0">
           <div className="flex justify-center mb-3">
             <button
               onClick={() => fileInputRef.current?.click()}
@@ -224,13 +237,79 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           <p className="text-sm text-white/80 mt-1">{user.email}</p>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {error && (
             <div className="rounded-xl bg-red-50 border border-red-200 p-3">
               <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
+          {/* Gamification Stats */}
+          {!isEditing && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-xl bg-gradient-to-br from-orange-50 to-amber-50/80 border border-orange-200/60 p-3 text-center">
+                  <span className="text-lg">
+                    {streak >= 7 ? '🔥' : streak >= 3 ? '⚡' : streak > 0 ? '✨' : '📅'}
+                  </span>
+                  <p className="text-lg font-black text-gray-900 mt-1">{streak}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-orange-600">Day Streak</p>
+                </div>
+                <div className="rounded-xl bg-gradient-to-br from-blue-50 to-sky-50/80 border border-blue-200/60 p-3 text-center">
+                  <span className="text-lg">💰</span>
+                  <p className="text-lg font-black text-gray-900 mt-1">{points.toLocaleString()}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-blue-600">Points</p>
+                </div>
+                <div className="rounded-xl bg-gradient-to-br from-purple-50 to-violet-50/80 border border-purple-200/60 p-3 text-center">
+                  <span className="text-lg">🏅</span>
+                  <p className="text-lg font-black text-gray-900 mt-1">{badges?.length ?? 0}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-purple-600">Badges</p>
+                </div>
+              </div>
+
+              {points > 0 && (
+                <div className="flex items-center justify-center">
+                  <span className={`inline-flex items-center rounded-full bg-gradient-to-r ${levelColor} p-[1px] shadow-sm`}>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[10px] font-bold text-gray-900">
+                      <span className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${levelColor}`} />
+                      {level} Tier
+                    </span>
+                  </span>
+                </div>
+              )}
+
+              {/* Badges showcase */}
+              {badges && badges.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Earned Badges</p>
+                  <div className="flex flex-wrap gap-2">
+                    {badges.slice(0, 8).map((badge) => (
+                      <div
+                        key={badge.id}
+                        className={`relative group w-12 h-12 rounded-xl border flex flex-col items-center justify-center cursor-default transition-all hover:scale-110 ${
+                          RARITY_COLORS[badge.rarity] || RARITY_COLORS.COMMON
+                        }`}
+                        title={`${badge.name}: ${badge.description}`}
+                      >
+                        <span className="text-lg">{badge.icon}</span>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10 w-40 rounded-xl border border-gray-200 bg-white p-2.5 shadow-lg">
+                          <p className="text-[10px] font-bold text-gray-900">{badge.name}</p>
+                          <p className="text-[9px] text-gray-500 mt-0.5">{badge.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                    {badges.length > 8 && (
+                      <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-gray-500">+{badges.length - 8}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Profile Info */}
           {isEditing ? (
             <div className="space-y-3">
               <div>
@@ -303,74 +382,78 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Status</p>
-                  <p className="mt-1 font-semibold text-gray-900">{user.status === 'ALUMNI' ? '🎓 Alumni' : '🎒 Student'}</p>
+                  <p className="mt-1 font-semibold text-gray-900 text-sm">{user.status === 'ALUMNI' ? '🎓 Alumni' : '🎒 Student'}</p>
                 </div>
                 {user.currentLevel && (
                   <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Level</p>
-                    <p className="mt-1 font-semibold text-gray-900">{user.currentLevel}</p>
+                    <p className="mt-1 font-semibold text-gray-900 text-sm">{user.currentLevel}</p>
                   </div>
                 )}
                 {user.matricNumber && (
                   <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Matric No</p>
-                    <p className="mt-1 font-semibold text-gray-900">{user.matricNumber}</p>
+                    <p className="mt-1 font-semibold text-gray-900 text-sm">{user.matricNumber}</p>
                   </div>
                 )}
                 {user.entryYear && (
                   <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Started</p>
-                    <p className="mt-1 font-semibold text-gray-900">{user.entryYear}</p>
+                    <p className="mt-1 font-semibold text-gray-900 text-sm">{user.entryYear}</p>
                   </div>
                 )}
                 {user.collegeName && (
                   <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 col-span-2">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">College</p>
-                    <p className="mt-1 font-semibold text-gray-900">{user.collegeName}</p>
+                    <p className="mt-1 font-semibold text-gray-900 text-sm">{user.collegeName}</p>
                   </div>
                 )}
                 {user.departmentName && (
                   <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 col-span-2">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Department</p>
-                    <p className="mt-1 font-semibold text-gray-900">{user.departmentName}</p>
+                    <p className="mt-1 font-semibold text-gray-900 text-sm">{user.departmentName}</p>
                   </div>
                 )}
                 {user.schoolEmail && (
                   <div className="rounded-xl bg-green-50 border border-green-200 p-3 col-span-2">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-green-700">University Email</p>
-                    <p className="mt-1 font-semibold text-gray-900">{user.schoolEmail}</p>
+                    <p className="mt-1 font-semibold text-gray-900 text-sm">{user.schoolEmail}</p>
                   </div>
                 )}
               </div>
 
-              <button
-                onClick={enterEditMode}
-                className="w-full rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-100 transition-colors"
-              >
-                Edit Profile
-              </button>
-
-              <button
-                onClick={onClose}
-                className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-opacity"
-              >
-                Close
-              </button>
-
-              <button
-                onClick={async () => {
-                  await logout();
-                  onClose();
-                }}
-                className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 transition-colors"
-              >
-                Sign Out
-              </button>
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={enterEditMode}
+                  className="flex-1 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-100 transition-colors"
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={async () => {
+                    await logout();
+                    onClose();
+                  }}
+                  className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
             </>
           )}
+        </div>
+
+        {/* Close button */}
+        <div className="p-4 pt-0 shrink-0">
+          <button
+            onClick={onClose}
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-opacity"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>

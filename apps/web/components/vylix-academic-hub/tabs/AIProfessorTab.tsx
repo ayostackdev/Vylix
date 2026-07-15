@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { offlineStore } from '@/lib/offline-store'
+import { useAuth } from '@/context/auth-context'
 import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface Message {
@@ -12,9 +13,11 @@ interface Message {
 
 interface AIProfessorTabProps {
   selectedDoc: DocumentInfo | null
+  isReadOnly?: boolean
 }
 
-export function AIProfessorTab({ selectedDoc }: AIProfessorTabProps) {
+export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorTabProps) {
+  const { promptLogin } = useAuth()
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -55,7 +58,7 @@ export function AIProfessorTab({ selectedDoc }: AIProfessorTabProps) {
     try {
       if (selectedDoc) {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || ''
-        const res = await fetch(`${apiBaseUrl}/api/v1/documents/chat`, {
+        const res = await fetch(`${apiBaseUrl}/api/documents/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -142,14 +145,14 @@ export function AIProfessorTab({ selectedDoc }: AIProfessorTabProps) {
         {selectedDoc && (
           <div className="flex gap-2 mb-3">
             <button
-              onClick={() => handleQuickAction('Summarize this document')}
+              onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleQuickAction('Summarize this document')}
               disabled={isLoading}
               className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-blue-50 to-blue-100/80 text-blue-700 font-medium hover:from-blue-100 hover:to-blue-200/80 transition-all duration-200 disabled:opacity-50 border border-blue-200/50 shadow-sm"
             >
               Summarize
             </button>
             <button
-              onClick={() => handleQuickAction('Create 3 practice questions from this material')}
+              onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleQuickAction('Create 3 practice questions from this material')}
               disabled={isLoading}
               className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-emerald-50 to-emerald-100/80 text-emerald-700 font-medium hover:from-emerald-100 hover:to-emerald-200/80 transition-all duration-200 disabled:opacity-50 border border-emerald-200/50 shadow-sm"
             >
@@ -161,14 +164,14 @@ export function AIProfessorTab({ selectedDoc }: AIProfessorTabProps) {
         {!selectedDoc && (
           <div className="flex gap-2 mb-3">
             <button
-              onClick={() => handleQuickAction('Explain the concept of probability distributions')}
+              onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleQuickAction('Explain the concept of probability distributions')}
               disabled={isLoading}
               className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-blue-50 to-blue-100/80 text-blue-700 font-medium hover:from-blue-100 hover:to-blue-200/80 transition-all duration-200 disabled:opacity-50 border border-blue-200/50 shadow-sm"
             >
               Explain a concept
             </button>
             <button
-              onClick={() => handleQuickAction('Help me prepare for my exam')}
+              onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleQuickAction('Help me prepare for my exam')}
               disabled={isLoading}
               className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-emerald-50 to-emerald-100/80 text-emerald-700 font-medium hover:from-emerald-100 hover:to-emerald-200/80 transition-all duration-200 disabled:opacity-50 border border-emerald-200/50 shadow-sm"
             >
@@ -215,14 +218,14 @@ export function AIProfessorTab({ selectedDoc }: AIProfessorTabProps) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={selectedDoc ? 'Ask about this document...' : 'Ask anything about your course...'}
+            onKeyDown={(e) => e.key === 'Enter' && !isReadOnly && handleSend()}
+            placeholder={isReadOnly ? 'Sign in to chat with AI...' : (selectedDoc ? 'Ask about this document...' : 'Ask anything about your course...')}
             className="flex-1 min-h-[44px] text-sm rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-300 focus:ring-1 focus:ring-blue-300 px-4 py-3 transition-all"
-            disabled={isLoading}
+            disabled={isLoading || isReadOnly}
           />
           <button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
+            onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleSend()}
+            disabled={!input.trim() || isLoading || isReadOnly}
             className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
             aria-label="Send message"
           >

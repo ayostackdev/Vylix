@@ -52,7 +52,7 @@ export function LoginModal() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent mb-3">
-                {isSignUp ? 'Join Vylix' : 'Welcome Back'}
+                {isSignUp ? 'Join Vylix Academic Hub' : 'Welcome Back'}
               </h2>
               <p className="cp-body mt-1 text-sm">
                 {isSignUp

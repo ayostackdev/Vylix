@@ -32,7 +32,7 @@ export function ChatPanel({ documentId, documentTitle, onClose }: ChatPanelProps
 
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const res = await fetch(`${apiBaseUrl}/api/v1/documents/chat`, {
+      const res = await fetch(`${apiBaseUrl}/api/documents/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ document_id: documentId, query: text.trim() }),

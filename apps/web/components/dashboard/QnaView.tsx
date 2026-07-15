@@ -31,6 +31,9 @@ export function QnaView() {
   const [askTitle, setAskTitle] = useState('');
   const [askContent, setAskContent] = useState('');
   const [answerContent, setAnswerContent] = useState('');
+  const [searchBackView, setSearchBackView] = useState<View>('browse');
+
+  const isSearching = debouncedSearch.trim().length >= 2;
 
   const { data: courses = [], isLoading: coursesLoading } = useCourses();
   const { data: topics = [], isLoading: topicsLoading } = useTopics(selectedCourse?.id ?? null);
@@ -64,12 +67,18 @@ export function QnaView() {
 
   const handleQuestionClick = useCallback((q: QnaQuestion) => {
     setSelectedQuestion(q);
+    setSearchBackView(isSearching ? 'browse' : view);
     setView('detail');
     setAnswerContent('');
-  }, []);
+  }, [isSearching, view]);
 
   const handleBack = useCallback(() => {
     if (view === 'detail') {
+      if (searchBackView === 'browse' && isSearching) {
+        setSelectedQuestion(null);
+        setView('browse');
+        return;
+      }
       setSelectedQuestion(null);
       setView('questions');
     } else if (view === 'questions') {
@@ -77,7 +86,7 @@ export function QnaView() {
       setSelectedCourse(null);
       setView('browse');
     }
-  }, [view]);
+  }, [view, searchBackView, isSearching]);
 
   const handleAskSubmit = useCallback(async () => {
     if (!selectedTopic || !askTitle.trim() || !askContent.trim()) return;
@@ -115,7 +124,6 @@ export function QnaView() {
     } catch {}
   }, [selectedQuestion, acceptAnswer]);
 
-  const isSearching = debouncedSearch.trim().length >= 2;
   const isOwner = (q: QnaQuestion) => user?.id === q.author.id;
 
   return (
@@ -331,7 +339,7 @@ export function QnaView() {
               onClick={handleBack}
               className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              ← Back
+              ← {searchBackView === 'browse' && isSearching ? 'Search Results' : 'Back'}
             </button>
             <span className="text-sm text-gray-500">Question</span>
           </div>

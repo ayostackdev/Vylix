@@ -7,6 +7,7 @@ import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface OfflineVaultTabProps {
   selectedDoc: DocumentInfo | null
+  isReadOnly?: boolean
 }
 
 interface CachedDoc {
@@ -16,7 +17,7 @@ interface CachedDoc {
   savedAt: number
 }
 
-export function OfflineVaultTab({ selectedDoc }: OfflineVaultTabProps) {
+export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaultTabProps) {
   const [cachedDocs, setCachedDocs] = useState<CachedDoc[]>([])
   const [vaultMaterials, setVaultMaterials] = useState<VaultMaterial[]>([])
   const [storageUsage, setStorageUsage] = useState<string>('')

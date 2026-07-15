@@ -14,17 +14,9 @@ from app.models import (
     TopicQuestion, QuestionAnswer, Topic, User,
     PointsTransaction, User as UserModel,
 )
+from app.schemas import QuestionCreate, AnswerCreate
 
 router = APIRouter(prefix="/qna", tags=["qna"])
-
-
-class QuestionCreate(BaseModel):
-    title: str
-    content: str
-
-
-class AnswerCreate(BaseModel):
-    content: str
 
 
 class AnswerOut(BaseModel):
@@ -230,4 +222,35 @@ async def search_questions(
             created_at=str(q_.created_at) if q_.created_at else None,
         )
         for q_ in result.scalars().all()
+    ]
+
+
+class TopAnswererOut(BaseModel):
+    user_id: str
+    answer_count: int
+    helpful_count: int
+
+
+@router.get("/topics/{topic_id}/top-answerers", response_model=list[TopAnswererOut])
+async def top_answerers(
+    topic_id: str,
+    limit: int = Query(default=5, ge=1, le=20),
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(
+            QuestionAnswer.author_id,
+            func.count(QuestionAnswer.id).label("answer_count"),
+            func.coalesce(func.sum(QuestionAnswer.help_count), 0).label("helpful_count"),
+        )
+        .join(TopicQuestion, TopicQuestion.id == QuestionAnswer.question_id)
+        .where(TopicQuestion.topic_id == topic_id)
+        .group_by(QuestionAnswer.author_id)
+        .order_by(desc("helpful_count"))
+        .limit(limit)
+    )
+    return [
+        TopAnswererOut(user_id=uid, answer_count=ac, helpful_count=hc)
+        for uid, ac, hc in result.all()
     ]

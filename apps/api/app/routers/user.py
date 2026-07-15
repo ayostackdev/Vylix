@@ -15,6 +15,7 @@ from app.models import (
     User, UserEmail, UserProfile, UserPrivacy, UserStreak,
     PointsTransaction, College, Department,
 )
+from app.schemas import StreakWithPointsOut
 from app.services.storage import get_storage
 
 settings = get_settings()
@@ -52,13 +53,6 @@ class UpdateProfileRequest(BaseModel):
     college_id: str | None = None
     department_id: str | None = None
     current_level: str | None = None
-
-
-class StreakOut(BaseModel):
-    current_streak: int = 0
-    longest_streak: int = 0
-    last_activity_at: str | None = None
-    total_points: int = 0
 
 
 class EmailOut(BaseModel):
@@ -242,7 +236,7 @@ async def backup_status(
     return {"should_prompt": count.scalar() < 2}
 
 
-@router.get("/streak", response_model=StreakOut)
+@router.get("/streak", response_model=StreakWithPointsOut)
 async def get_streak(
     user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -254,7 +248,7 @@ async def get_streak(
         .where(PointsTransaction.user_id == user.id)
     )
     total = pts.scalar()
-    return StreakOut(
+    return StreakWithPointsOut(
         current_streak=streak.current_streak if streak else 0,
         longest_streak=streak.longest_streak if streak else 0,
         last_activity_at=str(streak.last_activity_at) if streak else None,

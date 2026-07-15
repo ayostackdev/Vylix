@@ -33,6 +33,9 @@ class HashingEmbeddingFunction:
             stop_words="english",
         )
 
+    def name(self) -> str:
+        return "hashing"
+
     def __call__(self, input: list[str]) -> list[list[float]]:
         matrix = self.vectorizer.transform(input)
         normalized = normalize(matrix, norm="l2")
