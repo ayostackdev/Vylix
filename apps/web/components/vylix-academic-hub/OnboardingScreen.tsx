@@ -3,17 +3,9 @@
 import { useState, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { useSearchParams } from 'next/navigation'
+import { DriveFilePickerModal } from './DriveFilePickerModal'
 
-type Step = 'welcome' | 'auth' | 'drive' | 'importing' | 'complete'
-
-interface AutoImportResult {
-  folders_scanned: number
-  pdfs_found: number
-  imported: number
-  skipped: number
-  topics_created: string[]
-  errors: string[]
-}
+type Step = 'welcome' | 'auth' | 'drive' | 'picking' | 'complete'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
@@ -26,41 +18,17 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const [step, setStep] = useState<Step>('welcome')
   const [isLoading, setIsLoading] = useState(false)
   const [authError, setAuthError] = useState('')
-  const [importResult, setImportResult] = useState<AutoImportResult | null>(null)
 
   useEffect(() => {
     const driveStatus = searchParams.get('drive')
     if (driveStatus === 'connected') {
-      setStep('importing')
-      runAutoImport()
+      setStep('picking')
     } else if (driveStatus === 'error') {
       const detail = searchParams.get('detail') || 'unknown'
       setAuthError(`Drive connection failed: ${detail.replace(/_/g, ' ')}`)
       setStep('drive')
     }
   }, [searchParams])
-
-  const runAutoImport = async () => {
-    try {
-      const supabase = getSupabaseBrowserClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        setStep('complete')
-        return
-      }
-      const res = await fetch(`${API_BASE}/api/google-drive/auto-import`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setImportResult(data)
-      }
-    } catch {
-      // Non-critical, continue to dashboard
-    }
-    setStep('complete')
-  }
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
@@ -236,6 +204,14 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">Connect Your Drive</h2>
                 <p className="text-xs sm:text-sm text-white/50">Link your Google Drive to import course PDFs automatically.</p>
+                <div className="mt-4 flex items-start gap-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl px-3.5 py-3 text-left">
+                  <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <p className="text-[11px] text-white/50 leading-relaxed">
+                    <span className="text-white/70 font-semibold">Shared with classmates.</span> Your imported PDFs will be visible to students in your department. You can toggle sharing per file anytime.
+                  </p>
+                </div>
               </div>
               <button
                 onClick={handleConnectDrive}
@@ -260,18 +236,26 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             </div>
           )}
 
-          {step === 'importing' && (
+          {step === 'picking' && (
             <div className="premium-fade-in text-center">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/10">
-                <svg className="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">Scanning Your Drive</h2>
-              <p className="text-xs sm:text-sm text-white/50 leading-relaxed">
-                Finding your course PDFs and organizing them into folders...
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">Select Your Files</h2>
+              <p className="text-xs sm:text-sm text-white/50 leading-relaxed mb-6">
+                Choose which files to import from your Google Drive.
               </p>
+              <button
+                onClick={() => setStep('complete')}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold text-sm btn-glow shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+              >
+                Open File Picker
+              </button>
+              <button onClick={() => setStep('complete')} className="block mx-auto mt-4 text-xs text-white/25 hover:text-white/50 transition-colors font-medium">
+                Skip for now
+              </button>
             </div>
           )}
 
@@ -283,30 +267,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
                 </svg>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">You&apos;re All Set!</h2>
-              {importResult ? (
-                <div className="mb-6">
-                  <p className="text-xs sm:text-sm text-white/50 mb-3">
-                    Found <span className="text-white font-bold">{importResult.pdfs_found}</span> PDF{importResult.pdfs_found !== 1 ? 's' : ''} across{' '}
-                    <span className="text-white font-bold">{importResult.folders_scanned}</span> folder{importResult.folders_scanned !== 1 ? 's' : ''}
-                  </p>
-                  <div className="inline-flex items-center gap-4 text-xs text-white/40">
-                    <span className="flex items-center gap-1">
-                      <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {importResult.imported} imported
-                    </span>
-                    {importResult.skipped > 0 && (
-                      <span>{importResult.skipped} already had</span>
-                    )}
-                    {importResult.topics_created.length > 0 && (
-                      <span>{importResult.topics_created.length} course{importResult.topics_created.length !== 1 ? 's' : ''} found</span>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs sm:text-sm text-white/50 mb-6">Your courses are ready. Let&apos;s start learning!</p>
-              )}
+              <p className="text-xs sm:text-sm text-white/50 mb-6">Your courses are ready. Let&apos;s start learning!</p>
               <button
                 onClick={handleComplete}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold text-sm btn-glow shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
@@ -321,6 +282,13 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           VYLIX.TECH
         </p>
       </div>
+
+      {/* File Picker Modal */}
+      <DriveFilePickerModal
+        isOpen={step === 'picking'}
+        onClose={() => setStep('complete')}
+        onSuccess={() => setStep('complete')}
+      />
     </div>
   )
 }

@@ -3,14 +3,21 @@
 import { useState, useCallback, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { offlineStore } from '@/lib/offline-store'
-import { getCourseById } from '@/lib/departments'
 import type { DocumentInfo } from './ThreePanelLayout'
 import { PdfViewerInline } from './PdfViewerInline'
 import { DriveSyncBanner } from './DriveSyncBanner'
+import { DriveFilePickerModal } from './DriveFilePickerModal'
 import { useDrive } from '@/context/drive-context'
 import { useAuth } from '@/context/auth-context'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
+
+interface Course {
+  id: string
+  code: string
+  title: string
+  level: number
+}
 
 interface Material {
   id: string
@@ -18,7 +25,11 @@ interface Material {
   file_url: string
   file_size: number
   topic_id: string
+  uploader_id: string
+  uploader_name: string | null
+  uploader_avatar: string | null
   processing_status: string
+  is_shared: boolean
   uploaded_at: string | null
 }
 
@@ -45,6 +56,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
   const { connectDrive, driveConnected, driveError, clearError } = useDrive()
   const { promptLogin } = useAuth()
   const [documents, setDocuments] = useState<Material[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [viewerUrl, setViewerUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -53,18 +65,24 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
   const [offlineStatus] = useState<'online' | 'offline'>(
     typeof navigator !== 'undefined' && navigator.onLine ? 'online' : 'offline'
   )
+  const [userId, setUserId] = useState<string | null>(null)
+  const [showDrivePicker, setShowDrivePicker] = useState(false)
 
-  const course = selectedCourseId ? getCourseById(selectedCourseId) : null
+  const course = courses.find((c) => c.id === selectedCourseId) || null
 
   const fetchMaterials = useCallback(async () => {
     try {
+      setLoading(true)
       const supabase = getSupabaseBrowserClient()
       const { data: { session } } = await supabase.auth.getSession()
       const headers: Record<string, string> = {}
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`
       }
-      const res = await fetch(`${API_BASE}/api/materials/my-materials`, { headers })
+      const url = selectedCourseId
+        ? `${API_BASE}/api/materials/course/${selectedCourseId}`
+        : `${API_BASE}/api/materials/recent`
+      const res = await fetch(url, { headers })
       if (res.ok) {
         const data = await res.json()
         setDocuments(data)
@@ -74,11 +92,61 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
     } finally {
       setLoading(false)
     }
+  }, [selectedCourseId])
+
+  const fetchCourses = useCallback(async () => {
+    try {
+      const supabase = getSupabaseBrowserClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = {}
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+      const res = await fetch(`${API_BASE}/api/courses/my`, { headers })
+      if (res.ok) {
+        const data = await res.json()
+        setCourses(data)
+      }
+    } catch {
+      // Non-critical
+    }
   }, [])
+
+  useEffect(() => {
+    fetchCourses()
+  }, [fetchCourses])
 
   useEffect(() => {
     fetchMaterials()
   }, [fetchMaterials])
+
+  useEffect(() => {
+    const getUid = async () => {
+      const supabase = getSupabaseBrowserClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user?.id) setUserId(session.user.id)
+    }
+    getUid()
+  }, [])
+
+  const handleToggleShare = useCallback(async (doc: Material) => {
+    try {
+      const supabase = getSupabaseBrowserClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) return
+      const res = await fetch(`${API_BASE}/api/materials/${doc.id}/share`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ is_shared: !doc.is_shared }),
+      })
+      if (res.ok) {
+        setDocuments((prev) => prev.map((d) => d.id === doc.id ? { ...d, is_shared: !d.is_shared } : d))
+      }
+    } catch {}
+  }, [])
 
   const handleSelectDoc = useCallback((doc: Material) => {
     onSelectDoc({
@@ -241,7 +309,15 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
             <input type="file" accept=".pdf" className="hidden" onChange={handleUpload} />
           </label>
           <button
-            onClick={() => isReadOnly ? promptLogin('connect Google Drive') : connectDrive()}
+            onClick={() => {
+              if (isReadOnly) {
+                promptLogin('connect Google Drive')
+              } else if (driveConnected) {
+                setShowDrivePicker(true)
+              } else {
+                connectDrive()
+              }
+            }}
             className={`inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2 sm:px-3 py-2 rounded-xl font-semibold min-h-[36px] sm:min-h-[38px] transition-all duration-200 ${
               isReadOnly
                 ? 'bg-gray-50/60 border border-gray-200/60 text-gray-400 cursor-not-allowed hover:bg-amber-50/60 hover:border-amber-200/60 hover:text-amber-600'
@@ -263,8 +339,8 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
                 <path d="M7.71 3.5L1.15 15l3.43 6h13.72l3.42-6L15.29 3.5H7.71zm4.58 2.28l4.14 7.22H4.71l4.14-7.22h3.44z" opacity="0.9" />
               </svg>
             )}
-            <span className="hidden sm:inline">{driveConnected ? 'Google Drive Connected' : 'Google Drive'}</span>
-            <span className="sm:hidden">{driveConnected ? '✓' : 'Drive'}</span>
+            <span className="hidden sm:inline">{driveConnected ? 'Import from Drive' : 'Google Drive'}</span>
+            <span className="sm:hidden">{driveConnected ? '↓' : 'Drive'}</span>
           </button>
         </div>
       </header>
@@ -310,7 +386,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
                   {course ? `${course.code} Materials` : 'Recent Documents'}
                 </h2>
                 <p className="text-xs text-gray-400 mt-0.5 font-medium">
-                  {course ? course.title : 'Browse your uploaded course materials'}
+                  {course ? course.title : 'Materials shared by students in your department'}
                 </p>
               </div>
             </div>
@@ -333,14 +409,24 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-base font-bold text-gray-800 mb-1.5">No documents yet</h3>
+                <h3 className="text-base font-bold text-gray-800 mb-1.5">                  No materials in this course yet</h3>
                 <p className="text-sm text-gray-400 max-w-sm mb-6 leading-relaxed">
                   {driveConnected
-                    ? 'Your Drive is connected but no documents have been imported yet. Import files from your Drive or upload directly.'
-                    : 'Connect your Google Drive to automatically import your course materials, or upload PDFs directly.'}
+                    ? 'No materials imported yet. Import from Google Drive or upload PDFs to get started — they\'ll be shared with your classmates automatically.'
+                    : 'Connect your Google Drive to import your course materials, or upload PDFs directly. Everything you import is shared with students in your department.'}
                 </p>
                 <div className="flex flex-col sm:flex-row items-center gap-3">
-                  {!driveConnected && (
+                  {driveConnected ? (
+                    <button
+                      onClick={() => setShowDrivePicker(true)}
+                      className="inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl font-bold transition-all duration-200 bg-gradient-to-r from-blue-500 to-emerald-500 text-white btn-glow hover:shadow-lg hover:shadow-blue-500/25 hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7.71 3.5L1.15 15l3.43 6h13.72l3.42-6L15.29 3.5H7.71zm4.58 2.28l4.14 7.22H4.71l4.14-7.22h3.44z" opacity="0.9" />
+                      </svg>
+                      Import from Drive
+                    </button>
+                  ) : (
                     <button
                       onClick={() => isReadOnly ? promptLogin('connect Google Drive') : connectDrive()}
                       className={`inline-flex items-center gap-2 text-sm px-5 py-2.5 rounded-xl font-bold transition-all duration-200 ${
@@ -395,6 +481,43 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
                             <span className="font-medium">{formatFileSize(doc.file_size)}</span>
                             <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
                             <span>{formatDate(doc.uploaded_at)}</span>
+                            {doc.uploader_name && (
+                              <>
+                                <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
+                                <span className="flex items-center gap-1 text-gray-500">
+                                  {doc.uploader_avatar ? (
+                                    <img src={doc.uploader_avatar} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+                                  ) : (
+                                    <span className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-blue-400 to-emerald-400 flex items-center justify-center text-white text-[8px] font-bold">
+                                      {doc.uploader_name.charAt(0).toUpperCase()}
+                                    </span>
+                                  )}
+                                  {doc.uploader_name.split(' ')[0]}
+                                </span>
+                              </>
+                            )}
+                            {doc.uploader_id === userId && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleToggleShare(doc) }}
+                                className={`ml-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium transition-all ${
+                                  doc.is_shared
+                                    ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                }`}
+                                title={doc.is_shared ? 'Shared with classmates — click to make private' : 'Private — click to share with classmates'}
+                              >
+                                {doc.is_shared ? (
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                ) : (
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                  </svg>
+                                )}
+                                {doc.is_shared ? 'Shared' : 'Private'}
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -450,6 +573,16 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
           </div>
         )}
       </div>
+
+      {/* Drive File Picker Modal */}
+      <DriveFilePickerModal
+        isOpen={showDrivePicker}
+        onClose={() => setShowDrivePicker(false)}
+        onSuccess={() => {
+          setShowDrivePicker(false)
+          fetchMaterials()
+        }}
+      />
     </main>
   )
 }

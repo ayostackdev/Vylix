@@ -85,7 +85,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
         }
       }
 
-      const res = await fetch('/api/chat', {
+      const res = await fetch(`${apiBaseUrl}/api/documents/general-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history }),

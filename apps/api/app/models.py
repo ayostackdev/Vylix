@@ -120,6 +120,7 @@ class User(Base):
     email_prompt_dismissed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    last_active_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     user_streak_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("user_streaks.id"))
 
     college: Mapped["College | None"] = relationship(back_populates="users")
@@ -289,6 +290,7 @@ class Material(Base):
     processed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     uploaded_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
     is_seed: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_shared: Mapped[bool] = mapped_column(Boolean, default=True)
     is_past_question: Mapped[bool] = mapped_column(Boolean, default=False)
     exam_year: Mapped[int | None] = mapped_column(Integer)
     semester: Mapped[str | None] = mapped_column(String)

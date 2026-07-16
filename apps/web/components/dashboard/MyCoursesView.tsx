@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { DailyDigestCard } from './DailyDigestCard';
+import { SocialPresenceBanner } from './SocialPresenceBanner';
 
 interface CourseInfo {
   id: string;
@@ -119,6 +121,9 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
 
   return (
     <div className="space-y-4">
+      {/* Daily Digest */}
+      <DailyDigestCard />
+
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-lg font-black text-gray-900">My Courses</h3>

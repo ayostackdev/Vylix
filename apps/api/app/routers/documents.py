@@ -11,7 +11,7 @@ from app.services.pdf import compress_pdf
 from app.services.ocr import extract_text_with_tesseract
 from app.services.ingestion import ingest_document, search_documents
 from app.services.docling_parser import parse_with_docling
-from app.services.gemini import chat as gemini_chat
+from app.services.gemini import chat as gemini_chat, general_chat
 from app.services.rag import build_chunks
 from app.services.vector_store import VectorStore
 
@@ -245,3 +245,33 @@ def _generate_follow_ups(text: str, query: str) -> list[str]:
         suggestions = ["Can you summarize the key points?", "What are the main formulas or concepts?"]
 
     return suggestions
+
+
+class GeneralChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class GeneralChatRequest(BaseModel):
+    messages: list[GeneralChatMessage]
+
+
+class GeneralChatResponse(BaseModel):
+    content: str
+
+
+@router.post("/general-chat", response_model=GeneralChatResponse)
+async def general_chat_endpoint(payload: GeneralChatRequest) -> GeneralChatResponse:
+    if not payload.messages:
+        raise HTTPException(status_code=400, detail="Messages cannot be empty")
+
+    history_text = "\n".join(
+        f"{'Student' if m.role == 'user' else 'Assistant'}: {m.content}"
+        for m in payload.messages[-10:]
+    )
+
+    answer = general_chat(history_text)
+    if not answer:
+        answer = "I'm having trouble connecting to my knowledge base right now. Please try again in a moment."
+
+    return GeneralChatResponse(content=answer)

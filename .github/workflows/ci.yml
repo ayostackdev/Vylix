@@ -12,10 +12,11 @@ concurrency:
 
 env:
   NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
 
 jobs:
-  lint:
-    name: Lint & Format
+  lint-web:
+    name: Lint Web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,11 +25,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci
-      - run: npm run lint
-      - run: npx prettier --check .
+      - run: npm run lint -w @vylix/web
+      - run: npx prettier --check "apps/web/**/*.{ts,tsx,js,jsx,json,css}"
 
-  typecheck:
-    name: TypeScript Check
+  typecheck-web:
+    name: Typecheck Web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,18 +38,22 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci
-      - name: Generate Prisma client
-        working-directory: apps/api
-        run: npx prisma generate
-      - name: TypeScript API
-        working-directory: apps/api
-        run: npx tsc --noEmit
-      - name: TypeScript Web
-        working-directory: apps/web
-        run: npx tsc --noEmit
+      - run: npm run typecheck -w @vylix/web
 
-  test:
-    name: Tests
+  test-web:
+    name: Test Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test -w @vylix/web
+
+  test-api:
+    name: Test API
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -75,21 +80,26 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      - run: npm ci
-      - name: Generate Prisma client
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install dependencies
         working-directory: apps/api
-        run: npx prisma generate
+        run: pip install -r requirements.txt -r requirements-dev.txt
       - name: Run tests
-        run: npm run test --if-present
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://vylix:vylix@localhost:5432/vylix_test
+          REDIS_URL: redis://localhost:6379/0
+          SUPABASE_JWT_SECRET: test-secret-for-ci
+          CORS_ORIGINS: http://localhost:3000
+        run: pytest -v
 
-  build:
-    name: Build
+  build-web:
+    name: Build Web
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, test]
+    needs: [lint-web, typecheck-web, test-web]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -97,11 +107,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci
-      - name: Build API
-        working-directory: apps/api
-        run: npm run build
-      - name: Build Web
-        working-directory: apps/web
-        run: npm run build
+      - run: npm run build -w @vylix/web
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:4000

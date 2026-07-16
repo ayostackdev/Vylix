@@ -12,7 +12,7 @@ from app.database import get_db
 from app.deps import CurrentUser, get_current_user
 from app.models import (
     TopicQuestion, QuestionAnswer, Topic, User,
-    PointsTransaction, User as UserModel,
+    PointsTransaction, User as UserModel, Notification,
 )
 from app.schemas import QuestionCreate, AnswerCreate
 
@@ -123,6 +123,16 @@ async def create_answer(
     db.add(a)
     user.user.contribution_score += 10
     db.add(PointsTransaction(user_id=user.id, amount=10, reason="answer_question", related_id=a.id))
+
+    if q.author_id != user.id:
+        notif = Notification(
+            id=str(uuid.uuid4()), user_id=q.author_id,
+            kind="qa_reply", title="New answer to your question",
+            message=f"{user.full_name} answered: {q.title}",
+            payload={"question_id": q.id, "answer_id": a.id},
+        )
+        db.add(notif)
+
     await db.flush()
     return AnswerOut(
         id=a.id, question_id=a.question_id, author_id=a.author_id,
@@ -174,6 +184,16 @@ async def accept_answer(
     if author:
         author.contribution_score += 25
         db.add(PointsTransaction(user_id=a.author_id, amount=25, reason="answer_accepted", related_id=aid))
+
+    if a.author_id != user.id:
+        notif = Notification(
+            id=str(uuid.uuid4()), user_id=a.author_id,
+            kind="answer_accepted", title="Your answer was accepted!",
+            message=f"Your answer to '{q.title}' was marked as the best answer.",
+            payload={"question_id": q.id, "answer_id": a.id},
+        )
+        db.add(notif)
+
     await db.flush()
     return {"message": "Answer accepted"}
 

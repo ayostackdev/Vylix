@@ -1,24 +1,37 @@
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
+from app.core.middleware import ActivityTrackingMiddleware
 from app.routers import (
     health, colleges, courses, topics, user, materials,
     qna, gamification, settings as settings_router, collaboration, maintenance,
     documents, analytics, insights, uploads, ws, google_drive, study_agent,
+    digest,
 )
 
 settings = get_settings()
+
+if not settings.cors_origin_list:
+    print(
+        "FATAL: CORS_ORIGINS is not set. Refusing to start with wildcard CORS.",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 app = FastAPI(title=settings.app_name, version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origin_list or ["*"],
+    allow_origins=settings.cors_origin_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(ActivityTrackingMiddleware)
 
 # Core routers
 app.include_router(health.router)
@@ -45,3 +58,6 @@ app.include_router(uploads.router, prefix=settings.api_prefix)
 
 # WebSocket
 app.include_router(ws.router)
+
+# Retention & Digest
+app.include_router(digest.router, prefix=settings.api_prefix)

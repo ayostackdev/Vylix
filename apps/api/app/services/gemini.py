@@ -83,3 +83,15 @@ def chat(query: str, context: str) -> str | None:
         "Answer:"
     )
     return _call(prompt, system_instruction=system)
+
+
+def general_chat(conversation: str) -> str | None:
+    system = (
+        "You are a helpful AI study assistant for university students. "
+        "Answer the student's questions clearly and educationally. "
+        "Be concise but thorough. If the question is about a specific course topic, "
+        "provide explanations, examples, and study tips where relevant. "
+        "You can help with any academic question — math, science, humanities, study strategies, etc."
+    )
+    prompt = f"Conversation:\n{conversation}\n\nAssistant:"
+    return _call(prompt, system_instruction=system)
