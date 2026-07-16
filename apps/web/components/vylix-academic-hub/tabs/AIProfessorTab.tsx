@@ -5,6 +5,8 @@ import { offlineStore } from '@/lib/offline-store'
 import { useAuth } from '@/context/auth-context'
 import type { DocumentInfo } from '../ThreePanelLayout'
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
+
 interface Message {
   id: string
   role: 'user' | 'assistant'
@@ -85,7 +87,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
         }
       }
 
-      const res = await fetch(`${apiBaseUrl}/api/documents/general-chat`, {
+      const res = await fetch(`${API_BASE}/api/documents/general-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history }),
