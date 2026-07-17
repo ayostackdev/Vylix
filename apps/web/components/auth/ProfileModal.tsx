@@ -185,7 +185,18 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     }
   }, [supabase, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
 
-  if (!isOpen || !user) return null;
+  if (!isOpen) return null;
+
+  if (!user) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 p-8 text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto" />
+          <p className="mt-4 text-sm text-gray-500">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   const initials = user.fullName?.charAt(0) ?? 'CS';
   const points = stats?.total_points ?? 0;
