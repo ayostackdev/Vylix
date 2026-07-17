@@ -87,8 +87,8 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
         const data = await res.json()
         setDocuments(data)
       }
-    } catch {
-      // Non-critical
+    } catch (error) {
+      console.error('[MainContentPanel] Failed to load materials:', error)
     } finally {
       setLoading(false)
     }
@@ -107,8 +107,8 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
         const data = await res.json()
         setCourses(data)
       }
-    } catch {
-      // Non-critical
+    } catch (error) {
+      console.error('[MainContentPanel] Failed to load courses:', error)
     }
   }, [])
 
@@ -145,7 +145,9 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       if (res.ok) {
         setDocuments((prev) => prev.map((d) => d.id === doc.id ? { ...d, is_shared: !d.is_shared } : d))
       }
-    } catch {}
+    } catch (error) {
+      console.error('[MainContentPanel] Failed to toggle share:', error)
+    }
   }, [])
 
   const handleSelectDoc = useCallback((doc: Material) => {
@@ -164,7 +166,9 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       await offlineStore.cacheDocument(selectedDoc.id, { name: selectedDoc.name, courseId: selectedDoc.courseId, courseCode: selectedDoc.courseCode, savedAt: Date.now() })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-    } catch {}
+    } catch (error) {
+      console.error('[MainContentPanel] Failed to save offline:', error)
+    }
     setSaving(false)
   }, [selectedDoc])
 
@@ -180,8 +184,8 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       if (!res.ok) throw new Error('Failed to get file')
       const { download_url } = await res.json()
       setViewerUrl(download_url)
-    } catch {
-      // Failed to load PDF
+    } catch (error) {
+      console.error('[MainContentPanel] Failed to load PDF:', error)
     }
   }, [])
 
@@ -205,8 +209,8 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       if (res.ok) {
         await fetchMaterials()
       }
-    } catch {
-      // Upload failed
+    } catch (error) {
+      console.error('[MainContentPanel] Upload failed:', error)
     } finally {
       setUploading(false)
       e.target.value = ''

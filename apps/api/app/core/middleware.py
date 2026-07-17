@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 
 from fastapi import Request
@@ -8,6 +9,7 @@ from starlette.responses import Response
 
 from app.core.config import get_settings
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 _ACTIVITY_PATHS = {"/api/"}
@@ -55,7 +57,7 @@ class ActivityTrackingMiddleware(BaseHTTPMiddleware):
                     (user_id,),
                 )
                 conn.commit()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("Activity tracking skipped: %s", e)
 
         return response

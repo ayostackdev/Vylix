@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import logging
 from contextlib import suppress
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
+from app.deps import check_ai_rate_limit, get_optional_user, CurrentUser
 from app.services.pdf import compress_pdf
 from app.services.ocr import extract_text_with_tesseract
 from app.services.ingestion import ingest_document, search_documents
@@ -14,6 +16,8 @@ from app.services.docling_parser import parse_with_docling
 from app.services.gemini import chat as gemini_chat, general_chat
 from app.services.rag import build_chunks
 from app.services.vector_store import VectorStore
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -177,8 +181,8 @@ async def ocr_document(file: UploadFile = File(...)) -> OcrResponse:
 
 
 class ChatRequest(BaseModel):
-    document_id: str
-    query: str
+    document_id: str = Field(..., min_length=1, max_length=128)
+    query: str = Field(..., min_length=1, max_length=2000)
 
 
 class ChatResponse(BaseModel):
@@ -191,10 +195,11 @@ _vector_store_for_chat = VectorStore()
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat_with_document(payload: ChatRequest) -> ChatResponse:
-    if not payload.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
-
+async def chat_with_document(
+    payload: ChatRequest,
+    _user: CurrentUser = Depends(get_optional_user),
+    _rate_limit: None = Depends(check_ai_rate_limit),
+) -> ChatResponse:
     results = _vector_store_for_chat.query(payload.query, top_k=3)
 
     document_results = [r for r in results if r.document_id == payload.document_id]
@@ -249,11 +254,11 @@ def _generate_follow_ups(text: str, query: str) -> list[str]:
 
 class GeneralChatMessage(BaseModel):
     role: str
-    content: str
+    content: str = Field(..., max_length=4000)
 
 
 class GeneralChatRequest(BaseModel):
-    messages: list[GeneralChatMessage]
+    messages: list[GeneralChatMessage] = Field(..., min_length=1, max_length=20)
 
 
 class GeneralChatResponse(BaseModel):
@@ -261,10 +266,11 @@ class GeneralChatResponse(BaseModel):
 
 
 @router.post("/general-chat", response_model=GeneralChatResponse)
-async def general_chat_endpoint(payload: GeneralChatRequest) -> GeneralChatResponse:
-    if not payload.messages:
-        raise HTTPException(status_code=400, detail="Messages cannot be empty")
-
+async def general_chat_endpoint(
+    payload: GeneralChatRequest,
+    _user: CurrentUser = Depends(get_optional_user),
+    _rate_limit: None = Depends(check_ai_rate_limit),
+) -> GeneralChatResponse:
     history_text = "\n".join(
         f"{'Student' if m.role == 'user' else 'Assistant'}: {m.content}"
         for m in payload.messages[-10:]

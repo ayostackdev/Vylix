@@ -161,6 +161,7 @@ def process_material_task(
     material_id: str,
     file_url: str,
     file_name: str,
+    department_code: str = "COLPHY",
 ) -> str:
     """Download uploaded material, run ingestion pipeline, update DB record."""
     _update_material(material_id, status="PROCESSING")
@@ -176,7 +177,7 @@ def process_material_task(
             resp.raise_for_status()
             local_path.write_bytes(resp.content)
 
-        result = ingest_document(local_path, department_code="COLPHY")
+        result = ingest_document(local_path, department_code=department_code)
 
         _update_material(
             material_id,

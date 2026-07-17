@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+from collections import defaultdict
 from dataclasses import dataclass
 
 import jwt
@@ -15,6 +17,37 @@ from app.models import User, UserEmail
 
 settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
+
+
+class RateLimiter:
+    """Simple in-memory sliding window rate limiter."""
+
+    def __init__(self, max_requests: int = 20, window_seconds: int = 60):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self._requests: dict[str, list[float]] = defaultdict(list)
+
+    def is_rate_limited(self, key: str) -> bool:
+        now = time.time()
+        cutoff = now - self.window_seconds
+        self._requests[key] = [t for t in self._requests[key] if t > cutoff]
+        if len(self._requests[key]) >= self.max_requests:
+            return True
+        self._requests[key].append(now)
+        return False
+
+
+ai_rate_limiter = RateLimiter(max_requests=15, window_seconds=60)
+
+
+def check_ai_rate_limit(request: Request) -> None:
+    """Dependency that enforces rate limiting on AI endpoints."""
+    client_ip = request.client.host if request.client else "unknown"
+    if ai_rate_limiter.is_rate_limited(f"ai:{client_ip}"):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests. Please wait a moment before trying again.",
+        )
 
 
 @dataclass

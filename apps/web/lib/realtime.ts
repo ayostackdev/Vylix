@@ -1,6 +1,7 @@
 'use client';
 
 import { io, type Socket } from 'socket.io-client';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 
 export type RealtimeRoomType = 'department' | 'topic' | 'conversation' | 'user';
 
@@ -65,11 +66,21 @@ export function getRealtimeSocket() {
     return null;
   }
 
+  const supabase = getSupabaseBrowserClient();
+
   realtimeSocket = io(`${baseUrl}/pulse`, {
     autoConnect: false,
     transports: ['websocket', 'polling'],
     withCredentials: true,
-    reconnection: true
+    reconnection: true,
+    auth: async (callback) => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        callback({ token: session?.access_token ?? null });
+      } catch {
+        callback({ token: null });
+      }
+    },
   });
 
   return realtimeSocket;

@@ -85,6 +85,10 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
 
           return data.answer
         }
+
+        if (res.status === 429) {
+          return 'You\'re sending messages too quickly. Please wait a moment before trying again.'
+        }
       }
 
       const res = await fetch(`${API_BASE}/api/documents/general-chat`, {
@@ -93,14 +97,19 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
         body: JSON.stringify({ messages: history }),
       })
 
+      if (res.status === 429) {
+        return 'You\'re sending messages too quickly. Please wait a moment before trying again.'
+      }
+
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        return err.error || 'Something went wrong. Please try again.'
+        return err.detail || err.error || 'Something went wrong. Please try again.'
       }
 
       const data = await res.json()
       return data.content
-    } catch {
+    } catch (error) {
+      console.error('[AIProfessor] Request failed:', error)
       const cached = selectedDoc
         ? await offlineStore.getChatHistory(selectedDoc.courseId)
         : []
@@ -224,6 +233,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
             placeholder={isReadOnly ? 'Sign in to chat with AI...' : (selectedDoc ? 'Ask about this document...' : 'Ask anything about your course...')}
             className="flex-1 min-h-[44px] text-sm rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-300 focus:ring-1 focus:ring-blue-300 px-4 py-3 transition-all"
             disabled={isLoading || isReadOnly}
+            maxLength={2000}
           />
           <button
             onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleSend()}
