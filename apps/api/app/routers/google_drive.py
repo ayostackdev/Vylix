@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import uuid
-from datetime import datetime, timezone, timedelta
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
@@ -12,9 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.database import get_db
 from app.deps import CurrentUser, get_current_user
-from app.models import ConnectedAccount, ImportedFile, Topic, Course, Material, MaterialProcessingStatus
+from app.models import ConnectedAccount, ImportedFile, Topic
 from app.services import google_drive
-from app.services.storage import get_storage
+from app.tasks_drive import import_drive_files, auto_import_drive
 
 settings = get_settings()
 router = APIRouter(prefix="/google-drive", tags=["google-drive"])
@@ -227,102 +224,21 @@ async def list_files(
 
 # ── Import Files ───────────────────────────────────────────────────
 
-@router.post("/import", response_model=list[ImportedFileOut])
+@router.post("/import")
 async def import_files(
     payload: ImportRequest,
     user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Import selected Google Drive files into a topic."""
-    # Verify topic exists
+    """Import selected Google Drive files into a topic. Runs in background."""
     topic = await db.get(Topic, payload.topic_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
     token = await _get_valid_token(user.id, db)
-    storage = get_storage()
-    imported = []
 
-    for file_id in payload.file_ids[:20]:  # Max 20 files per import
-        try:
-            # Get file metadata
-            file_meta = await google_drive.get_file_metadata(token, file_id)
-
-            # Check if already imported
-            existing = await db.execute(
-                select(ImportedFile).where(
-                    ImportedFile.drive_file_id == file_id,
-                    ImportedFile.user_id == user.id,
-                )
-            )
-            if existing.scalar_one_or_none():
-                continue
-
-            # Download file
-            file_data = await google_drive.download_drive_file(token, file_id)
-
-            # Store file
-            material_id = str(uuid.uuid4())
-            ext = file_meta.name.split(".")[-1] if "." in file_meta.name else "pdf"
-            storage_path = f"materials/{material_id}.{ext}"
-
-            url = await storage.upload(
-                settings.supabase_storage_bucket,
-                storage_path,
-                file_data,
-                file_meta.mime_type,
-            )
-
-            # Create material
-            material = Material(
-                id=material_id,
-                file_name=file_meta.name,
-                file_url=url,
-                file_path=storage_path,
-                file_size=len(file_data),
-                topic_id=payload.topic_id,
-                uploader_id=user.id,
-                processing_status=MaterialProcessingStatus.QUEUED,
-            )
-            db.add(material)
-
-            # Track import
-            imported_file = ImportedFile(
-                id=str(uuid.uuid4()),
-                user_id=user.id,
-                drive_file_id=file_id,
-                file_name=file_meta.name,
-                mime_type=file_meta.mime_type,
-                file_size=len(file_data),
-                material_id=material_id,
-                status="imported",
-                imported_at=datetime.now(timezone.utc),
-            )
-            db.add(imported_file)
-            imported.append(imported_file)
-
-        except Exception as e:
-            # Track failed import
-            failed = ImportedFile(
-                id=str(uuid.uuid4()),
-                user_id=user.id,
-                drive_file_id=file_id,
-                file_name=f"failed_{file_id}",
-                mime_type="unknown",
-                status="failed",
-                error=str(e),
-            )
-            db.add(failed)
-
-    await db.flush()
-    return [
-        ImportedFileOut(
-            id=imp.id, drive_file_id=imp.drive_file_id,
-            file_name=imp.file_name, status=imp.status,
-            material_id=imp.material_id,
-        )
-        for imp in imported
-    ]
+    task = import_drive_files.delay(user.id, payload.file_ids[:20], payload.topic_id)
+    return {"task_id": task.id, "status": "queued", "file_count": len(payload.file_ids[:20])}
 
 
 @router.get("/imports", response_model=list[ImportedFileOut])
@@ -346,190 +262,12 @@ async def list_imports(
     ]
 
 
-# ── Auto-Import (scan Drive after connection) ────────────────────
-
-class AutoImportResult(BaseModel):
-    folders_scanned: int
-    pdfs_found: int
-    imported: int
-    skipped: int
-    topics_created: list[str]
-    errors: list[str]
-
-
-def _extract_course_code(folder_name: str) -> str | None:
-    """Try to extract a course code like 'CSC301' from a folder name."""
-    import re
-    match = re.search(r'([A-Za-z]{2,4}\d{3})', folder_name)
-    return match.group(1).upper() if match else None
-
-
-@router.post("/auto-import", response_model=AutoImportResult)
-async def auto_import_drive(
+@router.post("/auto-import")
+async def auto_import_drive_endpoint(
     user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Scan Google Drive after connection, match folders to courses, import all PDFs."""
+    """Scan Google Drive and import all PDFs. Runs in background."""
     token = await _get_valid_token(user.id, db)
-    storage = get_storage()
-
-    result = AutoImportResult(
-        folders_scanned=0, pdfs_found=0, imported=0, skipped=0,
-        topics_created=[], errors=[],
-    )
-
-    # Get or create a general course for unmatched folders
-    general_course = await db.execute(
-        select(Course).where(Course.is_general == True).limit(1)
-    )
-    general_course = general_course.scalar_one_or_none()
-    if not general_course:
-        general_course = Course(
-            id=str(uuid.uuid4()),
-            code="GEN",
-            title="General Materials",
-            level=100,
-            is_general=True,
-        )
-        db.add(general_course)
-        await db.flush()
-
-    # Scan root folders
-    folders = await google_drive.list_drive_folders(token, "root")
-    result.folders_scanned = len(folders)
-
-    # Also scan root-level PDFs (not in any folder)
-    try:
-        root_files, _ = await google_drive.list_drive_files(token, None, 100)
-        for f in root_files:
-            result.pdfs_found += 1
-            # Check if already imported
-            existing = await db.execute(
-                select(ImportedFile).where(
-                    ImportedFile.drive_file_id == f.id,
-                    ImportedFile.user_id == user.id,
-                )
-            )
-            if existing.scalar_one_or_none():
-                result.skipped += 1
-                continue
-
-            # Import to general topic
-            topic = await _get_or_create_topic(db, general_course.id, user.id, "Uncategorized")
-            try:
-                await _import_single_file(token, storage, db, f.id, topic.id, user.id)
-                result.imported += 1
-            except Exception as e:
-                result.errors.append(f"{f.name}: {str(e)}")
-    except Exception:
-        pass
-
-    # Scan each folder
-    for folder in folders:
-        try:
-            files, _ = await google_drive.list_drive_files(token, folder.id, 100)
-            result.pdfs_found += len(files)
-
-            # Try to match folder to a course
-            code = _extract_course_code(folder.name)
-            course = None
-            if code:
-                course_result = await db.execute(
-                    select(Course).where(Course.code.ilike(code))
-                )
-                course = course_result.scalar_one_or_none()
-
-            target_course = course or general_course
-            topic_name = folder.name if not course else folder.name
-            topic = await _get_or_create_topic(db, target_course.id, user.id, topic_name)
-
-            if not course:
-                result.topics_created.append(folder.name)
-
-            for f in files:
-                # Check if already imported
-                existing = await db.execute(
-                    select(ImportedFile).where(
-                        ImportedFile.drive_file_id == f.id,
-                        ImportedFile.user_id == user.id,
-                    )
-                )
-                if existing.scalar_one_or_none():
-                    result.skipped += 1
-                    continue
-
-                try:
-                    await _import_single_file(token, storage, db, f.id, topic.id, user.id)
-                    result.imported += 1
-                except Exception as e:
-                    result.errors.append(f"{f.name}: {str(e)}")
-        except Exception as e:
-            result.errors.append(f"Folder '{folder.name}': {str(e)}")
-
-    await db.flush()
-    return result
-
-
-async def _get_or_create_topic(db: AsyncSession, course_id: str, user_id: str, title: str) -> Topic:
-    """Get an existing topic or create one."""
-    result = await db.execute(
-        select(Topic).where(
-            Topic.course_id == course_id,
-            Topic.is_active == True,
-        ).limit(1)
-    )
-    topic = result.scalar_one_or_none()
-    if topic:
-        return topic
-
-    topic = Topic(
-        id=str(uuid.uuid4()),
-        title=title,
-        course_id=course_id,
-        author_id=user_id,
-    )
-    db.add(topic)
-    await db.flush()
-    return topic
-
-
-async def _import_single_file(
-    token: str, storage, db: AsyncSession,
-    drive_file_id: str, topic_id: str, user_id: str,
-) -> None:
-    """Import a single Drive file into the database."""
-    file_meta = await google_drive.get_file_metadata(token, drive_file_id)
-    file_data = await google_drive.download_drive_file(token, drive_file_id)
-
-    material_id = str(uuid.uuid4())
-    ext = file_meta.name.split(".")[-1] if "." in file_meta.name else "pdf"
-    storage_path = f"materials/{material_id}.{ext}"
-
-    url = await storage.upload(
-        settings.supabase_storage_bucket, storage_path, file_data, file_meta.mime_type,
-    )
-
-    material = Material(
-        id=material_id,
-        file_name=file_meta.name,
-        file_url=url,
-        file_path=storage_path,
-        file_size=len(file_data),
-        topic_id=topic_id,
-        uploader_id=user_id,
-        processing_status=MaterialProcessingStatus.QUEUED,
-    )
-    db.add(material)
-
-    imported_file = ImportedFile(
-        id=str(uuid.uuid4()),
-        user_id=user_id,
-        drive_file_id=drive_file_id,
-        file_name=file_meta.name,
-        mime_type=file_meta.mime_type,
-        file_size=len(file_data),
-        material_id=material_id,
-        status="imported",
-        imported_at=datetime.now(timezone.utc),
-    )
-    db.add(imported_file)
+    task = auto_import_drive.delay(user.id)
+    return {"task_id": task.id, "status": "queued"}

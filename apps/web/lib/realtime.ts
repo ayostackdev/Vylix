@@ -55,7 +55,19 @@ function getRealtimeBaseUrl() {
   }
 }
 
-export function getRealtimeSocket() {
+async function fetchAuthToken(): Promise<string> {
+  try {
+    const supabase = getSupabaseBrowserClient();
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
+    return session?.access_token ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export async function getRealtimeSocket(): Promise<Socket | null> {
   if (realtimeSocket) {
     return realtimeSocket;
   }
@@ -66,21 +78,20 @@ export function getRealtimeSocket() {
     return null;
   }
 
-  const supabase = getSupabaseBrowserClient();
+  const token = await fetchAuthToken();
 
   realtimeSocket = io(`${baseUrl}/pulse`, {
     autoConnect: false,
     transports: ['websocket', 'polling'],
     withCredentials: true,
     reconnection: true,
-    auth: async (callback) => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        callback({ token: session?.access_token ?? null });
-      } catch {
-        callback({ token: null });
-      }
-    },
+    query: token ? { token } : undefined,
+  });
+
+  realtimeSocket.on('connect_error', (err) => {
+    if (err.message?.includes('Authentication required') || err.message?.includes('4001')) {
+      console.error('[Vylix] WebSocket authentication failed — token may be expired');
+    }
   });
 
   return realtimeSocket;

@@ -11,45 +11,54 @@ export function useRealtimeMessages(conversationId: string | null, userId: strin
   useEffect(() => {
     if (!conversationId || !userId) return;
 
-    const socket = getRealtimeSocket();
-    if (!socket) return;
+    let cancelled = false;
 
-    const handleEvent = (event: RealtimeEvent) => {
-      if (event.roomType !== 'conversation' || event.roomKey !== conversationId) return;
+    (async () => {
+      const socket = await getRealtimeSocket();
+      if (!socket || cancelled) return;
 
-      const payload = event.payload as Record<string, unknown> | undefined;
+      const handleEvent = (event: RealtimeEvent) => {
+        if (cancelled) return;
+        if (event.roomType !== 'conversation' || event.roomKey !== conversationId) return;
 
-      if (event.kind === 'message' && payload?.fullMessage) {
-        const msg = payload.fullMessage as Message;
-        queryClient.setQueryData(['messages', conversationId], (old: Message[] | undefined) => {
-          if (!old) return [msg];
-          if (old.some((m) => m.id === msg.id)) return old;
-          return [...old, msg];
-        });
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      }
+        const payload = event.payload as Record<string, unknown> | undefined;
 
-      if (event.kind === 'edit' && payload?.fullMessage) {
-        const msg = payload.fullMessage as Message;
-        queryClient.setQueryData(['messages', conversationId], (old: Message[] | undefined) => {
-          if (!old) return [msg];
-          return old.map((m) => (m.id === msg.id ? msg : m));
-        });
-      }
+        if (event.kind === 'message' && payload?.fullMessage) {
+          const msg = payload.fullMessage as Message;
+          queryClient.setQueryData(['messages', conversationId], (old: Message[] | undefined) => {
+            if (!old) return [msg];
+            if (old.some((m) => m.id === msg.id)) return old;
+            return [...old, msg];
+          });
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        }
 
-      if (event.kind === 'delete' && payload?.messageId) {
-        const messageId = payload.messageId as string;
-        queryClient.setQueryData(['messages', conversationId], (old: Message[] | undefined) => {
-          if (!old) return [];
-          return old.filter((m) => m.id !== messageId);
-        });
-      }
-    };
+        if (event.kind === 'edit' && payload?.fullMessage) {
+          const msg = payload.fullMessage as Message;
+          queryClient.setQueryData(['messages', conversationId], (old: Message[] | undefined) => {
+            if (!old) return [msg];
+            return old.map((m) => (m.id === msg.id ? msg : m));
+          });
+        }
 
-    socket.on('pulse:event', handleEvent);
+        if (event.kind === 'delete' && payload?.messageId) {
+          const messageId = payload.messageId as string;
+          queryClient.setQueryData(['messages', conversationId], (old: Message[] | undefined) => {
+            if (!old) return [];
+            return old.filter((m) => m.id !== messageId);
+          });
+        }
+      };
+
+      socket.on('pulse:event', handleEvent);
+    })();
 
     return () => {
-      socket.off('pulse:event', handleEvent);
+      cancelled = true;
+      getRealtimeSocket().then((socket) => {
+        if (!socket) return;
+        socket.off('pulse:event');
+      });
     };
   }, [conversationId, userId, queryClient]);
 }

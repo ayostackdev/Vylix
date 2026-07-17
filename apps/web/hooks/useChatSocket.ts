@@ -30,84 +30,95 @@ export function useChatSocket({ conversationId, userId, enabled = true, otherUse
 
     setOtherOnline(false);
 
-    const socket = getRealtimeSocket();
-    if (!socket) return;
+    let cancelled = false;
 
-    const handleConnect = () => {
-      setConnected(true);
-      socket.emit('pulse:join-room', {
-        roomType: 'conversation',
-        roomKey: conversationId,
-        userId,
-      });
-    };
+    (async () => {
+      const socket = await getRealtimeSocket();
+      if (!socket || cancelled) return;
 
-    const handleDisconnect = () => {
-      setConnected(false);
-    };
-
-    const handleEvent = (event: RealtimeEvent) => {
-      if (event.roomType !== 'conversation' || event.roomKey !== conversationId) return;
-
-      if (event.kind === 'presence' && otherUserId && event.actorId === otherUserId) {
-        setOtherOnline(event.title === 'User joined');
-      }
-
-      if (event.kind === 'typing' && event.actorId !== userId) {
-        const payload = event.payload as { isTyping?: boolean; userId?: string } | undefined;
-        const typingUserId = payload?.userId ?? event.actorId;
-        const isTyping = payload?.isTyping ?? true;
-
-        if (!typingUserId) return;
-
-        setTypingUsers((prev) => {
-          if (isTyping) {
-            if (!prev.some((t) => t.userId === typingUserId)) {
-              return [...prev, { userId: typingUserId, isTyping: true }];
-            }
-          } else {
-            return prev.filter((t) => t.userId !== typingUserId);
-          }
-          return prev;
+      const handleConnect = () => {
+        if (cancelled) return;
+        setConnected(true);
+        socket.emit('pulse:join-room', {
+          roomType: 'conversation',
+          roomKey: conversationId,
+          userId,
         });
+      };
 
-        const existing = typingTimeouts.current.get(typingUserId);
-        if (existing) clearTimeout(existing);
-        if (isTyping) {
-          typingTimeouts.current.set(
-            typingUserId,
-            setTimeout(() => {
-              setTypingUsers((prev) => prev.filter((t) => t.userId !== typingUserId));
-              typingTimeouts.current.delete(typingUserId);
-            }, 4000)
-          );
-        } else {
-          typingTimeouts.current.delete(typingUserId);
+      const handleDisconnect = () => {
+        if (cancelled) return;
+        setConnected(false);
+      };
+
+      const handleEvent = (event: RealtimeEvent) => {
+        if (cancelled) return;
+        if (event.roomType !== 'conversation' || event.roomKey !== conversationId) return;
+
+        if (event.kind === 'presence' && otherUserId && event.actorId === otherUserId) {
+          setOtherOnline(event.title === 'User joined');
         }
+
+        if (event.kind === 'typing' && event.actorId !== userId) {
+          const payload = event.payload as { isTyping?: boolean; userId?: string } | undefined;
+          const typingUserId = payload?.userId ?? event.actorId;
+          const isTyping = payload?.isTyping ?? true;
+
+          if (!typingUserId) return;
+
+          setTypingUsers((prev) => {
+            if (isTyping) {
+              if (!prev.some((t) => t.userId === typingUserId)) {
+                return [...prev, { userId: typingUserId, isTyping: true }];
+              }
+            } else {
+              return prev.filter((t) => t.userId !== typingUserId);
+            }
+            return prev;
+          });
+
+          const existing = typingTimeouts.current.get(typingUserId);
+          if (existing) clearTimeout(existing);
+          if (isTyping) {
+            typingTimeouts.current.set(
+              typingUserId,
+              setTimeout(() => {
+                setTypingUsers((prev) => prev.filter((t) => t.userId !== typingUserId));
+                typingTimeouts.current.delete(typingUserId);
+              }, 4000)
+            );
+          } else {
+            typingTimeouts.current.delete(typingUserId);
+          }
+        }
+      };
+
+      socket.on('connect', handleConnect);
+      socket.on('disconnect', handleDisconnect);
+      socket.on('pulse:event', handleEvent);
+
+      if (!socket.connected) {
+        socket.connect();
+      } else {
+        handleConnect();
       }
-    };
-
-    socket.on('connect', handleConnect);
-    socket.on('disconnect', handleDisconnect);
-    socket.on('pulse:event', handleEvent);
-
-    if (!socket.connected) {
-      socket.connect();
-    } else {
-      handleConnect();
-    }
+    })();
 
     return () => {
-      socket.emit('pulse:leave-room', {
-        roomType: 'conversation',
-        roomKey: conversationId,
-        userId,
+      cancelled = true;
+      getRealtimeSocket().then((socket) => {
+        if (!socket) return;
+        socket.emit('pulse:leave-room', {
+          roomType: 'conversation',
+          roomKey: conversationId,
+          userId,
+        });
+        socket.off('connect');
+        socket.off('disconnect');
+        socket.off('pulse:event');
+        typingTimeouts.current.forEach((t) => clearTimeout(t));
+        typingTimeouts.current.clear();
       });
-      socket.off('connect', handleConnect);
-      socket.off('disconnect', handleDisconnect);
-      socket.off('pulse:event', handleEvent);
-      typingTimeouts.current.forEach((t) => clearTimeout(t));
-      typingTimeouts.current.clear();
     };
   }, [conversationId, userId, enabled]);
 

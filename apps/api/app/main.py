@@ -1,9 +1,11 @@
+import logging
 import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import get_settings
+from app.core.access_log import AccessLogMiddleware
 from app.core.middleware import ActivityTrackingMiddleware
 from app.routers import (
     health, colleges, courses, topics, user, materials,
@@ -13,6 +15,19 @@ from app.routers import (
 )
 
 settings = get_settings()
+
+# ── Structured logging ──────────────────────────────────────────────
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+    force=True,
+)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.error").setLevel(logging.INFO)
+
+# ── App ─────────────────────────────────────────────────────────────
 
 if not settings.cors_origin_list:
     print(
@@ -32,6 +47,7 @@ app.add_middleware(
 )
 
 app.add_middleware(ActivityTrackingMiddleware)
+app.add_middleware(AccessLogMiddleware)
 
 # Core routers
 app.include_router(health.router)

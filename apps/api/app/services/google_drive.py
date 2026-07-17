@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 import time
 from dataclasses import dataclass
 
@@ -9,17 +11,72 @@ import httpx
 from app.core.config import get_settings
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_DRIVE_API = "https://www.googleapis.com/drive/v3"
-GOOGLE_DRIVE_UPLOAD = "https://www.googleapis.com/upload/drive/v3"
 
 SCOPES = [
     "https://www.googleapis.com/auth/drive.readonly",
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
+
+_MAX_RETRIES = 4
+_BASE_DELAY = 1.0
+
+
+# ── Retry wrapper ──────────────────────────────────────────────────
+
+
+def _is_retryable(status_code: int) -> bool:
+    return status_code == 429 or status_code >= 500
+
+
+def _parse_retry_after(resp: httpx.Response) -> float | None:
+    val = resp.headers.get("retry-after")
+    if not val:
+        return None
+    try:
+        return float(val)
+    except ValueError:
+        return None
+
+
+async def _request_with_retry(
+    method: str,
+    url: str,
+    **kwargs,
+) -> httpx.Response:
+    """Make an HTTP request with exponential backoff on retryable errors."""
+    last_exc: Exception | None = None
+
+    for attempt in range(_MAX_RETRIES):
+        async with httpx.AsyncClient() as client:
+            resp = await client.request(method, url, **kwargs)
+
+        if not _is_retryable(resp.status_code):
+            return resp
+
+        if attempt == _MAX_RETRIES - 1:
+            return resp
+
+        retry_after = _parse_retry_after(resp)
+        delay = retry_after or min(
+            _BASE_DELAY * (2 ** attempt) + (time.monotonic() % 1),
+            30.0,
+        )
+        logger.warning(
+            "Google API %s %s returned %d (attempt %d/%d), retrying in %.1fs",
+            method, url, resp.status_code, attempt + 1, _MAX_RETRIES, delay,
+        )
+        await asyncio.sleep(delay)
+
+    return resp
+
+
+# ── Data classes ───────────────────────────────────────────────────
 
 
 @dataclass
@@ -48,8 +105,10 @@ class DriveFolder:
     mimeType: str
 
 
+# ── OAuth ──────────────────────────────────────────────────────────
+
+
 def get_auth_url(state: str) -> str:
-    """Generate Google OAuth authorization URL."""
     params = {
         "client_id": settings.google_client_id,
         "redirect_uri": settings.google_redirect_uri,
@@ -64,18 +123,17 @@ def get_auth_url(state: str) -> str:
 
 
 async def exchange_code(code: str) -> GoogleTokens:
-    """Exchange authorization code for tokens."""
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(GOOGLE_TOKEN_URL, data={
+    resp = await _request_with_retry(
+        "POST", GOOGLE_TOKEN_URL, data={
             "code": code,
             "client_id": settings.google_client_id,
             "client_secret": settings.google_client_secret,
             "redirect_uri": settings.google_redirect_uri,
             "grant_type": "authorization_code",
-        })
-        resp.raise_for_status()
-        data = resp.json()
-
+        },
+    )
+    resp.raise_for_status()
+    data = resp.json()
     return GoogleTokens(
         access_token=data["access_token"],
         refresh_token=data.get("refresh_token"),
@@ -85,17 +143,16 @@ async def exchange_code(code: str) -> GoogleTokens:
 
 
 async def refresh_access_token(refresh_token: str) -> GoogleTokens:
-    """Refresh an expired access token."""
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(GOOGLE_TOKEN_URL, data={
+    resp = await _request_with_retry(
+        "POST", GOOGLE_TOKEN_URL, data={
             "refresh_token": refresh_token,
             "client_id": settings.google_client_id,
             "client_secret": settings.google_client_secret,
             "grant_type": "refresh_token",
-        })
-        resp.raise_for_status()
-        data = resp.json()
-
+        },
+    )
+    resp.raise_for_status()
+    data = resp.json()
     return GoogleTokens(
         access_token=data["access_token"],
         refresh_token=refresh_token,
@@ -105,33 +162,33 @@ async def refresh_access_token(refresh_token: str) -> GoogleTokens:
 
 
 async def get_user_info(access_token: str) -> dict:
-    """Get user profile from Google."""
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            "https://www.googleapis.com/oauth2/v2/userinfo",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        resp.raise_for_status()
-        return resp.json()
+    resp = await _request_with_retry(
+        "GET",
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
+# ── Drive API ──────────────────────────────────────────────────────
 
 
 async def list_drive_folders(access_token: str, parent_id: str = "root") -> list[DriveFolder]:
-    """List folders in Google Drive."""
     query = f"'{parent_id}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{GOOGLE_DRIVE_API}/files",
-            headers={"Authorization": f"Bearer {access_token}"},
-            params={
-                "q": query,
-                "fields": "files(id,name,mimeType)",
-                "pageSize": "100",
-                "orderBy": "name",
-            },
-        )
-        resp.raise_for_status()
-        data = resp.json()
-
+    resp = await _request_with_retry(
+        "GET",
+        f"{GOOGLE_DRIVE_API}/files",
+        headers={"Authorization": f"Bearer {access_token}"},
+        params={
+            "q": query,
+            "fields": "files(id,name,mimeType)",
+            "pageSize": "100",
+            "orderBy": "name",
+        },
+    )
+    resp.raise_for_status()
+    data = resp.json()
     return [
         DriveFolder(id=f["id"], name=f["name"], mimeType=f["mimeType"])
         for f in data.get("files", [])
@@ -144,7 +201,6 @@ async def list_drive_files(
     page_size: int = 50,
     page_token: str | None = None,
 ) -> tuple[list[DriveFile], str | None]:
-    """List PDF files in a Google Drive folder."""
     mime_filter = "mimeType='application/pdf'"
     if folder_id:
         query = f"'{folder_id}' in parents and {mime_filter} and trashed=false"
@@ -160,14 +216,14 @@ async def list_drive_files(
     if page_token:
         params["pageToken"] = page_token
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{GOOGLE_DRIVE_API}/files",
-            headers={"Authorization": f"Bearer {access_token}"},
-            params=params,
-        )
-        resp.raise_for_status()
-        data = resp.json()
+    resp = await _request_with_retry(
+        "GET",
+        f"{GOOGLE_DRIVE_API}/files",
+        headers={"Authorization": f"Bearer {access_token}"},
+        params=params,
+    )
+    resp.raise_for_status()
+    data = resp.json()
 
     files = [
         DriveFile(
@@ -185,28 +241,26 @@ async def list_drive_files(
 
 
 async def download_drive_file(access_token: str, file_id: str) -> bytes:
-    """Download a file from Google Drive."""
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{GOOGLE_DRIVE_API}/files/{file_id}",
-            headers={"Authorization": f"Bearer {access_token}"},
-            params={"alt": "media"},
-            timeout=60.0,
-        )
-        resp.raise_for_status()
-        return resp.content
+    resp = await _request_with_retry(
+        "GET",
+        f"{GOOGLE_DRIVE_API}/files/{file_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        params={"alt": "media"},
+        timeout=60.0,
+    )
+    resp.raise_for_status()
+    return resp.content
 
 
 async def get_file_metadata(access_token: str, file_id: str) -> DriveFile:
-    """Get metadata for a single file."""
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            f"{GOOGLE_DRIVE_API}/files/{file_id}",
-            headers={"Authorization": f"Bearer {access_token}"},
-            params={"fields": "id,name,mimeType,size,createdTime,modifiedTime,webViewLink"},
-        )
-        resp.raise_for_status()
-        f = resp.json()
+    resp = await _request_with_retry(
+        "GET",
+        f"{GOOGLE_DRIVE_API}/files/{file_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        params={"fields": "id,name,mimeType,size,createdTime,modifiedTime,webViewLink"},
+    )
+    resp.raise_for_status()
+    f = resp.json()
     return DriveFile(
         id=f["id"],
         name=f["name"],

@@ -116,68 +116,79 @@ export function useRealtimePulse({ roomType, roomKey, enabled = true, userId }: 
       return;
     }
 
-    const socket = getRealtimeSocket();
+    let cancelled = false;
 
-    if (!socket) {
-      return;
-    }
+    (async () => {
+      const socket = await getRealtimeSocket();
 
-    const handleConnect = () => {
-      setConnected(true);
-      socket.emit('pulse:join-room', { ...room, userId });
-    };
-
-    const handleDisconnect = () => {
-      setConnected(false);
-    };
-
-    const handleEvent = (event: RealtimeEvent) => {
-      const nextEvent = buildRealtimeEvent(event.roomType, event.roomKey, event);
-      setLastEvent(nextEvent);
-      setItems((currentItems) => [toPulseItem(nextEvent), ...currentItems].slice(0, 5));
-
-      if (nextEvent.kind === 'presence') {
-        const action = String((nextEvent.payload as Record<string, unknown> | undefined)?.action ?? 'join');
-        setPresenceCount((current) => {
-          if (action === 'leave') {
-            return Math.max(current - 1, 0);
-          }
-
-          if (action === 'join') {
-            return current + 1;
-          }
-
-          return current;
-        });
+      if (!socket || cancelled) {
+        return;
       }
-    };
 
-    socket.on('connect', handleConnect);
-    socket.on('disconnect', handleDisconnect);
-    socket.on('pulse:event', handleEvent);
-    socket.on('pulse:update', (payload: { topicId?: string; type?: RealtimeEventKind }) => {
-      handleEvent({
-        roomType,
-        roomKey,
-        kind: payload.type ?? 'status',
-        title: payload.type === 'upload' ? 'New upload' : 'Live update',
-        payload,
-        createdAt: new Date().toISOString()
-      } satisfies RealtimeEvent);
-    });
+      const handleConnect = () => {
+        if (cancelled) return;
+        setConnected(true);
+        socket.emit('pulse:join-room', { ...room, userId });
+      };
 
-    if (!socket.connected) {
-      socket.connect();
-    } else {
-      handleConnect();
-    }
+      const handleDisconnect = () => {
+        if (cancelled) return;
+        setConnected(false);
+      };
+
+      const handleEvent = (event: RealtimeEvent) => {
+        if (cancelled) return;
+        const nextEvent = buildRealtimeEvent(event.roomType, event.roomKey, event);
+        setLastEvent(nextEvent);
+        setItems((currentItems) => [toPulseItem(nextEvent), ...currentItems].slice(0, 5));
+
+        if (nextEvent.kind === 'presence') {
+          const action = String((nextEvent.payload as Record<string, unknown> | undefined)?.action ?? 'join');
+          setPresenceCount((current) => {
+            if (action === 'leave') {
+              return Math.max(current - 1, 0);
+            }
+
+            if (action === 'join') {
+              return current + 1;
+            }
+
+            return current;
+          });
+        }
+      };
+
+      socket.on('connect', handleConnect);
+      socket.on('disconnect', handleDisconnect);
+      socket.on('pulse:event', handleEvent);
+      socket.on('pulse:update', (payload: { topicId?: string; type?: RealtimeEventKind }) => {
+        handleEvent({
+          roomType,
+          roomKey,
+          kind: payload.type ?? 'status',
+          title: payload.type === 'upload' ? 'New upload' : 'Live update',
+          payload,
+          createdAt: new Date().toISOString()
+        } satisfies RealtimeEvent);
+      });
+
+      if (!socket.connected) {
+        socket.connect();
+      } else {
+        handleConnect();
+      }
+    })();
 
     return () => {
-      socket.emit('pulse:leave-room', { ...room, userId });
-      socket.off('connect', handleConnect);
-      socket.off('disconnect', handleDisconnect);
-      socket.off('pulse:event', handleEvent);
-      socket.off('pulse:update');
+      cancelled = true;
+      getRealtimeSocket().then((socket) => {
+        if (!socket) return;
+        socket.emit('pulse:leave-room', { ...room, userId });
+        socket.off('connect');
+        socket.off('disconnect');
+        socket.off('pulse:event');
+        socket.off('pulse:update');
+      });
     };
   }, [enabled, room, roomKey, roomType, userId]);
 

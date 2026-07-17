@@ -9,7 +9,7 @@ celery_app = Celery(
     "vylix_ai_service",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["app.tasks", "app.tasks_retention"],
+    include=["app.tasks", "app.tasks_retention", "app.tasks_drive"],
 )
 
 celery_app.conf.task_track_started = True
@@ -34,5 +34,9 @@ celery_app.conf.beat_schedule = {
     "active-user-count": {
         "task": "retention.update_active_counts",
         "schedule": crontab(minute="*/5"),
+    },
+    "refresh-expiring-tokens": {
+        "task": "drive.refresh_expiring_tokens",
+        "schedule": crontab(minute="*/10"),
     },
 }

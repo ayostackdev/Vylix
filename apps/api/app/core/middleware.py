@@ -8,48 +8,59 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.responses import Response
 
 from app.core.config import get_settings
+from app.db_rls import set_current_user_id
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-_ACTIVITY_PATHS = {"/api/"}
-_ACTIVITY_EXCLUDE = {"/api/health", "/api/ws"}
+_ACTIVITY_PATHS = {"/api/v1/"}
+_ACTIVITY_EXCLUDE = {"/api/v1/health", "/api/v1/ws"}
+
+
+def _extract_user_id(request: Request) -> str | None:
+    auth = request.headers.get("authorization", "")
+    if not auth.startswith("Bearer "):
+        return None
+    if not settings.supabase_jwt_secret:
+        return None
+    try:
+        import jwt
+
+        token = auth[7:]
+        payload = jwt.decode(
+            token, settings.supabase_jwt_secret,
+            algorithms=["HS256"], audience="authenticated",
+        )
+        return payload.get("sub")
+    except Exception:
+        return None
 
 
 class ActivityTrackingMiddleware(BaseHTTPMiddleware):
     """Update user's last_active_at on authenticated API requests.
 
-    Runs a lightweight background update so request latency is minimal.
+    Also sets the RLS user context so Postgres row-level security policies
+    can enforce per-user access on every database transaction.
     """
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        response = await call_next(request)
-
-        path = request.url.path
-        if not any(path.startswith(p) for p in _ACTIVITY_PATHS):
-            return response
-        if any(path.startswith(p) for p in _ACTIVITY_EXCLUDE):
-            return response
-        if request.method not in {"GET", "POST", "PATCH", "PUT", "DELETE"}:
-            return response
-
-        auth = request.headers.get("authorization", "")
-        if not auth.startswith("Bearer "):
-            return response
+        user_id = _extract_user_id(request)
+        set_current_user_id(user_id)
+        request.state.user_id = user_id or ""
 
         try:
-            import jwt
+            response = await call_next(request)
+        finally:
+            set_current_user_id(None)
+
+        if user_id and _should_track(request.url.path, request.method):
+            self._update_last_active(user_id)
+
+        return response
+
+    def _update_last_active(self, user_id: str) -> None:
+        try:
             from app.core.postgres import get_connection
-
-            token = auth[7:]
-            jwt_secret = settings.supabase_jwt_secret
-            if not jwt_secret:
-                return response
-
-            payload = jwt.decode(token, jwt_secret, algorithms=["HS256"], audience="authenticated")
-            user_id = payload.get("sub")
-            if not user_id:
-                return response
 
             with get_connection() as conn, conn.cursor() as cursor:
                 cursor.execute(
@@ -60,4 +71,12 @@ class ActivityTrackingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             logger.debug("Activity tracking skipped: %s", e)
 
-        return response
+
+def _should_track(path: str, method: str) -> bool:
+    if method not in {"GET", "POST", "PATCH", "PUT", "DELETE"}:
+        return False
+    if not any(path.startswith(p) for p in _ACTIVITY_PATHS):
+        return False
+    if any(path.startswith(p) for p in _ACTIVITY_EXCLUDE):
+        return False
+    return True

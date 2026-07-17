@@ -10,6 +10,8 @@ settings = get_settings()
 
 router = APIRouter(tags=["websocket"])
 
+AUTH_FAILED_CODE = 4001
+
 
 def _verify_ws_token(token: str | None) -> str | None:
     """Verify JWT and return user_id, or None if invalid."""
@@ -34,10 +36,14 @@ async def pulse_websocket(
     websocket: WebSocket,
     department_code: str | None = Query(default=None),
     department_id: str | None = Query(default=None),
-    user_id: str | None = Query(default=None),
     token: str | None = Query(default=None),
 ):
-    verified_user_id = _verify_ws_token(token) or user_id
+    verified_user_id = _verify_ws_token(token)
+    if not verified_user_id:
+        logger.warning("WebSocket auth failed: invalid or missing token")
+        await websocket.close(code=AUTH_FAILED_CODE, reason="Authentication required")
+        return
+
     rooms = []
 
     if department_code:
@@ -45,14 +51,10 @@ async def pulse_websocket(
     elif department_id:
         rooms.append(f"department:{department_id}")
 
-    if verified_user_id:
-        rooms.append(f"user:{verified_user_id}")
+    rooms.append(f"user:{verified_user_id}")
 
     for room in rooms:
         await manager.connect(websocket, room, verified_user_id)
-
-    if not rooms:
-        await manager.connect(websocket, "global", verified_user_id)
 
     try:
         while True:

@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     app_name: str = "Vylix API"
     environment: str = "development"
     port: int = Field(default=4000)
-    api_prefix: str = "/api"
+    api_prefix: str = "/api/v1"
 
     # Database
     database_url: str = Field(
@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     # Google Drive
     google_client_id: str = Field(default="")
     google_client_secret: str = Field(default="")
-    google_redirect_uri: str = Field(default="http://localhost:4000/api/google-drive/callback")
+    google_redirect_uri: str = Field(default="http://localhost:4000/api/v1/google-drive/callback")
     frontend_url: str = Field(default="http://localhost:3000")
 
     # Worker
