@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useDriveFolders, useDriveFiles, useDriveImport } from '@/queries/use-drive';
+import { API_BASE } from '@/lib/api-base';
 
 interface DriveFilePickerModalProps {
   isOpen: boolean;
@@ -14,8 +15,6 @@ interface Course {
   code: string;
   title: string;
 }
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
 export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePickerModalProps) {
   const [currentFolderId, setCurrentFolderId] = useState<string>('root');

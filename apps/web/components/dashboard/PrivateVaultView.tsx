@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { API_BASE } from '@/lib/api-base';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useBackupEmailPrompt } from '@/hooks/useBackupEmailPrompt';
 import { BackupEmailModal } from '@/components/auth/BackupEmailModal';
@@ -42,8 +43,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
 
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const res = await fetch(`${apiBaseUrl}/api/materials/${id}`, {
+      const res = await fetch(`${API_BASE}/api/materials/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
@@ -85,8 +85,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const res = await fetch(`${apiBaseUrl}/api/materials/my-materials?limit=50`, { headers });
+      const res = await fetch(`${API_BASE}/api/materials/my-materials?limit=50`, { headers });
       if (!res.ok) throw new Error('Failed to fetch vault materials');
       const json = await res.json();
       setItems(json.items ?? []);

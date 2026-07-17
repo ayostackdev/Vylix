@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useAuth } from '@/context/auth-context';
 import { useProgressiveGating, isInCurrentSession } from '@/context/progressive-gating-context';
+import { API_BASE } from '@/lib/api-base';
 
 const LEVELS = ['100L', '200L', '300L', '400L', '500L', 'Spillover'] as const;
 
@@ -27,8 +28,7 @@ export function LevelUpdateBanner() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const res = await fetch(`${apiBaseUrl}/api/user/update-level`, {
+      const res = await fetch(`${API_BASE}/api/user/update-level`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

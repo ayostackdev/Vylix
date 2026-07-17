@@ -3,14 +3,13 @@
 import { useState, useCallback, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { offlineStore } from '@/lib/offline-store'
+import { API_BASE } from '@/lib/api-base'
 import type { DocumentInfo } from './ThreePanelLayout'
 import { PdfViewerInline } from './PdfViewerInline'
 import { DriveSyncBanner } from './DriveSyncBanner'
 import { DriveFilePickerModal } from './DriveFilePickerModal'
 import { useDrive } from '@/context/drive-context'
 import { useAuth } from '@/context/auth-context'
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
 interface Course {
   id: string

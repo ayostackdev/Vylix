@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { isUniversityEmail } from '@/context/progressive-gating-context';
+import { API_BASE } from '@/lib/api-base';
 
 export interface EmailVerificationModalProps {
   isOpen: boolean;
@@ -42,8 +43,7 @@ export function EmailVerificationModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const res = await fetch(`${apiBaseUrl}/api/user/school-email`, {
+      const res = await fetch(`${API_BASE}/api/user/school-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,8 +111,7 @@ export function EmailVerificationModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      await fetch(`${apiBaseUrl}/api/user/school-email`, {
+      await fetch(`${API_BASE}/api/user/school-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

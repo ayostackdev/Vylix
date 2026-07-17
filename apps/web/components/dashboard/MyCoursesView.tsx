@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { API_BASE } from '@/lib/api-base';
 import { DailyDigestCard } from './DailyDigestCard';
 import { SocialPresenceBanner } from './SocialPresenceBanner';
 
@@ -35,8 +36,6 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
   const [checkingIn, setCheckingIn] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-
   const authHeaders = useCallback(async (): Promise<Record<string, string>> => {
     const supabase = getSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -52,7 +51,7 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
     setFetchError(null);
     try {
       const headers = await authHeaders();
-      const res = await fetch(`${apiBaseUrl}/api/courses/my`, { headers });
+      const res = await fetch(`${API_BASE}/api/courses/my`, { headers });
       if (res.ok) {
         setCourses(await res.json());
       } else {
@@ -63,20 +62,20 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
       setFetchError(err instanceof TypeError ? 'Network error — check your connection' : 'Failed to load courses');
     }
     setLoading(false);
-  }, [isAuthenticated, apiBaseUrl, authHeaders]);
+  }, [isAuthenticated, API_BASE, authHeaders]);
 
   const fetchStreak = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
       const headers = await authHeaders();
-      const res = await fetch(`${apiBaseUrl}/api/user/streak`, { headers });
+      const res = await fetch(`${API_BASE}/api/user/streak`, { headers });
       if (res.ok) {
         const data = await res.json();
         setStreak(data.streak ?? null);
         setPoints(data.points ?? 0);
       }
     } catch { /* ignore */ }
-  }, [isAuthenticated, apiBaseUrl, authHeaders]);
+  }, [isAuthenticated, API_BASE, authHeaders]);
 
   useEffect(() => {
     fetchCourses();
@@ -88,7 +87,7 @@ export function MyCoursesView({ onOpenProfile }: MyCoursesViewProps) {
     setCheckingIn(true);
     try {
       const headers = await authHeaders();
-      const res = await fetch(`${apiBaseUrl}/api/user/check-in`, {
+      const res = await fetch(`${API_BASE}/api/user/check-in`, {
         method: 'POST',
         headers,
       });

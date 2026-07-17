@@ -2,6 +2,7 @@
 
 import { io, type Socket } from 'socket.io-client';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { API_BASE } from '@/lib/api-base';
 
 export type RealtimeRoomType = 'department' | 'topic' | 'conversation' | 'user';
 
@@ -36,7 +37,7 @@ export interface RealtimeEvent<TPayload = Record<string, unknown>> {
 let realtimeSocket: Socket | null = null;
 
 function getRealtimeBaseUrl() {
-  const value = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const value = API_BASE;
 
   if (!value) {
     return null;

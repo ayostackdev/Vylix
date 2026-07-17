@@ -1,8 +1,7 @@
 'use client';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+import { API_BASE } from '@/lib/api-base';
 export const API_PREFIX = '/api/v1';
 
 export async function authFetch(path: string, options?: RequestInit): Promise<unknown> {

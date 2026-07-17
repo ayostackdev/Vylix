@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { useSearchParams } from 'next/navigation'
 import { DriveFilePickerModal } from './DriveFilePickerModal'
+import { API_BASE } from '@/lib/api-base'
 
 type Step = 'welcome' | 'auth' | 'drive' | 'picking' | 'complete'
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000'
 
 interface OnboardingScreenProps {
   onComplete: () => void
