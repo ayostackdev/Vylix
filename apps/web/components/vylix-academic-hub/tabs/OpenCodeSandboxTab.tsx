@@ -1,6 +1,33 @@
 'use client';
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+
+const SANDBOX_HTML = `<!DOCTYPE html>
+<html><head><script>
+window.addEventListener('message', function(e) {
+  if (e.source !== parent) return;
+  var logs = [];
+  varMethods = ['log','error','warn'];
+  for (var i = 0; i < varMethods.length; i++) {
+    (function(m) {
+      console[m] = function() {
+        var args = Array.prototype.slice.call(arguments);
+        var type = m === 'log' ? 'log' : m === 'error' ? 'error' : 'warn';
+        logs.push({ type: type, args: args.map(function(a) {
+          return typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a);
+        })});
+      };
+    })(varMethods[i]);
+  }
+  try {
+    new Function(e.data)();
+    parent.postMessage({ type: 'done', logs: logs }, '*');
+  } catch(err) {
+    logs.push({ type: 'error', args: ['[Runtime Error] ' + err.message] });
+    parent.postMessage({ type: 'done', logs: logs }, '*');
+  }
+});
+</script></head><body></body></html>`;
 
 export function OpenCodeSandboxTab() {
   const [code, setCode] = useState([
@@ -18,35 +45,29 @@ export function OpenCodeSandboxTab() {
   ].join('\n'))
   const [output, setOutput] = useState<string[]>([])
   const [isRunning, setIsRunning] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
 
-  const handleRun = () => {
+  useEffect(() => {
+    function handleMessage(e: MessageEvent) {
+      if (e.data?.type === 'done' && Array.isArray(e.data.logs)) {
+        setOutput(e.data.logs.map((l: { type: string; args: string[] }) =>
+          l.type === 'error' ? `[Error] ${l.args.join(' ')}` :
+          l.type === 'warn' ? `[Warn] ${l.args.join(' ')}` :
+          l.args.join(' ')
+        ))
+        setIsRunning(false)
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
+  const handleRun = useCallback(() => {
     setIsRunning(true)
     setOutput([])
-
-    const logs: string[] = []
-    const mockConsole = {
-      log: (...args: any[]) => {
-        logs.push(args.map((a) => (typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a))).join(' '))
-      },
-      error: (...args: any[]) => {
-        logs.push(`[Error] ${args.map(String).join(' ')}`)
-      },
-      warn: (...args: any[]) => {
-        logs.push(`[Warn] ${args.map(String).join(' ')}`)
-      },
-    }
-
-    try {
-      const fn = new Function('console', code)
-      fn(mockConsole)
-    } catch (err: any) {
-      logs.push(`[Runtime Error] ${err.message}`)
-    }
-
-    setOutput(logs)
-    setIsRunning(false)
-  }
+    iframeRef.current?.contentWindow?.postMessage(code, '*')
+  }, [code])
 
   const handleClear = () => {
     setOutput([])
@@ -54,6 +75,13 @@ export function OpenCodeSandboxTab() {
 
   return (
     <div className="flex flex-col h-full bg-white">
+      <iframe
+        ref={iframeRef}
+        srcDoc={SANDBOX_HTML}
+        sandbox="allow-scripts"
+        className="hidden"
+        title="code-sandbox"
+      />
       <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f5f3ff 0%, #f0f4ff 100%)' }}>
         <div className="flex items-center justify-between">
           <div>

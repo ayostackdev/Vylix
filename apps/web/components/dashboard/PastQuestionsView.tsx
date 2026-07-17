@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useAuth } from '@/context/auth-context';
 
@@ -94,7 +95,7 @@ export function PastQuestionsView() {
       const blobUrl = URL.createObjectURL(blob);
       setViewerUrl(blobUrl);
       setViewerTitle(title);
-    } catch {}
+    } catch { toast.error('Failed to open file'); }
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {

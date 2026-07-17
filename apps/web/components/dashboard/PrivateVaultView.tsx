@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useBackupEmailPrompt } from '@/hooks/useBackupEmailPrompt';
 import { BackupEmailModal } from '@/components/auth/BackupEmailModal';
@@ -51,7 +52,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
 
       setItems((prev) => prev.filter((item) => item.id !== id));
       setConfirmDeleteId(null);
-    } catch {}
+    } catch { toast.error('Failed to delete material'); }
     setDeletingId(null);
   }, []);
 
@@ -71,7 +72,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
       const blobUrl = URL.createObjectURL(blob);
       setViewerUrl(blobUrl);
       setViewerTitle(title);
-    } catch {}
+    } catch { toast.error('Failed to open file'); }
   }, []);
 
   const fetchVault = useCallback(async () => {

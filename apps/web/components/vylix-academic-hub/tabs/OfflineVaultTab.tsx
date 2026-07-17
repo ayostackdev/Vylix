@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { offlineStore } from '@/lib/offline-store'
 import { getVaultMaterials, deleteVaultMaterial, type VaultMaterial } from '@/lib/vault-store'
 import type { DocumentInfo } from '../ThreePanelLayout'
@@ -43,7 +44,7 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
     try {
       const mats = await getVaultMaterials()
       setVaultMaterials(mats)
-    } catch {}
+    } catch { toast.error('Failed to load vault materials'); }
 
     try {
       const estimate = await offlineStore.getStorageEstimate()
@@ -52,7 +53,7 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
         const total = (estimate.quota / (1024 * 1024)).toFixed(1)
         setStorageUsage(`${used} MB / ${total} MB`)
       }
-    } catch {}
+    } catch { toast.error('Failed to load storage info'); }
   }
 
   const handleDelete = async (id: string) => {

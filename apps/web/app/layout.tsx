@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 import { QueryProvider } from '@/providers/query-provider';
+import { Toaster } from 'sonner';
 
 const displayFont = Space_Grotesk({
   subsets: ['latin'],
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={`${displayFont.variable} ${bodyFont.variable} min-h-dvh w-full overflow-x-hidden overflow-y-auto`}>
         <QueryProvider>{children}</QueryProvider>
+        <Toaster position="bottom-right" richColors closeButton />
         <Analytics />
         <SpeedInsights />
       </body>

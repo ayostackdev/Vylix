@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/context/auth-context';
 import {
   useCourses,
@@ -99,7 +100,7 @@ export function QnaView() {
       setAskTitle('');
       setAskContent('');
       setShowAskModal(false);
-    } catch {}
+    } catch { toast.error('Failed to post question'); }
   }, [selectedTopic, askTitle, askContent, createQuestion]);
 
   const handleAnswerSubmit = useCallback(async () => {
@@ -110,18 +111,18 @@ export function QnaView() {
         content: answerContent.trim(),
       });
       setAnswerContent('');
-    } catch {}
+    } catch { toast.error('Failed to post answer'); }
   }, [selectedQuestion, answerContent, createAnswer]);
 
   const handleMarkHelpful = useCallback(async (answerId: string) => {
-    try { await markHelpful.mutateAsync(answerId); } catch {}
+    try { await markHelpful.mutateAsync(answerId); } catch { toast.error('Failed to mark as helpful'); }
   }, [markHelpful]);
 
   const handleAcceptAnswer = useCallback(async (answerId: string) => {
     if (!selectedQuestion) return;
     try {
       await acceptAnswer.mutateAsync({ questionId: selectedQuestion.id, answerId });
-    } catch {}
+    } catch { toast.error('Failed to accept answer'); }
   }, [selectedQuestion, acceptAnswer]);
 
   const isOwner = (q: QnaQuestion) => user?.id === q.author.id;

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
@@ -56,7 +57,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) setColleges(await res.json());
-    } catch {}
+    } catch { toast.error('Failed to load colleges'); }
   }, [supabase]);
 
   const fetchDepartments = useCallback(async (collegeId: string) => {
@@ -67,7 +68,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) setDepartments(await res.json());
-    } catch {}
+    } catch { toast.error('Failed to load departments'); }
   }, [supabase]);
 
   useEffect(() => {

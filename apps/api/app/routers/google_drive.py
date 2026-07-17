@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import logging
+from datetime import datetime, timezone
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
@@ -12,6 +16,8 @@ from app.deps import CurrentUser, get_current_user
 from app.models import ConnectedAccount, ImportedFile, Topic
 from app.services import google_drive
 from app.tasks_drive import import_drive_files, auto_import_drive
+
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 router = APIRouter(prefix="/google-drive", tags=["google-drive"])
@@ -121,6 +127,7 @@ async def google_callback(
         await db.flush()
         return RedirectResponse(url=f"{frontend_base}/onboarding?drive=connected")
     except Exception:
+        logger.exception("Google OAuth callback failed for state=%s", state)
         return RedirectResponse(url=f"{frontend_base}/onboarding?drive=error&detail=callback_failed")
 
 
