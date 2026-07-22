@@ -2,8 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { API_BASE } from '@/lib/api-base';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface DriveContextType {
   driveConnected: boolean;
@@ -30,16 +29,8 @@ export function DriveProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const res = await fetch(`${API_BASE}/api/google-drive/status`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setDriveConnected(data.connected);
-      }
+      const data = await authFetch('/api/google-drive/status') as { connected: boolean };
+      setDriveConnected(data.connected);
     } catch {
       setDriveConnected(false);
     } finally {
@@ -53,16 +44,9 @@ export function DriveProvider({ children }: { children: React.ReactNode }) {
 
   const connectDrive = useCallback(async () => {
     setDriveError(null);
-    const supabase = getSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/google-drive/connect`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (!res.ok) throw new Error('Failed to start Drive connection');
-      const { auth_url } = await res.json();
+      const { auth_url } = await authFetch('/api/google-drive/connect') as { auth_url: string };
       window.location.href = auth_url;
     } catch (err) {
       console.error('Drive connection failed:', err);
@@ -71,18 +55,9 @@ export function DriveProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const disconnectDrive = useCallback(async () => {
-    const supabase = getSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
     try {
-      const res = await fetch(`${API_BASE}/api/google-drive/disconnect`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (res.ok) {
-        setDriveConnected(false);
-      }
+      await authFetch('/api/google-drive/disconnect', { method: 'DELETE' });
+      setDriveConnected(false);
     } catch (err) {
       console.error('Drive disconnect failed:', err);
     }
