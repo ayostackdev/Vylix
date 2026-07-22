@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from 'react'
 import { OnboardingScreen } from '@/components/vylix-academic-hub/OnboardingScreen'
 import { ThreePanelLayout } from '@/components/vylix-academic-hub/ThreePanelLayout'
+import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 
 function OnboardingWrapper({ onComplete }: { onComplete: () => void }) {
   return (
@@ -25,7 +26,15 @@ export default function HomePage() {
     const onboarded = localStorage.getItem('vylix_onboarded')
     if (onboarded) {
       setShowOnboarding(false)
+      return
     }
+    const supabase = getSupabaseBrowserClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        localStorage.setItem('vylix_onboarded', 'true')
+        setShowOnboarding(false)
+      }
+    })
   }, [])
 
   const handleOnboardingComplete = () => {
