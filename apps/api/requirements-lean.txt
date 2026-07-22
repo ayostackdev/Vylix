@@ -25,8 +25,10 @@ Pillow>=10.4.0
 # PDF processing
 PyMuPDF>=1.24.0
 
-# AI (lightweight - no torch/transformers)
+# AI / ML (lightweight - no torch/transformers/easyocr/docling)
 numpy>=2.1.0
+pandas>=2.2.0
+scikit-learn>=1.5.0
 google-genai>=1.0.0
 
 # Rate limiting
