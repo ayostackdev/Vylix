@@ -15,6 +15,17 @@ COPY db/ db/
 EXPOSE 4000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "4000"]
 
+# Lean production target (no torch, easyocr, docling, transformers)
+FROM base AS lean-deps
+COPY requirements-lean.txt .
+RUN pip install --no-cache-dir -r requirements-lean.txt
+
+FROM lean-deps AS api-lean
+COPY app/ app/
+COPY db/ db/
+EXPOSE 4000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "4000"]
+
 FROM base AS worker
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
