@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     celery_result_backend: str = Field(default="redis://localhost:6379/1")
 
     # CORS
-    cors_origins: str = Field(default="http://localhost:3000")
+    cors_origins: str = Field(default="http://localhost:3000,https://vylix.vercel.app")
 
     # Uploads
     max_upload_mb: int = Field(default=50, ge=1)
