@@ -45,6 +45,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const [selectedCollegeId, setSelectedCollegeId] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState('');
   const [currentLevel, setCurrentLevel] = useState('');
+  const [fullName, setFullName] = useState('');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -90,6 +91,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   }, [isOpen, colleges, user?.collegeCode]);
 
   const enterEditMode = () => {
+    setFullName(user?.fullName || '');
     setCurrentLevel(user?.currentLevel || '');
     const matchedCollege = colleges.find((c) => c.code === user?.collegeCode);
     setSelectedCollegeId(matchedCollege?.id || '');
@@ -159,6 +161,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       if (!session) throw new Error('No session');
 
       const body: Record<string, unknown> = {};
+      if (fullName.trim()) body.fullName = fullName.trim();
       if (currentLevel) body.currentLevel = currentLevel;
       if (selectedCollegeId) body.collegeId = selectedCollegeId;
       if (selectedDeptId) body.departmentId = selectedDeptId;
@@ -184,7 +187,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     } finally {
       setSaving(false);
     }
-  }, [supabase, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
+  }, [supabase, fullName, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
 
   if (!isOpen) return null;
 
@@ -324,6 +327,16 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           {/* Profile Info */}
           {isEditing ? (
             <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Your full name"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                />
+              </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">College</label>
                 <select

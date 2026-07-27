@@ -16,17 +16,18 @@ export interface DocumentInfo {
   courseCode: string
 }
 
-type AppView = 'courses' | 'chat'
+type MobileView = 'courses' | 'content' | 'chat' | 'tools'
 
 export function ThreePanelLayout() {
   const { user, isAuthenticated, promptLogin } = useAuth()
-  const [activeView, setActiveView] = useState<AppView>('courses')
+  const [mobileView, setMobileView] = useState<MobileView>('content')
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
   const [selectedDoc, setSelectedDoc] = useState<DocumentInfo | null>(null)
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
   const [showTools, setShowTools] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  const [mobileNav, setMobileNav] = useState<'courses' | 'content' | 'tools'>('content')
+
+  const activeView = mobileView === 'chat' ? 'chat' : 'courses'
 
   const initials = (user?.fullName || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 
@@ -48,7 +49,7 @@ export function ThreePanelLayout() {
               </button>
             ) : (
               <button
-                onClick={() => { setShowMobileSidebar(!showMobileSidebar); setMobileNav('courses') }}
+                onClick={() => { setShowMobileSidebar(!showMobileSidebar); setMobileView('courses') }}
                 className="p-2 rounded-xl hover:bg-gray-100/80 active:bg-gray-200/60 shrink-0 transition-colors"
                 aria-label="Toggle course list"
               >
@@ -136,7 +137,7 @@ export function ThreePanelLayout() {
               </button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <MainSidebar variant="drawer" selectedCourseId={selectedCourseId} onSelectCourse={(id) => { setSelectedCourseId(id); setShowMobileSidebar(false); setMobileNav('content') }} />
+              <MainSidebar variant="drawer" selectedCourseId={selectedCourseId} onSelectCourse={(id) => { setSelectedCourseId(id); setShowMobileSidebar(false); setMobileView('content') }} />
             </div>
           </div>
         </div>
@@ -172,7 +173,7 @@ export function ThreePanelLayout() {
         {/* View switcher */}
         <div className="px-3 pb-2 flex gap-1 shrink-0">
           <button
-            onClick={() => setActiveView('courses')}
+            onClick={() => setMobileView('content')}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 ${
               activeView === 'courses'
                 ? 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-sm shadow-blue-500/20'
@@ -185,7 +186,7 @@ export function ThreePanelLayout() {
             Courses
           </button>
           <button
-            onClick={() => { if (!isAuthenticated) { promptLogin('chat with classmates'); return } setActiveView('chat') }}
+            onClick={() => { if (!isAuthenticated) { promptLogin('chat with classmates'); return } setMobileView('chat') }}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 ${
               activeView === 'chat'
                 ? 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-sm shadow-blue-500/20'
@@ -222,7 +223,7 @@ export function ThreePanelLayout() {
       </div>
 
       {/* Interactive sidebar */}
-      <InteractiveSidebar selectedDoc={selectedDoc} isOpen={showTools} onOpenChange={setShowTools} isReadOnly={!isAuthenticated} />
+      <InteractiveSidebar selectedDoc={selectedDoc} isOpen={showTools} onOpenChange={(open) => { setShowTools(open); if (!open && mobileView === 'tools') setMobileView('content') }} isReadOnly={!isAuthenticated} />
 
       {/* Profile Modal */}
       <ProfileModal isOpen={showProfile} onClose={() => setShowProfile(false)} />
@@ -231,8 +232,8 @@ export function ThreePanelLayout() {
       <nav className="fixed bottom-0 left-0 right-0 z-30 bottom-nav pb-[env(safe-area-inset-bottom)] md:hidden safe-bottom">
         <div className="flex items-center justify-around px-2 py-1.5">
           <button
-            onClick={() => { setShowMobileSidebar(true); setMobileNav('courses'); setActiveView('courses') }}
-            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileNav === 'courses' ? 'is-active' : 'text-gray-400'}`}
+            onClick={() => { setShowMobileSidebar(true); setMobileView('courses') }}
+            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileView === 'courses' ? 'is-active' : 'text-gray-400'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -242,8 +243,8 @@ export function ThreePanelLayout() {
           </button>
 
           <button
-            onClick={() => { setMobileNav('content'); setActiveView('courses') }}
-            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileNav === 'content' ? 'is-active' : 'text-gray-400'}`}
+            onClick={() => setMobileView('content')}
+            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileView === 'content' ? 'is-active' : 'text-gray-400'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -253,8 +254,8 @@ export function ThreePanelLayout() {
           </button>
 
           <button
-            onClick={() => { if (!isAuthenticated) { promptLogin('chat with classmates'); return } setMobileNav('content'); setActiveView('chat'); setShowTools(false) }}
-            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${activeView === 'chat' ? 'is-active' : 'text-gray-400'}`}
+            onClick={() => { if (!isAuthenticated) { promptLogin('chat with classmates'); return } setMobileView('chat'); setShowTools(false) }}
+            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileView === 'chat' ? 'is-active' : 'text-gray-400'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -264,8 +265,8 @@ export function ThreePanelLayout() {
           </button>
 
           <button
-            onClick={() => { setShowTools(true); setMobileNav('tools') }}
-            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileNav === 'tools' ? 'is-active' : 'text-gray-400'}`}
+            onClick={() => { setMobileView('tools'); setShowTools(true) }}
+            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileView === 'tools' ? 'is-active' : 'text-gray-400'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />

@@ -48,6 +48,7 @@ class UserProfileOut(BaseModel):
 
 
 class UpdateProfileRequest(BaseModel):
+    full_name: str | None = None
     matric_number: str | None = None
     entry_year: int | None = None
     college_id: str | None = None
@@ -101,6 +102,8 @@ async def update_profile(
     db: AsyncSession = Depends(get_db),
 ):
     u = user.user
+    if payload.full_name is not None:
+        u.full_name = payload.full_name.strip()
     if payload.matric_number is not None:
         u.matric_number = payload.matric_number
     if payload.entry_year is not None:

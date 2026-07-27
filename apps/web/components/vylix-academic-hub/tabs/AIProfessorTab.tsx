@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { offlineStore } from '@/lib/offline-store'
 import { useAuth } from '@/context/auth-context'
-import { API_BASE } from '@/lib/api-base'
+
 import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface Message {
@@ -23,29 +23,55 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
     {
       id: 'welcome',
       role: 'assistant',
-      content: selectedDoc
-        ? `Hello! I can help you with "${selectedDoc.name}". Ask me anything about this document.`
-        : "Hello! I'm your AI Professor. Select a document from the library or ask me anything about your course.",
+      content: "Hello! I'm your AI Professor. Select a document from the library or ask me anything about your course.",
     },
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const prevDocRef = useRef<DocumentInfo | null>(selectedDoc)
+  const mountedRef = useRef(false)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   useEffect(() => {
-    if (selectedDoc) {
-      setMessages([
-        {
-          id: 'welcome',
-          role: 'assistant',
-          content: `I've loaded "${selectedDoc.name}" from ${selectedDoc.courseCode}. What would you like to know about it?`,
-        },
-      ])
+    if (!mountedRef.current) {
+      mountedRef.current = true
+      return
     }
+
+    const prev = prevDocRef.current
+    prevDocRef.current = selectedDoc
+
+    if (!selectedDoc) {
+      if (prev) {
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            id: `ctx-cleared-${Date.now()}`,
+            role: 'assistant',
+            content: `Document context cleared. Feel free to ask me anything about your courses, or open a new document.`,
+          },
+        ])
+      }
+      return
+    }
+
+    const announcement: Message = prev
+      ? {
+          id: `ctx-switch-${Date.now()}`,
+          role: 'assistant',
+          content: `I see you've opened "${selectedDoc.name}" from ${selectedDoc.courseCode}. I've switched context to this document. What would you like to know?`,
+        }
+      : {
+          id: `ctx-first-${Date.now()}`,
+          role: 'assistant',
+          content: `I can see "${selectedDoc.name}" from ${selectedDoc.courseCode}. Want me to summarize it or create practice questions?`,
+        }
+
+    setMessages((msgs) => [...msgs, announcement])
   }, [selectedDoc?.id])
 
   const callAI = useCallback(async (userMessage: string) => {
@@ -58,7 +84,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
 
     try {
       if (selectedDoc) {
-        const res = await fetch(`${API_BASE}/api/documents/chat`, {
+        const res = await fetch(`/api/documents/chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -89,7 +115,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
         }
       }
 
-      const res = await fetch(`${API_BASE}/api/documents/general-chat`, {
+      const res = await fetch(`/api/documents/general-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history }),
