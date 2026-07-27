@@ -3,70 +3,527 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R] /Count 5 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 13 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 761 >>
+<< /Length 2229 >>
 stream
 BT
-/F1 14 Tf
-1 0 0 1 50 750 Tm
-(Vylix Demo Material) Tj
-1 0 0 1 50 730 Tm
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(Vylix University - Sample Study Material) Tj
+1 0 0 1 50 744 Tm
 () Tj
-1 0 0 1 50 710 Tm
-(Module 1: Variables and Data Types) Tj
-1 0 0 1 50 690 Tm
+1 0 0 1 50 728 Tm
+(MODULE 1: VARIABLES AND DATA TYPES) Tj
+1 0 0 1 50 712 Tm
 () Tj
-1 0 0 1 50 670 Tm
-(A variable is a named storage location in memory.) Tj
-1 0 0 1 50 650 Tm
-(Primitive types: int, float, string, boolean) Tj
-1 0 0 1 50 630 Tm
+1 0 0 1 50 696 Tm
+(1.1 What is Programming?) Tj
+1 0 0 1 50 680 Tm
 () Tj
-1 0 0 1 50 610 Tm
-(Module 2: Control Flow) Tj
-1 0 0 1 50 590 Tm
+1 0 0 1 50 664 Tm
+(Programming is the process of writing instructions that a) Tj
+1 0 0 1 50 648 Tm
+(computer can execute to perform specific tasks. A programming) Tj
+1 0 0 1 50 632 Tm
+(language provides the syntax and rules for writing these) Tj
+1 0 0 1 50 616 Tm
+(instructions.) Tj
+1 0 0 1 50 600 Tm
 () Tj
-1 0 0 1 50 570 Tm
-(if/else statements) Tj
-1 0 0 1 50 550 Tm
-(for loops) Tj
-1 0 0 1 50 530 Tm
-(while loops) Tj
-1 0 0 1 50 510 Tm
+1 0 0 1 50 584 Tm
+(1.2 Variables) Tj
+1 0 0 1 50 568 Tm
 () Tj
-1 0 0 1 50 490 Tm
-(Module 3: Functions) Tj
-1 0 0 1 50 470 Tm
+1 0 0 1 50 552 Tm
+(A variable is a named storage location in computer memory) Tj
+1 0 0 1 50 536 Tm
+(that holds a value. Think of it as a labeled box.) Tj
+1 0 0 1 50 520 Tm
 () Tj
-1 0 0 1 50 450 Tm
-(A function is a reusable block of code.) Tj
-1 0 0 1 50 430 Tm
-(def function_name\(parameters\):) Tj
-1 0 0 1 50 410 Tm
-(    return result) Tj
+1 0 0 1 50 504 Tm
+(Example in Python:) Tj
+1 0 0 1 50 488 Tm
+(  name = 'Alice'        # string) Tj
+1 0 0 1 50 472 Tm
+(  age = 20              # integer) Tj
+1 0 0 1 50 456 Tm
+(  gpa = 3.85            # float) Tj
+1 0 0 1 50 440 Tm
+(  is_enrolled = True    # boolean) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(Naming Rules:) Tj
+1 0 0 1 50 392 Tm
+(  - Must start with a letter or underscore) Tj
+1 0 0 1 50 376 Tm
+(  - Can contain letters, numbers, underscores) Tj
+1 0 0 1 50 360 Tm
+(  - Case-sensitive \(age != Age != AGE\)) Tj
+1 0 0 1 50 344 Tm
+(  - Cannot use Python keywords \(if, for, while, etc.\)) Tj
+1 0 0 1 50 328 Tm
+() Tj
+1 0 0 1 50 312 Tm
+(1.3 Data Types) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(  int     - whole numbers: 42, -7, 0) Tj
+1 0 0 1 50 264 Tm
+(  float   - decimal numbers: 3.14, -0.5) Tj
+1 0 0 1 50 248 Tm
+(  str     - text: 'hello', "world") Tj
+1 0 0 1 50 232 Tm
+(  bool    - True or False) Tj
+1 0 0 1 50 216 Tm
+(  NoneType - represents absence of value) Tj
+1 0 0 1 50 200 Tm
+() Tj
+1 0 0 1 50 184 Tm
+(Type Functions:) Tj
+1 0 0 1 50 168 Tm
+(  type\(x\)        - returns the type of x) Tj
+1 0 0 1 50 152 Tm
+(  int\(x\)         - converts x to integer) Tj
+1 0 0 1 50 136 Tm
+(  float\(x\)       - converts x to float) Tj
+1 0 0 1 50 120 Tm
+(  str\(x\)         - converts x to string) Tj
+1 0 0 1 50 104 Tm
+() Tj
+1 0 0 1 50 88 Tm
+() Tj
+1 0 0 1 50 72 Tm
+(MODULE 2: CONTROL FLOW) Tj
+1 0 0 1 50 56 Tm
+() Tj
 ET
 
 endstream
 endobj
 5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 1904 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(2.1 Conditional Statements) Tj
+1 0 0 1 50 744 Tm
+() Tj
+1 0 0 1 50 728 Tm
+(  if condition:) Tj
+1 0 0 1 50 712 Tm
+(      # code if true) Tj
+1 0 0 1 50 696 Tm
+(  elif condition2:) Tj
+1 0 0 1 50 680 Tm
+(      # code if condition2 true) Tj
+1 0 0 1 50 664 Tm
+(  else:) Tj
+1 0 0 1 50 648 Tm
+(      # code if all false) Tj
+1 0 0 1 50 632 Tm
+() Tj
+1 0 0 1 50 616 Tm
+(Example:) Tj
+1 0 0 1 50 600 Tm
+(  grade = 85) Tj
+1 0 0 1 50 584 Tm
+(  if grade >= 90:) Tj
+1 0 0 1 50 568 Tm
+(      print\('A'\)) Tj
+1 0 0 1 50 552 Tm
+(  elif grade >= 80:) Tj
+1 0 0 1 50 536 Tm
+(      print\('B'\)) Tj
+1 0 0 1 50 520 Tm
+(  elif grade >= 70:) Tj
+1 0 0 1 50 504 Tm
+(      print\('C'\)) Tj
+1 0 0 1 50 488 Tm
+(  else:) Tj
+1 0 0 1 50 472 Tm
+(      print\('F'\)) Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+(Comparison Operators:) Tj
+1 0 0 1 50 424 Tm
+(  ==  equal to) Tj
+1 0 0 1 50 408 Tm
+(  !=  not equal to) Tj
+1 0 0 1 50 392 Tm
+(  >   greater than) Tj
+1 0 0 1 50 376 Tm
+(  <   less than) Tj
+1 0 0 1 50 360 Tm
+(  >=  greater or equal) Tj
+1 0 0 1 50 344 Tm
+(  <=  less or equal) Tj
+1 0 0 1 50 328 Tm
+() Tj
+1 0 0 1 50 312 Tm
+(Logical Operators:) Tj
+1 0 0 1 50 296 Tm
+(  and  - both conditions must be true) Tj
+1 0 0 1 50 280 Tm
+(  or   - at least one condition must be true) Tj
+1 0 0 1 50 264 Tm
+(  not  - inverts the condition) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+(2.2 Loops) Tj
+1 0 0 1 50 216 Tm
+() Tj
+1 0 0 1 50 200 Tm
+(For Loop \(iterates over a sequence\):) Tj
+1 0 0 1 50 184 Tm
+(  for i in range\(5\):      # 0, 1, 2, 3, 4) Tj
+1 0 0 1 50 168 Tm
+(      print\(i\)) Tj
+1 0 0 1 50 152 Tm
+() Tj
+1 0 0 1 50 136 Tm
+(  for char in 'hello':    # iterates over characters) Tj
+1 0 0 1 50 120 Tm
+(      print\(char\)) Tj
+1 0 0 1 50 104 Tm
+() Tj
+1 0 0 1 50 88 Tm
+(  fruits = ['apple', 'banana', 'cherry']) Tj
+1 0 0 1 50 72 Tm
+(  for fruit in fruits:) Tj
+1 0 0 1 50 56 Tm
+(      print\(fruit\)) Tj
+ET
+
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 2013 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+() Tj
+1 0 0 1 50 744 Tm
+(While Loop \(repeats while condition is true\):) Tj
+1 0 0 1 50 728 Tm
+(  count = 0) Tj
+1 0 0 1 50 712 Tm
+(  while count < 5:) Tj
+1 0 0 1 50 696 Tm
+(      print\(count\)) Tj
+1 0 0 1 50 680 Tm
+(      count += 1) Tj
+1 0 0 1 50 664 Tm
+() Tj
+1 0 0 1 50 648 Tm
+(Loop Control:) Tj
+1 0 0 1 50 632 Tm
+(  break    - exit the loop immediately) Tj
+1 0 0 1 50 616 Tm
+(  continue - skip to next iteration) Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(Example:) Tj
+1 0 0 1 50 568 Tm
+(  for i in range\(10\):) Tj
+1 0 0 1 50 552 Tm
+(      if i == 3:) Tj
+1 0 0 1 50 536 Tm
+(          continue    # skip 3) Tj
+1 0 0 1 50 520 Tm
+(      if i == 7:) Tj
+1 0 0 1 50 504 Tm
+(          break       # stop at 7) Tj
+1 0 0 1 50 488 Tm
+(      print\(i\)        # prints: 0,1,2,4,5,6) Tj
+1 0 0 1 50 472 Tm
+() Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+(MODULE 3: FUNCTIONS) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(3.1 Defining Functions) Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(A function is a reusable block of code that performs a) Tj
+1 0 0 1 50 360 Tm
+(specific task. Functions help organize code and avoid) Tj
+1 0 0 1 50 344 Tm
+(repetition.) Tj
+1 0 0 1 50 328 Tm
+() Tj
+1 0 0 1 50 312 Tm
+(  def function_name\(parameters\):) Tj
+1 0 0 1 50 296 Tm
+(      # code block) Tj
+1 0 0 1 50 280 Tm
+(      return result) Tj
+1 0 0 1 50 264 Tm
+() Tj
+1 0 0 1 50 248 Tm
+(Example:) Tj
+1 0 0 1 50 232 Tm
+(  def calculate_average\(numbers\):) Tj
+1 0 0 1 50 216 Tm
+(      total = sum\(numbers\)) Tj
+1 0 0 1 50 200 Tm
+(      count = len\(numbers\)) Tj
+1 0 0 1 50 184 Tm
+(      return total / count) Tj
+1 0 0 1 50 168 Tm
+() Tj
+1 0 0 1 50 152 Tm
+(  result = calculate_average\([85, 90, 78, 92]\)) Tj
+1 0 0 1 50 136 Tm
+(  print\(result\)  # 86.25) Tj
+1 0 0 1 50 120 Tm
+() Tj
+1 0 0 1 50 104 Tm
+(3.2 Parameters and Arguments) Tj
+1 0 0 1 50 88 Tm
+() Tj
+1 0 0 1 50 72 Tm
+(  def greet\(name, greeting='Hello'\):  # default parameter) Tj
+1 0 0 1 50 56 Tm
+(      return f'{greeting}, {name}!') Tj
+ET
+
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 10 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+10 0 obj
+<< /Length 2232 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+() Tj
+1 0 0 1 50 744 Tm
+(  greet\('Alice'\)                # 'Hello, Alice!') Tj
+1 0 0 1 50 728 Tm
+(  greet\('Bob', 'Good morning'\)  # 'Good morning, Bob!') Tj
+1 0 0 1 50 712 Tm
+() Tj
+1 0 0 1 50 696 Tm
+(  def add_all\(*args\):           # variable arguments) Tj
+1 0 0 1 50 680 Tm
+(      return sum\(args\)) Tj
+1 0 0 1 50 664 Tm
+() Tj
+1 0 0 1 50 648 Tm
+(  add_all\(1, 2, 3, 4\)  # 10) Tj
+1 0 0 1 50 632 Tm
+() Tj
+1 0 0 1 50 616 Tm
+(3.3 Scope) Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(  def my_function\(\):) Tj
+1 0 0 1 50 568 Tm
+(      local_var = 'I am local'   # local scope) Tj
+1 0 0 1 50 552 Tm
+(      print\(global_var\)           # can read global) Tj
+1 0 0 1 50 536 Tm
+() Tj
+1 0 0 1 50 520 Tm
+(  global_var = 'I am global'     # global scope) Tj
+1 0 0 1 50 504 Tm
+(  my_function\(\)) Tj
+1 0 0 1 50 488 Tm
+(  print\(global_var\)              # works) Tj
+1 0 0 1 50 472 Tm
+(  # print\(local_var\)             # NameError!) Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+() Tj
+1 0 0 1 50 424 Tm
+(MODULE 4: DATA STRUCTURES) Tj
+1 0 0 1 50 408 Tm
+() Tj
+1 0 0 1 50 392 Tm
+(4.1 Lists) Tj
+1 0 0 1 50 376 Tm
+() Tj
+1 0 0 1 50 360 Tm
+(  my_list = [1, 2, 3, 4, 5]) Tj
+1 0 0 1 50 344 Tm
+(  my_list.append\(6\)        # add to end) Tj
+1 0 0 1 50 328 Tm
+(  my_list.insert\(0, 0\)     # insert at index) Tj
+1 0 0 1 50 312 Tm
+(  my_list.remove\(3\)        # remove first occurrence) Tj
+1 0 0 1 50 296 Tm
+(  popped = my_list.pop\(\)   # remove and return last) Tj
+1 0 0 1 50 280 Tm
+(  my_list[0]               # access by index) Tj
+1 0 0 1 50 264 Tm
+(  my_list[1:3]             # slice: [2, 3]) Tj
+1 0 0 1 50 248 Tm
+(  len\(my_list\)             # length) Tj
+1 0 0 1 50 232 Tm
+(  3 in my_list             # membership test: True) Tj
+1 0 0 1 50 216 Tm
+() Tj
+1 0 0 1 50 200 Tm
+(4.2 Dictionaries) Tj
+1 0 0 1 50 184 Tm
+() Tj
+1 0 0 1 50 168 Tm
+(  student = {) Tj
+1 0 0 1 50 152 Tm
+(      'name': 'Alice',) Tj
+1 0 0 1 50 136 Tm
+(      'age': 20,) Tj
+1 0 0 1 50 120 Tm
+(      'gpa': 3.85) Tj
+1 0 0 1 50 104 Tm
+(  }) Tj
+1 0 0 1 50 88 Tm
+(  student['name']              # 'Alice') Tj
+1 0 0 1 50 72 Tm
+(  student['major'] = 'CS'      # add new key) Tj
+1 0 0 1 50 56 Tm
+(  del student['age']           # delete key) Tj
+ET
+
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 12 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+12 0 obj
+<< /Length 1952 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  student.keys\(\)               # dict_keys\(['name', 'gpa']\)) Tj
+1 0 0 1 50 744 Tm
+(  student.values\(\)             # dict_values\(['Alice', 3.85]\)) Tj
+1 0 0 1 50 728 Tm
+(  student.get\('name', 'N/A'\)   # safe access) Tj
+1 0 0 1 50 712 Tm
+() Tj
+1 0 0 1 50 696 Tm
+(4.3 List Comprehensions) Tj
+1 0 0 1 50 680 Tm
+() Tj
+1 0 0 1 50 664 Tm
+(  squares = [x**2 for x in range\(10\)]) Tj
+1 0 0 1 50 648 Tm
+(  evens = [x for x in range\(20\) if x % 2 == 0]) Tj
+1 0 0 1 50 632 Tm
+(  words = [w.upper\(\) for w in ['hello', 'world']]) Tj
+1 0 0 1 50 616 Tm
+() Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(MODULE 5: FILE I/O AND ERROR HANDLING) Tj
+1 0 0 1 50 568 Tm
+() Tj
+1 0 0 1 50 552 Tm
+(5.1 Reading and Writing Files) Tj
+1 0 0 1 50 536 Tm
+() Tj
+1 0 0 1 50 520 Tm
+(  # Writing) Tj
+1 0 0 1 50 504 Tm
+(  with open\('output.txt', 'w'\) as f:) Tj
+1 0 0 1 50 488 Tm
+(      f.write\('Hello, World!\\n'\)) Tj
+1 0 0 1 50 472 Tm
+(      f.write\('Line two\\n'\)) Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+(  # Reading) Tj
+1 0 0 1 50 424 Tm
+(  with open\('output.txt', 'r'\) as f:) Tj
+1 0 0 1 50 408 Tm
+(      content = f.read\(\)       # read all) Tj
+1 0 0 1 50 392 Tm
+(      lines = f.readlines\(\)    # list of lines) Tj
+1 0 0 1 50 376 Tm
+(      for line in f:           # iterate line by line) Tj
+1 0 0 1 50 360 Tm
+(          print\(line.strip\(\)\)) Tj
+1 0 0 1 50 344 Tm
+() Tj
+1 0 0 1 50 328 Tm
+(5.2 Error Handling) Tj
+1 0 0 1 50 312 Tm
+() Tj
+1 0 0 1 50 296 Tm
+(  try:) Tj
+1 0 0 1 50 280 Tm
+(      result = 10 / 0) Tj
+1 0 0 1 50 264 Tm
+(  except ZeroDivisionError:) Tj
+1 0 0 1 50 248 Tm
+(      print\('Cannot divide by zero!'\)) Tj
+1 0 0 1 50 232 Tm
+(  except Exception as e:) Tj
+1 0 0 1 50 216 Tm
+(      print\(f'Unexpected error: {e}'\)) Tj
+1 0 0 1 50 200 Tm
+(  else:) Tj
+1 0 0 1 50 184 Tm
+(      print\('No errors occurred'\)) Tj
+1 0 0 1 50 168 Tm
+(  finally:) Tj
+1 0 0 1 50 152 Tm
+(      print\('This always runs'\)) Tj
+ET
+
+endstream
+endobj
+13 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 xref
-0 6
+0 14
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
-0000000115 00000 n 
-0000000241 00000 n 
-0000000274 00000 n 
-0000001053 00000 n 
+0000000140 00000 n 
+0000000267 00000 n 
+0000002548 00000 n 
+0000002675 00000 n 
+0000004631 00000 n 
+0000004758 00000 n 
+0000006823 00000 n 
+0000006951 00000 n 
+0000009236 00000 n 
+0000009365 00000 n 
+0000011370 00000 n 
 trailer
-<< /Size 6 /Root 1 0 R >>
+<< /Size 14 /Root 1 0 R >>
 startxref
-1123
+11441
 %%EOF

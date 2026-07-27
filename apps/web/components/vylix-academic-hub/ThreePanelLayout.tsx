@@ -231,7 +231,7 @@ export function ThreePanelLayout() {
       <nav className="fixed bottom-0 left-0 right-0 z-30 bottom-nav pb-[env(safe-area-inset-bottom)] md:hidden safe-bottom">
         <div className="flex items-center justify-around px-2 py-1.5">
           <button
-            onClick={() => { setShowMobileSidebar(true); setMobileNav('courses') }}
+            onClick={() => { setShowMobileSidebar(true); setMobileNav('courses'); setActiveView('courses') }}
             className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileNav === 'courses' ? 'is-active' : 'text-gray-400'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +242,7 @@ export function ThreePanelLayout() {
           </button>
 
           <button
-            onClick={() => setMobileNav('content')}
+            onClick={() => { setMobileNav('content'); setActiveView('courses') }}
             className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileNav === 'content' ? 'is-active' : 'text-gray-400'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +253,7 @@ export function ThreePanelLayout() {
           </button>
 
           <button
-            onClick={() => { if (!isAuthenticated) { promptLogin('chat with classmates'); return } setActiveView('chat'); setShowTools(false) }}
+            onClick={() => { if (!isAuthenticated) { promptLogin('chat with classmates'); return } setMobileNav('content'); setActiveView('chat'); setShowTools(false) }}
             className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${activeView === 'chat' ? 'is-active' : 'text-gray-400'}`}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

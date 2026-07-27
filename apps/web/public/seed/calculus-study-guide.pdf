@@ -3,64 +3,479 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R] /Count 5 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 13 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 749 >>
+<< /Length 2468 >>
 stream
 BT
-/F1 14 Tf
-1 0 0 1 50 750 Tm
-(Vylix Demo Material) Tj
-1 0 0 1 50 730 Tm
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(Vylix University - Sample Study Material) Tj
+1 0 0 1 50 744 Tm
 () Tj
-1 0 0 1 50 710 Tm
-(Chapter 1: Limits and Continuity) Tj
-1 0 0 1 50 690 Tm
+1 0 0 1 50 728 Tm
+(TABLE OF CONTENTS) Tj
+1 0 0 1 50 712 Tm
+(1. Limits and Continuity) Tj
+1 0 0 1 50 696 Tm
+(2. Derivatives and Differentiation Rules) Tj
+1 0 0 1 50 680 Tm
+(3. Applications of Derivatives) Tj
+1 0 0 1 50 664 Tm
+(4. Integration and the Fundamental Theorem) Tj
+1 0 0 1 50 648 Tm
+(5. Techniques of Integration) Tj
+1 0 0 1 50 632 Tm
 () Tj
-1 0 0 1 50 670 Tm
-(The limit of a function f\(x\) as x approaches a value c) Tj
-1 0 0 1 50 650 Tm
-(is the value that f\(x\) approaches as x gets closer to c.) Tj
-1 0 0 1 50 630 Tm
+1 0 0 1 50 616 Tm
 () Tj
-1 0 0 1 50 610 Tm
-(Definition: lim\(x->c\) f\(x\) = L means for every e > 0,) Tj
-1 0 0 1 50 590 Tm
-(there exists d > 0 such that if 0 < |x - c| < d,) Tj
-1 0 0 1 50 570 Tm
-(then |f\(x\) - L| < e.) Tj
-1 0 0 1 50 550 Tm
+1 0 0 1 50 600 Tm
+(CHAPTER 1: LIMITS AND CONTINUITY) Tj
+1 0 0 1 50 584 Tm
 () Tj
-1 0 0 1 50 530 Tm
-(Key Theorems:) Tj
-1 0 0 1 50 510 Tm
-(1. Squeeze Theorem) Tj
-1 0 0 1 50 490 Tm
-(2. Intermediate Value Theorem) Tj
-1 0 0 1 50 470 Tm
-(3. Mean Value Theorem) Tj
+1 0 0 1 50 568 Tm
+(1.1 Definition of a Limit) Tj
+1 0 0 1 50 552 Tm
+() Tj
+1 0 0 1 50 536 Tm
+(Let f be a function defined on an open interval containing c) Tj
+1 0 0 1 50 520 Tm
+(\(except possibly at c\) and let L be a real number. The statement) Tj
+1 0 0 1 50 504 Tm
+(lim\(x->c\) f\(x\) = L means that for each epsilon > 0 there exists) Tj
+1 0 0 1 50 488 Tm
+(a delta > 0 such that for all x in the domain of f:) Tj
+1 0 0 1 50 472 Tm
+(if 0 < |x - c| < delta, then |f\(x\) - L| < epsilon.) Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+(1.2 Limit Laws) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(Suppose lim\(x->a\) f\(x\) = L and lim\(x->a\) g\(x\) = M exist.) Tj
+1 0 0 1 50 392 Tm
+(  1. Sum: lim[f\(x\) + g\(x\)] = L + M) Tj
+1 0 0 1 50 376 Tm
+(  2. Product: lim[f\(x\) * g\(x\)] = L * M) Tj
+1 0 0 1 50 360 Tm
+(  3. Quotient: lim[f\(x\) / g\(x\)] = L / M, provided M != 0) Tj
+1 0 0 1 50 344 Tm
+(  4. Constant Multiple: lim[k * f\(x\)] = k * L) Tj
+1 0 0 1 50 328 Tm
+(  5. Power: lim[f\(x\)]^n = L^n) Tj
+1 0 0 1 50 312 Tm
+() Tj
+1 0 0 1 50 296 Tm
+(1.3 Squeeze Theorem) Tj
+1 0 0 1 50 280 Tm
+() Tj
+1 0 0 1 50 264 Tm
+(If g\(x\) <= f\(x\) <= h\(x\) for all x in an open interval) Tj
+1 0 0 1 50 248 Tm
+(containing c \(except possibly at c\), and) Tj
+1 0 0 1 50 232 Tm
+(lim\(x->c\) g\(x\) = lim\(x->c\) h\(x\) = L,) Tj
+1 0 0 1 50 216 Tm
+(then lim\(x->c\) f\(x\) = L.) Tj
+1 0 0 1 50 200 Tm
+() Tj
+1 0 0 1 50 184 Tm
+(Example: Find lim\(x->0\) [sin\(x\)/x]) Tj
+1 0 0 1 50 168 Tm
+(Since -1 <= sin\(x\) <= 1 for all x, we can show that) Tj
+1 0 0 1 50 152 Tm
+(cos\(x\) <= sin\(x\)/x <= 1 for x near 0.) Tj
+1 0 0 1 50 136 Tm
+(Since lim\(x->0\) cos\(x\) = 1 and lim\(x->0\) 1 = 1,) Tj
+1 0 0 1 50 120 Tm
+(by the Squeeze Theorem, lim\(x->0\) [sin\(x\)/x] = 1.) Tj
+1 0 0 1 50 104 Tm
+() Tj
+1 0 0 1 50 88 Tm
+(1.4 Continuity) Tj
+1 0 0 1 50 72 Tm
+() Tj
+1 0 0 1 50 56 Tm
+(A function f is continuous at x = c if three conditions hold:) Tj
 ET
 
 endstream
 endobj
 5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 2376 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  1. f\(c\) is defined) Tj
+1 0 0 1 50 744 Tm
+(  2. lim\(x->c\) f\(x\) exists) Tj
+1 0 0 1 50 728 Tm
+(  3. lim\(x->c\) f\(x\) = f\(c\)) Tj
+1 0 0 1 50 712 Tm
+() Tj
+1 0 0 1 50 696 Tm
+(Types of Discontinuity:) Tj
+1 0 0 1 50 680 Tm
+(  - Removable: limit exists but does not equal f\(c\)) Tj
+1 0 0 1 50 664 Tm
+(  - Jump: left and right limits exist but are different) Tj
+1 0 0 1 50 648 Tm
+(  - Infinite: one or both one-sided limits are infinite) Tj
+1 0 0 1 50 632 Tm
+() Tj
+1 0 0 1 50 616 Tm
+() Tj
+1 0 0 1 50 600 Tm
+(CHAPTER 2: DERIVATIVES AND DIFFERENTIATION RULES) Tj
+1 0 0 1 50 584 Tm
+() Tj
+1 0 0 1 50 568 Tm
+(2.1 Definition of the Derivative) Tj
+1 0 0 1 50 552 Tm
+() Tj
+1 0 0 1 50 536 Tm
+(The derivative of f at x = a is defined as:) Tj
+1 0 0 1 50 520 Tm
+(f'\(a\) = lim\(h->0\) [f\(a+h\) - f\(a\)] / h) Tj
+1 0 0 1 50 504 Tm
+() Tj
+1 0 0 1 50 488 Tm
+(This represents the slope of the tangent line to the curve) Tj
+1 0 0 1 50 472 Tm
+(y = f\(x\) at the point \(a, f\(a\)\).) Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+(2.2 Basic Differentiation Rules) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(  Power Rule: d/dx [x^n] = n * x^\(n-1\)) Tj
+1 0 0 1 50 392 Tm
+(  Constant Rule: d/dx [c] = 0) Tj
+1 0 0 1 50 376 Tm
+(  Constant Multiple: d/dx [cf\(x\)] = c * f'\(x\)) Tj
+1 0 0 1 50 360 Tm
+(  Sum Rule: d/dx [f\(x\) + g\(x\)] = f'\(x\) + g'\(x\)) Tj
+1 0 0 1 50 344 Tm
+(  Product Rule: d/dx [f\(x\)*g\(x\)] = f'\(x\)*g\(x\) + f\(x\)*g'\(x\)) Tj
+1 0 0 1 50 328 Tm
+(  Quotient Rule: d/dx [f/g] = [f'g - fg'] / g^2) Tj
+1 0 0 1 50 312 Tm
+() Tj
+1 0 0 1 50 296 Tm
+(2.3 Chain Rule) Tj
+1 0 0 1 50 280 Tm
+() Tj
+1 0 0 1 50 264 Tm
+(If y = f\(u\) and u = g\(x\), then dy/dx = f'\(u\) * g'\(x\).) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+(Example: Find d/dx [sin\(x^2\)]) Tj
+1 0 0 1 50 216 Tm
+(  Outer function: sin\(u\), derivative: cos\(u\)) Tj
+1 0 0 1 50 200 Tm
+(  Inner function: u = x^2, derivative: 2x) Tj
+1 0 0 1 50 184 Tm
+(  Result: cos\(x^2\) * 2x = 2x * cos\(x^2\)) Tj
+1 0 0 1 50 168 Tm
+() Tj
+1 0 0 1 50 152 Tm
+(2.4 Trigonometric Derivatives) Tj
+1 0 0 1 50 136 Tm
+() Tj
+1 0 0 1 50 120 Tm
+(  d/dx [sin\(x\)] = cos\(x\)) Tj
+1 0 0 1 50 104 Tm
+(  d/dx [cos\(x\)] = -sin\(x\)) Tj
+1 0 0 1 50 88 Tm
+(  d/dx [tan\(x\)] = sec^2\(x\)) Tj
+1 0 0 1 50 72 Tm
+(  d/dx [sec\(x\)] = sec\(x\)*tan\(x\)) Tj
+1 0 0 1 50 56 Tm
+(  d/dx [csc\(x\)] = -csc\(x\)*cot\(x\)) Tj
+ET
+
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 2436 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  d/dx [cot\(x\)] = -csc^2\(x\)) Tj
+1 0 0 1 50 744 Tm
+() Tj
+1 0 0 1 50 728 Tm
+() Tj
+1 0 0 1 50 712 Tm
+(CHAPTER 3: APPLICATIONS OF DERIVATIVES) Tj
+1 0 0 1 50 696 Tm
+() Tj
+1 0 0 1 50 680 Tm
+(3.1 Related Rates) Tj
+1 0 0 1 50 664 Tm
+() Tj
+1 0 0 1 50 648 Tm
+(Steps for solving related rates problems:) Tj
+1 0 0 1 50 632 Tm
+(  1. Draw a diagram and identify given information) Tj
+1 0 0 1 50 616 Tm
+(  2. Define variables for all changing quantities) Tj
+1 0 0 1 50 600 Tm
+(  3. Write an equation relating the variables) Tj
+1 0 0 1 50 584 Tm
+(  4. Differentiate both sides with respect to time t) Tj
+1 0 0 1 50 568 Tm
+(  5. Substitute known values and solve) Tj
+1 0 0 1 50 552 Tm
+() Tj
+1 0 0 1 50 536 Tm
+(Example: A ladder 10 ft long rests against a vertical wall.) Tj
+1 0 0 1 50 520 Tm
+(If the bottom slides away at 1 ft/s, how fast is the top) Tj
+1 0 0 1 50 504 Tm
+(sliding down when the bottom is 6 ft from the wall?) Tj
+1 0 0 1 50 488 Tm
+(  x^2 + y^2 = 100) Tj
+1 0 0 1 50 472 Tm
+(  2x\(dx/dt\) + 2y\(dy/dt\) = 0) Tj
+1 0 0 1 50 456 Tm
+(  When x = 6: y = 8, so 12 + 16\(dy/dt\) = 0) Tj
+1 0 0 1 50 440 Tm
+(  dy/dt = -12/16 = -3/4 ft/s) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(3.2 Optimization) Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(Steps for optimization problems:) Tj
+1 0 0 1 50 360 Tm
+(  1. Identify the quantity to be optimized) Tj
+1 0 0 1 50 344 Tm
+(  2. Write the objective function) Tj
+1 0 0 1 50 328 Tm
+(  3. Express in terms of one variable using constraints) Tj
+1 0 0 1 50 312 Tm
+(  4. Find critical points: f'\(x\) = 0 or undefined) Tj
+1 0 0 1 50 296 Tm
+(  5. Test endpoints and critical points) Tj
+1 0 0 1 50 280 Tm
+() Tj
+1 0 0 1 50 264 Tm
+(Example: Find the dimensions of a rectangle with perimeter) Tj
+1 0 0 1 50 248 Tm
+(40 ft that has maximum area.) Tj
+1 0 0 1 50 232 Tm
+(  Let x = length, y = width. 2x + 2y = 40, so y = 20 - x) Tj
+1 0 0 1 50 216 Tm
+(  A\(x\) = x\(20 - x\) = 20x - x^2) Tj
+1 0 0 1 50 200 Tm
+(  A'\(x\) = 20 - 2x = 0 -> x = 10) Tj
+1 0 0 1 50 184 Tm
+(  A''\(x\) = -2 < 0, so x = 10 is a maximum) Tj
+1 0 0 1 50 168 Tm
+(  Dimensions: 10 ft by 10 ft \(a square\), Area = 100 sq ft) Tj
+1 0 0 1 50 152 Tm
+() Tj
+1 0 0 1 50 136 Tm
+() Tj
+1 0 0 1 50 120 Tm
+(CHAPTER 4: INTEGRATION) Tj
+1 0 0 1 50 104 Tm
+() Tj
+1 0 0 1 50 88 Tm
+(4.1 Antiderivatives) Tj
+1 0 0 1 50 72 Tm
+() Tj
+1 0 0 1 50 56 Tm
+(An antiderivative of f\(x\) is a function F\(x\) such that F'\(x\) = f\(x\).) Tj
+ET
+
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 10 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+10 0 obj
+<< /Length 2218 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(The general antiderivative is F\(x\) + C where C is a constant.) Tj
+1 0 0 1 50 744 Tm
+() Tj
+1 0 0 1 50 728 Tm
+(Basic Antiderivative Formulas:) Tj
+1 0 0 1 50 712 Tm
+(  int x^n dx = x^\(n+1\)/\(n+1\) + C, n != -1) Tj
+1 0 0 1 50 696 Tm
+(  int \(1/x\) dx = ln|x| + C) Tj
+1 0 0 1 50 680 Tm
+(  int e^x dx = e^x + C) Tj
+1 0 0 1 50 664 Tm
+(  int sin\(x\) dx = -cos\(x\) + C) Tj
+1 0 0 1 50 648 Tm
+(  int cos\(x\) dx = sin\(x\) + C) Tj
+1 0 0 1 50 632 Tm
+(  int sec^2\(x\) dx = tan\(x\) + C) Tj
+1 0 0 1 50 616 Tm
+() Tj
+1 0 0 1 50 600 Tm
+(4.2 The Fundamental Theorem of Calculus) Tj
+1 0 0 1 50 584 Tm
+() Tj
+1 0 0 1 50 568 Tm
+(Part 1: If f is continuous on [a,b] and F\(x\) = int\(a->x\) f\(t\) dt,) Tj
+1 0 0 1 50 552 Tm
+(then F'\(x\) = f\(x\).) Tj
+1 0 0 1 50 536 Tm
+() Tj
+1 0 0 1 50 520 Tm
+(Part 2: If f is continuous on [a,b] and F is any antiderivative) Tj
+1 0 0 1 50 504 Tm
+(of f, then int\(a->b\) f\(x\) dx = F\(b\) - F\(a\).) Tj
+1 0 0 1 50 488 Tm
+() Tj
+1 0 0 1 50 472 Tm
+(Example: int\(0->1\) \(3x^2 + 2x\) dx) Tj
+1 0 0 1 50 456 Tm
+(  F\(x\) = x^3 + x^2) Tj
+1 0 0 1 50 440 Tm
+(  F\(1\) - F\(0\) = \(1 + 1\) - \(0 + 0\) = 2) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+() Tj
+1 0 0 1 50 392 Tm
+(CHAPTER 5: TECHNIQUES OF INTEGRATION) Tj
+1 0 0 1 50 376 Tm
+() Tj
+1 0 0 1 50 360 Tm
+(5.1 Substitution \(u-substitution\)) Tj
+1 0 0 1 50 344 Tm
+() Tj
+1 0 0 1 50 328 Tm
+(Let u = g\(x\), then du = g'\(x\) dx.) Tj
+1 0 0 1 50 312 Tm
+(int f\(g\(x\)\) * g'\(x\) dx = int f\(u\) du) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(Example: int 2x * cos\(x^2\) dx) Tj
+1 0 0 1 50 264 Tm
+(  Let u = x^2, du = 2x dx) Tj
+1 0 0 1 50 248 Tm
+(  int cos\(u\) du = sin\(u\) + C = sin\(x^2\) + C) Tj
+1 0 0 1 50 232 Tm
+() Tj
+1 0 0 1 50 216 Tm
+(5.2 Integration by Parts) Tj
+1 0 0 1 50 200 Tm
+() Tj
+1 0 0 1 50 184 Tm
+(int u dv = uv - int v du) Tj
+1 0 0 1 50 168 Tm
+() Tj
+1 0 0 1 50 152 Tm
+(Choose u using LIATE order:) Tj
+1 0 0 1 50 136 Tm
+(  Logarithmic, Inverse trig, Algebraic, Trig, Exponential) Tj
+1 0 0 1 50 120 Tm
+() Tj
+1 0 0 1 50 104 Tm
+(Example: int x * e^x dx) Tj
+1 0 0 1 50 88 Tm
+(  u = x, dv = e^x dx) Tj
+1 0 0 1 50 72 Tm
+(  du = dx, v = e^x) Tj
+1 0 0 1 50 56 Tm
+(  = x*e^x - int e^x dx = x*e^x - e^x + C) Tj
+ET
+
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 12 0 R /Resources << /Font << /F1 13 0 R >> >> >>
+endobj
+12 0 obj
+<< /Length 862 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+() Tj
+1 0 0 1 50 744 Tm
+(5.3 Partial Fractions) Tj
+1 0 0 1 50 728 Tm
+() Tj
+1 0 0 1 50 712 Tm
+(For proper rational functions P\(x\)/Q\(x\) where deg\(P\) < deg\(Q\):) Tj
+1 0 0 1 50 696 Tm
+(  Factor Q\(x\) completely into linear and irreducible quadratic) Tj
+1 0 0 1 50 680 Tm
+(  Set up partial fraction decomposition) Tj
+1 0 0 1 50 664 Tm
+(  Solve for coefficients) Tj
+1 0 0 1 50 648 Tm
+() Tj
+1 0 0 1 50 632 Tm
+(Example: int \(5x-4\) / \(x^2 - x - 2\) dx) Tj
+1 0 0 1 50 616 Tm
+(  x^2 - x - 2 = \(x-2\)\(x+1\)) Tj
+1 0 0 1 50 600 Tm
+(  \(5x-4\) / \(\(x-2\)\(x+1\)\) = A/\(x-2\) + B/\(x+1\)) Tj
+1 0 0 1 50 584 Tm
+(  5x - 4 = A\(x+1\) + B\(x-2\)) Tj
+1 0 0 1 50 568 Tm
+(  x = 2: 6 = 3A -> A = 2) Tj
+1 0 0 1 50 552 Tm
+(  x = -1: -9 = -3B -> B = 3) Tj
+1 0 0 1 50 536 Tm
+(  = int [2/\(x-2\) + 3/\(x+1\)] dx = 2ln|x-2| + 3ln|x+1| + C) Tj
+ET
+
+endstream
+endobj
+13 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 xref
-0 6
+0 14
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
-0000000115 00000 n 
-0000000241 00000 n 
-0000000274 00000 n 
-0000001041 00000 n 
+0000000140 00000 n 
+0000000267 00000 n 
+0000002787 00000 n 
+0000002914 00000 n 
+0000005342 00000 n 
+0000005469 00000 n 
+0000007957 00000 n 
+0000008085 00000 n 
+0000010356 00000 n 
+0000010485 00000 n 
+0000011399 00000 n 
 trailer
-<< /Size 6 /Root 1 0 R >>
+<< /Size 14 /Root 1 0 R >>
 startxref
-1111
+11470
 %%EOF

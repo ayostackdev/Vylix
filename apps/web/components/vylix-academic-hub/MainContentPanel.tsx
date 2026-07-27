@@ -53,11 +53,11 @@ function formatDate(dateStr: string | null): string {
 }
 
 const SEED_MATERIALS: Material[] = [
-  { id: 'seed-1', file_name: 'Calculus Study Guide.pdf', file_url: '/seed/calculus-study-guide.pdf', file_size: 1315, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
-  { id: 'seed-2', file_name: 'Physics Formula Sheet.pdf', file_url: '/seed/physics-formula-sheet.pdf', file_size: 1151, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
-  { id: 'seed-3', file_name: 'Introduction to Programming.pdf', file_url: '/seed/introduction-to-programming.pdf', file_size: 1327, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
-  { id: 'seed-4', file_name: 'Organic Chemistry Notes.pdf', file_url: '/seed/organic-chemistry-notes.pdf', file_size: 1170, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
-  { id: 'seed-5', file_name: 'Linear Algebra Basics.pdf', file_url: '/seed/linear-algebra-basics.pdf', file_size: 1352, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-1', file_name: 'Calculus Study Guide.pdf', file_url: '/seed/calculus-study-guide.pdf', file_size: 11817, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-2', file_name: 'Physics Formula Sheet.pdf', file_url: '/seed/physics-formula-sheet.pdf', file_size: 8486, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-3', file_name: 'Introduction to Programming.pdf', file_url: '/seed/introduction-to-programming.pdf', file_size: 11788, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-4', file_name: 'Organic Chemistry Notes.pdf', file_url: '/seed/organic-chemistry-notes.pdf', file_size: 9036, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-5', file_name: 'Linear Algebra Basics.pdf', file_url: '/seed/linear-algebra-basics.pdf', file_size: 12884, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
 ]
 
 export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, isReadOnly = false }: MainContentPanelProps) {

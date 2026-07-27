@@ -3,62 +3,369 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R] /Count 4 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 11 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 586 >>
+<< /Length 2298 >>
 stream
 BT
-/F1 14 Tf
-1 0 0 1 50 750 Tm
-(Vylix Demo Material) Tj
-1 0 0 1 50 730 Tm
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(Vylix University - Sample Study Material) Tj
+1 0 0 1 50 744 Tm
 () Tj
-1 0 0 1 50 710 Tm
-(Chapter 1: Mechanics) Tj
-1 0 0 1 50 690 Tm
+1 0 0 1 50 728 Tm
+(MECHANICS) Tj
+1 0 0 1 50 712 Tm
 () Tj
-1 0 0 1 50 670 Tm
-(Newton Second Law: F = ma) Tj
-1 0 0 1 50 650 Tm
-(Kinetic Energy: KE = 1/2 mv^2) Tj
-1 0 0 1 50 630 Tm
-(Potential Energy: PE = mgh) Tj
-1 0 0 1 50 610 Tm
-(Work: W = Fd cos\(theta\)) Tj
-1 0 0 1 50 590 Tm
+1 0 0 1 50 696 Tm
+(1. Kinematics \(Motion in One Dimension\)) Tj
+1 0 0 1 50 680 Tm
 () Tj
-1 0 0 1 50 570 Tm
-(Chapter 2: Thermodynamics) Tj
-1 0 0 1 50 550 Tm
+1 0 0 1 50 664 Tm
+(  v = v0 + at) Tj
+1 0 0 1 50 648 Tm
+(  x = x0 + v0*t + \(1/2\)*a*t^2) Tj
+1 0 0 1 50 632 Tm
+(  v^2 = v0^2 + 2*a*\(x - x0\)) Tj
+1 0 0 1 50 616 Tm
+(  x = x0 + \(1/2\)*\(v0 + v\)*t) Tj
+1 0 0 1 50 600 Tm
 () Tj
-1 0 0 1 50 530 Tm
-(First Law: dU = dQ - dW) Tj
-1 0 0 1 50 510 Tm
-(Ideal Gas Law: PV = nRT) Tj
-1 0 0 1 50 490 Tm
-(Entropy: dS >= dQ/T) Tj
+1 0 0 1 50 584 Tm
+(Where: v0 = initial velocity, v = final velocity) Tj
+1 0 0 1 50 568 Tm
+(       a = acceleration, t = time, x = position) Tj
+1 0 0 1 50 552 Tm
+() Tj
+1 0 0 1 50 536 Tm
+(2. Newton's Laws of Motion) Tj
+1 0 0 1 50 520 Tm
+() Tj
+1 0 0 1 50 504 Tm
+(  First Law: An object at rest stays at rest, and an object in) Tj
+1 0 0 1 50 488 Tm
+(  motion stays in motion at constant velocity, unless acted upon) Tj
+1 0 0 1 50 472 Tm
+(  by a net external force.) Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+(  Second Law: F_net = m * a \(vector equation\)) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(  Third Law: For every action, there is an equal and opposite) Tj
+1 0 0 1 50 392 Tm
+(  reaction. F_AB = -F_BA) Tj
+1 0 0 1 50 376 Tm
+() Tj
+1 0 0 1 50 360 Tm
+(Common Forces:) Tj
+1 0 0 1 50 344 Tm
+(  Weight: W = m * g \(g = 9.8 m/s^2 downward\)) Tj
+1 0 0 1 50 328 Tm
+(  Normal Force: perpendicular to surface) Tj
+1 0 0 1 50 312 Tm
+(  Friction: f_s <= mu_s * N \(static\)) Tj
+1 0 0 1 50 296 Tm
+(           f_k = mu_k * N \(kinetic\)) Tj
+1 0 0 1 50 280 Tm
+(  Tension: transmitted through strings/ropes) Tj
+1 0 0 1 50 264 Tm
+(  Spring: F = -k * x \(Hooke's Law\)) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+(3. Work, Energy, and Power) Tj
+1 0 0 1 50 216 Tm
+() Tj
+1 0 0 1 50 200 Tm
+(  Work: W = F * d * cos\(theta\)) Tj
+1 0 0 1 50 184 Tm
+(  Kinetic Energy: KE = \(1/2\) * m * v^2) Tj
+1 0 0 1 50 168 Tm
+(  Potential Energy \(gravity\): PE = m * g * h) Tj
+1 0 0 1 50 152 Tm
+(  Potential Energy \(spring\): PE = \(1/2\) * k * x^2) Tj
+1 0 0 1 50 136 Tm
+(  Work-Energy Theorem: W_net = delta\(KE\)) Tj
+1 0 0 1 50 120 Tm
+(  Conservation of Energy: KE1 + PE1 = KE2 + PE2) Tj
+1 0 0 1 50 104 Tm
+(  Power: P = W/t = F * v * cos\(theta\)) Tj
+1 0 0 1 50 88 Tm
+() Tj
+1 0 0 1 50 72 Tm
+(4. Momentum and Collisions) Tj
+1 0 0 1 50 56 Tm
+() Tj
 ET
 
 endstream
 endobj
 5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 11 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 2268 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  Linear Momentum: p = m * v) Tj
+1 0 0 1 50 744 Tm
+(  Impulse: J = F * delta\(t\) = delta\(p\)) Tj
+1 0 0 1 50 728 Tm
+(  Impulse-Momentum Theorem: J = m*v2 - m*v1) Tj
+1 0 0 1 50 712 Tm
+() Tj
+1 0 0 1 50 696 Tm
+(  Conservation of Momentum:) Tj
+1 0 0 1 50 680 Tm
+(  m1*v1i + m2*v2i = m1*v1f + m2*v2f) Tj
+1 0 0 1 50 664 Tm
+() Tj
+1 0 0 1 50 648 Tm
+(  Elastic Collision: both KE and momentum conserved) Tj
+1 0 0 1 50 632 Tm
+(  Inelastic Collision: only momentum conserved) Tj
+1 0 0 1 50 616 Tm
+(  Perfectly Inelastic: objects stick together) Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(5. Rotational Motion) Tj
+1 0 0 1 50 568 Tm
+() Tj
+1 0 0 1 50 552 Tm
+(  Angular Velocity: omega = delta\(theta\) / delta\(t\)) Tj
+1 0 0 1 50 536 Tm
+(  Angular Acceleration: alpha = delta\(omega\) / delta\(t\)) Tj
+1 0 0 1 50 520 Tm
+(  Torque: tau = r * F * sin\(theta\) = I * alpha) Tj
+1 0 0 1 50 504 Tm
+(  Moment of Inertia: I = sum\(m_i * r_i^2\)) Tj
+1 0 0 1 50 488 Tm
+(  Rotational KE: KE_rot = \(1/2\) * I * omega^2) Tj
+1 0 0 1 50 472 Tm
+(  Angular Momentum: L = I * omega) Tj
+1 0 0 1 50 456 Tm
+(  Conservation of L: I1*omega1 = I2*omega2) Tj
+1 0 0 1 50 440 Tm
+() Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(THERMODYNAMICS) Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(6. Temperature and Heat) Tj
+1 0 0 1 50 360 Tm
+() Tj
+1 0 0 1 50 344 Tm
+(  Temperature Scales:) Tj
+1 0 0 1 50 328 Tm
+(    F = \(9/5\)*C + 32) Tj
+1 0 0 1 50 312 Tm
+(    K = C + 273.15) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(  Heat Transfer: Q = m * c * delta\(T\)) Tj
+1 0 0 1 50 264 Tm
+(  Where c = specific heat capacity) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+(  Phase Changes: Q = m * L) Tj
+1 0 0 1 50 216 Tm
+(  Where L = latent heat of fusion/vaporization) Tj
+1 0 0 1 50 200 Tm
+() Tj
+1 0 0 1 50 184 Tm
+(7. Laws of Thermodynamics) Tj
+1 0 0 1 50 168 Tm
+() Tj
+1 0 0 1 50 152 Tm
+(  Zeroth Law: If A is in thermal equilibrium with B, and B) Tj
+1 0 0 1 50 136 Tm
+(  with C, then A is in equilibrium with C.) Tj
+1 0 0 1 50 120 Tm
+() Tj
+1 0 0 1 50 104 Tm
+(  First Law: delta\(U\) = Q - W) Tj
+1 0 0 1 50 88 Tm
+(  \(change in internal energy = heat added - work done\)) Tj
+1 0 0 1 50 72 Tm
+() Tj
+1 0 0 1 50 56 Tm
+(  Second Law: Heat flows spontaneously from hot to cold.) Tj
+ET
+
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 11 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 2078 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  Entropy of an isolated system always increases.) Tj
+1 0 0 1 50 744 Tm
+(  delta\(S\) >= Q/T) Tj
+1 0 0 1 50 728 Tm
+() Tj
+1 0 0 1 50 712 Tm
+(  Third Law: As T -> 0 K, S -> 0 for a perfect crystal.) Tj
+1 0 0 1 50 696 Tm
+() Tj
+1 0 0 1 50 680 Tm
+(8. Ideal Gas Law) Tj
+1 0 0 1 50 664 Tm
+() Tj
+1 0 0 1 50 648 Tm
+(  PV = nRT) Tj
+1 0 0 1 50 632 Tm
+(  Where: P = pressure \(Pa\), V = volume \(m^3\)) Tj
+1 0 0 1 50 616 Tm
+(         n = moles, R = 8.314 J/\(mol*K\), T = temp \(K\)) Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(  Kinetic Theory: KE_avg = \(3/2\) * k_B * T) Tj
+1 0 0 1 50 568 Tm
+(  Where k_B = 1.38 * 10^-23 J/K) Tj
+1 0 0 1 50 552 Tm
+() Tj
+1 0 0 1 50 536 Tm
+() Tj
+1 0 0 1 50 520 Tm
+(WAVES AND SOUND) Tj
+1 0 0 1 50 504 Tm
+() Tj
+1 0 0 1 50 488 Tm
+(9. Wave Properties) Tj
+1 0 0 1 50 472 Tm
+() Tj
+1 0 0 1 50 456 Tm
+(  Wave Speed: v = f * lambda) Tj
+1 0 0 1 50 440 Tm
+(  Where f = frequency, lambda = wavelength) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(  Period: T = 1/f) Tj
+1 0 0 1 50 392 Tm
+(  Angular Frequency: omega = 2*pi*f) Tj
+1 0 0 1 50 376 Tm
+(  Wave Number: k = 2*pi/lambda) Tj
+1 0 0 1 50 360 Tm
+() Tj
+1 0 0 1 50 344 Tm
+(  Standing Waves \(string\): f_n = n*v / \(2*L\)) Tj
+1 0 0 1 50 328 Tm
+(  Standing Waves \(pipe, open\): f_n = n*v / \(2*L\)) Tj
+1 0 0 1 50 312 Tm
+(  Standing Waves \(pipe, closed\): f_n = n*v / \(4*L\)) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(  Doppler Effect:) Tj
+1 0 0 1 50 264 Tm
+(  f_observed = f_source * \(v +/- v_observer\) / \(v -/+ v_source\)) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+() Tj
+1 0 0 1 50 216 Tm
+(ELECTRICITY AND MAGNETISM) Tj
+1 0 0 1 50 200 Tm
+() Tj
+1 0 0 1 50 184 Tm
+(10. Electric Charge and Force) Tj
+1 0 0 1 50 168 Tm
+() Tj
+1 0 0 1 50 152 Tm
+(  Coulomb's Law: F = k * |q1*q2| / r^2) Tj
+1 0 0 1 50 136 Tm
+(  Where k = 8.99 * 10^9 N*m^2/C^2) Tj
+1 0 0 1 50 120 Tm
+() Tj
+1 0 0 1 50 104 Tm
+(  Electric Field: E = F/q = k*Q/r^2) Tj
+1 0 0 1 50 88 Tm
+(  Electric Potential: V = k*Q/r) Tj
+1 0 0 1 50 72 Tm
+(  Electric Potential Energy: U = k*q1*q2/r) Tj
+1 0 0 1 50 56 Tm
+() Tj
+ET
+
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 10 0 R /Resources << /Font << /F1 11 0 R >> >> >>
+endobj
+10 0 obj
+<< /Length 615 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(11. Circuits) Tj
+1 0 0 1 50 744 Tm
+() Tj
+1 0 0 1 50 728 Tm
+(  Ohm's Law: V = I*R) Tj
+1 0 0 1 50 712 Tm
+(  Power: P = V*I = I^2*R = V^2/R) Tj
+1 0 0 1 50 696 Tm
+() Tj
+1 0 0 1 50 680 Tm
+(  Series: R_total = R1 + R2 + R3 + ...) Tj
+1 0 0 1 50 664 Tm
+(  Parallel: 1/R_total = 1/R1 + 1/R2 + 1/R3 + ...) Tj
+1 0 0 1 50 648 Tm
+() Tj
+1 0 0 1 50 632 Tm
+(  Capacitors in Parallel: C_total = C1 + C2 + C3 + ...) Tj
+1 0 0 1 50 616 Tm
+(  Capacitors in Series: 1/C_total = 1/C1 + 1/C2 + ...) Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(  Energy in Capacitor: U = \(1/2\)*C*V^2 = \(1/2\)*Q*V) Tj
+ET
+
+endstream
+endobj
+11 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 xref
-0 6
+0 12
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
-0000000115 00000 n 
-0000000241 00000 n 
-0000000274 00000 n 
-0000000878 00000 n 
+0000000133 00000 n 
+0000000260 00000 n 
+0000002610 00000 n 
+0000002737 00000 n 
+0000005057 00000 n 
+0000005184 00000 n 
+0000007314 00000 n 
+0000007442 00000 n 
+0000008109 00000 n 
 trailer
-<< /Size 6 /Root 1 0 R >>
+<< /Size 12 /Root 1 0 R >>
 startxref
-948
+8180
 %%EOF

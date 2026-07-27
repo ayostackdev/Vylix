@@ -3,68 +3,557 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R] /Count 6 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 15 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 786 >>
+<< /Length 2233 >>
 stream
 BT
-/F1 14 Tf
-1 0 0 1 50 750 Tm
-(Vylix Demo Material) Tj
-1 0 0 1 50 730 Tm
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(Vylix University - Sample Study Material) Tj
+1 0 0 1 50 744 Tm
 () Tj
-1 0 0 1 50 710 Tm
-(Chapter 1: Vectors and Matrices) Tj
-1 0 0 1 50 690 Tm
+1 0 0 1 50 728 Tm
+(CHAPTER 1: SYSTEMS OF LINEAR EQUATIONS) Tj
+1 0 0 1 50 712 Tm
 () Tj
-1 0 0 1 50 670 Tm
-(A vector is an ordered list of numbers.) Tj
-1 0 0 1 50 650 Tm
-(A matrix is a rectangular array of numbers.) Tj
-1 0 0 1 50 630 Tm
+1 0 0 1 50 696 Tm
+(1.1 Linear Equations) Tj
+1 0 0 1 50 680 Tm
 () Tj
-1 0 0 1 50 610 Tm
-(Chapter 2: Matrix Operations) Tj
-1 0 0 1 50 590 Tm
+1 0 0 1 50 664 Tm
+(A linear equation in n variables has the form:) Tj
+1 0 0 1 50 648 Tm
+(  a1*x1 + a2*x2 + ... + an*xn = b) Tj
+1 0 0 1 50 632 Tm
 () Tj
-1 0 0 1 50 570 Tm
-(Addition: A + B \(element-wise\)) Tj
-1 0 0 1 50 550 Tm
-(Multiplication: AB \(row by column\)) Tj
-1 0 0 1 50 530 Tm
-(Transpose: A^T \(swap rows and columns\)) Tj
-1 0 0 1 50 510 Tm
+1 0 0 1 50 616 Tm
+(A system of linear equations is a collection of one or more) Tj
+1 0 0 1 50 600 Tm
+(linear equations involving the same variables.) Tj
+1 0 0 1 50 584 Tm
 () Tj
-1 0 0 1 50 490 Tm
-(Chapter 3: Determinants) Tj
-1 0 0 1 50 470 Tm
+1 0 0 1 50 568 Tm
+(Example system \(2 equations, 2 unknowns\):) Tj
+1 0 0 1 50 552 Tm
+(  2x + 3y = 8) Tj
+1 0 0 1 50 536 Tm
+(  x - y = 1) Tj
+1 0 0 1 50 520 Tm
 () Tj
-1 0 0 1 50 450 Tm
-(det\(A\) = ad - bc \(for 2x2 matrix\)) Tj
-1 0 0 1 50 430 Tm
-(det\(A\) = 0 means singular matrix) Tj
+1 0 0 1 50 504 Tm
+(Solution Methods:) Tj
+1 0 0 1 50 488 Tm
+(  - Substitution: solve one equation, substitute into other) Tj
+1 0 0 1 50 472 Tm
+(  - Elimination: add/subtract equations to eliminate variables) Tj
+1 0 0 1 50 456 Tm
+(  - Matrix methods: Gaussian elimination, Cramer's rule) Tj
+1 0 0 1 50 440 Tm
+() Tj
+1 0 0 1 50 424 Tm
+(1.2 Gaussian Elimination) Tj
+1 0 0 1 50 408 Tm
+() Tj
+1 0 0 1 50 392 Tm
+(Steps:) Tj
+1 0 0 1 50 376 Tm
+(  1. Write augmented matrix [A|b]) Tj
+1 0 0 1 50 360 Tm
+(  2. Use row operations to reach row echelon form:) Tj
+1 0 0 1 50 344 Tm
+(     - Swap two rows) Tj
+1 0 0 1 50 328 Tm
+(     - Multiply a row by a nonzero scalar) Tj
+1 0 0 1 50 312 Tm
+(     - Add a multiple of one row to another) Tj
+1 0 0 1 50 296 Tm
+(  3. Back-substitute to find the solution) Tj
+1 0 0 1 50 280 Tm
+() Tj
+1 0 0 1 50 264 Tm
+(Row Echelon Form:) Tj
+1 0 0 1 50 248 Tm
+(  - All zero rows at the bottom) Tj
+1 0 0 1 50 232 Tm
+(  - Leading entry \(pivot\) of each row is to the right) Tj
+1 0 0 1 50 216 Tm
+(    of the pivot in the row above) Tj
+1 0 0 1 50 200 Tm
+(  - All entries below pivots are zero) Tj
+1 0 0 1 50 184 Tm
+() Tj
+1 0 0 1 50 168 Tm
+(Solution Types:) Tj
+1 0 0 1 50 152 Tm
+(  - Unique solution: one solution exists) Tj
+1 0 0 1 50 136 Tm
+(  - Infinitely many: free variables exist) Tj
+1 0 0 1 50 120 Tm
+(  - No solution: inconsistent system \(0 = nonzero\)) Tj
+1 0 0 1 50 104 Tm
+() Tj
+1 0 0 1 50 88 Tm
+() Tj
+1 0 0 1 50 72 Tm
+(CHAPTER 2: MATRICES) Tj
+1 0 0 1 50 56 Tm
+() Tj
 ET
 
 endstream
 endobj
 5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 15 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 2139 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(2.1 Matrix Basics) Tj
+1 0 0 1 50 744 Tm
+() Tj
+1 0 0 1 50 728 Tm
+(A matrix is a rectangular array of numbers arranged in) Tj
+1 0 0 1 50 712 Tm
+(rows and columns. An m x n matrix has m rows and n columns.) Tj
+1 0 0 1 50 696 Tm
+() Tj
+1 0 0 1 50 680 Tm
+(  A = | 1  2  3 |) Tj
+1 0 0 1 50 664 Tm
+(      | 4  5  6 |    \(2 x 3 matrix\)) Tj
+1 0 0 1 50 648 Tm
+(      | 7  8  9 |) Tj
+1 0 0 1 50 632 Tm
+() Tj
+1 0 0 1 50 616 Tm
+(Special Matrices:) Tj
+1 0 0 1 50 600 Tm
+(  Square: m = n) Tj
+1 0 0 1 50 584 Tm
+(  Identity \(I\): 1s on diagonal, 0s elsewhere) Tj
+1 0 0 1 50 568 Tm
+(  Zero matrix: all entries are 0) Tj
+1 0 0 1 50 552 Tm
+(  Diagonal: nonzero only on main diagonal) Tj
+1 0 0 1 50 536 Tm
+(  Symmetric: A = A^T) Tj
+1 0 0 1 50 520 Tm
+() Tj
+1 0 0 1 50 504 Tm
+(2.2 Matrix Operations) Tj
+1 0 0 1 50 488 Tm
+() Tj
+1 0 0 1 50 472 Tm
+(Addition: A + B \(add corresponding entries\)) Tj
+1 0 0 1 50 456 Tm
+(  | 1 2 |   | 5 6 |   | 6  8 |) Tj
+1 0 0 1 50 440 Tm
+(  | 3 4 | + | 7 8 | = | 10 12 |) Tj
+1 0 0 1 50 424 Tm
+() Tj
+1 0 0 1 50 408 Tm
+(Scalar Multiplication: k * A \(multiply every entry by k\)) Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(Matrix Multiplication: AB) Tj
+1 0 0 1 50 360 Tm
+(  \(AB\)_ij = sum over k of \(A_ik * B_kj\)) Tj
+1 0 0 1 50 344 Tm
+() Tj
+1 0 0 1 50 328 Tm
+(  For A \(m x n\) and B \(n x p\), result is \(m x p\)) Tj
+1 0 0 1 50 312 Tm
+(  NOTE: AB is NOT generally equal to BA) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(  Example:) Tj
+1 0 0 1 50 264 Tm
+(  | 1 2 |   | 5 6 |   | 19 22 |) Tj
+1 0 0 1 50 248 Tm
+(  | 3 4 | * | 7 8 | = | 43 50 |) Tj
+1 0 0 1 50 232 Tm
+() Tj
+1 0 0 1 50 216 Tm
+(Properties:) Tj
+1 0 0 1 50 200 Tm
+(  A\(B + C\) = AB + AC  \(distributive\)) Tj
+1 0 0 1 50 184 Tm
+(  \(AB\)C = A\(BC\)       \(associative\)) Tj
+1 0 0 1 50 168 Tm
+(  AI = IA = A          \(identity\)) Tj
+1 0 0 1 50 152 Tm
+(  A\(BC\) = \(AB\)C       \(associative\)) Tj
+1 0 0 1 50 136 Tm
+() Tj
+1 0 0 1 50 120 Tm
+(2.3 Transpose) Tj
+1 0 0 1 50 104 Tm
+() Tj
+1 0 0 1 50 88 Tm
+(The transpose of A \(written A^T\) is obtained by swapping) Tj
+1 0 0 1 50 72 Tm
+(rows and columns.) Tj
+1 0 0 1 50 56 Tm
+() Tj
+ET
+
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 15 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 2242 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  If A = | 1 2 3 |    then A^T = | 1 4 |) Tj
+1 0 0 1 50 744 Tm
+(         | 4 5 6 |              | 2 5 |) Tj
+1 0 0 1 50 728 Tm
+(                                | 3 6 |) Tj
+1 0 0 1 50 712 Tm
+() Tj
+1 0 0 1 50 696 Tm
+(Properties:) Tj
+1 0 0 1 50 680 Tm
+(  \(A^T\)^T = A) Tj
+1 0 0 1 50 664 Tm
+(  \(A + B\)^T = A^T + B^T) Tj
+1 0 0 1 50 648 Tm
+(  \(AB\)^T = B^T * A^T) Tj
+1 0 0 1 50 632 Tm
+() Tj
+1 0 0 1 50 616 Tm
+() Tj
+1 0 0 1 50 600 Tm
+(CHAPTER 3: DETERMINANTS) Tj
+1 0 0 1 50 584 Tm
+() Tj
+1 0 0 1 50 568 Tm
+(3.1 Definition and Computation) Tj
+1 0 0 1 50 552 Tm
+() Tj
+1 0 0 1 50 536 Tm
+(The determinant is a scalar value that encodes important) Tj
+1 0 0 1 50 520 Tm
+(properties of a square matrix.) Tj
+1 0 0 1 50 504 Tm
+() Tj
+1 0 0 1 50 488 Tm
+(2x2 Matrix:) Tj
+1 0 0 1 50 472 Tm
+(  det | a  b | = ad - bc) Tj
+1 0 0 1 50 456 Tm
+(      | c  d |) Tj
+1 0 0 1 50 440 Tm
+() Tj
+1 0 0 1 50 424 Tm
+(  Example: det | 3  2 | = \(3\)\(4\) - \(2\)\(1\) = 10) Tj
+1 0 0 1 50 408 Tm
+(              | 1  4 |) Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(3x3 Matrix \(cofactor expansion along first row\):) Tj
+1 0 0 1 50 360 Tm
+(  det\(A\) = a11*C11 - a12*C12 + a13*C13) Tj
+1 0 0 1 50 344 Tm
+(  where C_ij is the minor \(determinant of submatrix\)) Tj
+1 0 0 1 50 328 Tm
+() Tj
+1 0 0 1 50 312 Tm
+(3.2 Properties of Determinants) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(  - det\(A^T\) = det\(A\)) Tj
+1 0 0 1 50 264 Tm
+(  - det\(AB\) = det\(A\) * det\(B\)) Tj
+1 0 0 1 50 248 Tm
+(  - det\(kA\) = k^n * det\(A\) for n x n matrix) Tj
+1 0 0 1 50 232 Tm
+(  - det\(A\) = 0 if and only if A is singular \(non-invertible\)) Tj
+1 0 0 1 50 216 Tm
+(  - det\(I\) = 1) Tj
+1 0 0 1 50 200 Tm
+(  - Swapping two rows changes the sign of det) Tj
+1 0 0 1 50 184 Tm
+(  - Adding a multiple of one row to another does not change det) Tj
+1 0 0 1 50 168 Tm
+() Tj
+1 0 0 1 50 152 Tm
+(3.3 Invertibility) Tj
+1 0 0 1 50 136 Tm
+() Tj
+1 0 0 1 50 120 Tm
+(A square matrix A is invertible \(non-singular\) if and only if:) Tj
+1 0 0 1 50 104 Tm
+(  - det\(A\) != 0) Tj
+1 0 0 1 50 88 Tm
+(  - rank\(A\) = n \(full rank\)) Tj
+1 0 0 1 50 72 Tm
+(  - The system Ax = 0 has only the trivial solution) Tj
+1 0 0 1 50 56 Tm
+(  - The columns of A are linearly independent) Tj
+ET
+
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 10 0 R /Resources << /Font << /F1 15 0 R >> >> >>
+endobj
+10 0 obj
+<< /Length 2207 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+() Tj
+1 0 0 1 50 744 Tm
+(Finding the inverse \(2x2\):) Tj
+1 0 0 1 50 728 Tm
+(  A = | a  b |    A^-1 = \(1/det\) * |  d  -b |) Tj
+1 0 0 1 50 712 Tm
+(      | c  d |                      | -c   a |) Tj
+1 0 0 1 50 696 Tm
+() Tj
+1 0 0 1 50 680 Tm
+() Tj
+1 0 0 1 50 664 Tm
+(CHAPTER 4: VECTOR SPACES) Tj
+1 0 0 1 50 648 Tm
+() Tj
+1 0 0 1 50 632 Tm
+(4.1 Vectors) Tj
+1 0 0 1 50 616 Tm
+() Tj
+1 0 0 1 50 600 Tm
+(A vector is an ordered list of numbers:) Tj
+1 0 0 1 50 584 Tm
+(  v = \(v1, v2, ..., vn\) in R^n) Tj
+1 0 0 1 50 568 Tm
+() Tj
+1 0 0 1 50 552 Tm
+(Vector Operations:) Tj
+1 0 0 1 50 536 Tm
+(  u + v = \(u1+v1, u2+v2, ..., un+vn\)) Tj
+1 0 0 1 50 520 Tm
+(  k * v = \(k*v1, k*v2, ..., k*vn\)) Tj
+1 0 0 1 50 504 Tm
+(  Dot product: u . v = u1*v1 + u2*v2 + ... + un*vn) Tj
+1 0 0 1 50 488 Tm
+() Tj
+1 0 0 1 50 472 Tm
+(Properties of Dot Product:) Tj
+1 0 0 1 50 456 Tm
+(  u . v = v . u \(commutative\)) Tj
+1 0 0 1 50 440 Tm
+(  u . \(v + w\) = u.v + u.w \(distributive\)) Tj
+1 0 0 1 50 424 Tm
+(  k\(u . v\) = \(ku\) . v) Tj
+1 0 0 1 50 408 Tm
+(  v . v = |v|^2 \(magnitude squared\)) Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(4.2 Linear Independence) Tj
+1 0 0 1 50 360 Tm
+() Tj
+1 0 0 1 50 344 Tm
+(Vectors v1, v2, ..., vk are linearly independent if the only) Tj
+1 0 0 1 50 328 Tm
+(solution to c1*v1 + c2*v2 + ... + ck*vk = 0 is) Tj
+1 0 0 1 50 312 Tm
+(c1 = c2 = ... = ck = 0.) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(If a nontrivial solution exists, the vectors are linearly) Tj
+1 0 0 1 50 264 Tm
+(dependent.) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+(4.3 Basis and Dimension) Tj
+1 0 0 1 50 216 Tm
+() Tj
+1 0 0 1 50 200 Tm
+(A basis for a vector space V is a set of linearly independent) Tj
+1 0 0 1 50 184 Tm
+(vectors that span V \(every vector in V can be written as a) Tj
+1 0 0 1 50 168 Tm
+(linear combination of the basis vectors\).) Tj
+1 0 0 1 50 152 Tm
+() Tj
+1 0 0 1 50 136 Tm
+(The dimension of V is the number of vectors in any basis.) Tj
+1 0 0 1 50 120 Tm
+(  dim\(R^n\) = n) Tj
+1 0 0 1 50 104 Tm
+(  dim\(P_n\) = n+1 \(polynomials of degree <= n\)) Tj
+1 0 0 1 50 88 Tm
+() Tj
+1 0 0 1 50 72 Tm
+(Standard basis for R^3: {\(1,0,0\), \(0,1,0\), \(0,0,1\)}) Tj
+1 0 0 1 50 56 Tm
+() Tj
+ET
+
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 12 0 R /Resources << /Font << /F1 15 0 R >> >> >>
+endobj
+12 0 obj
+<< /Length 2212 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+() Tj
+1 0 0 1 50 744 Tm
+(CHAPTER 5: EIGENVALUES AND EIGENVECTORS) Tj
+1 0 0 1 50 728 Tm
+() Tj
+1 0 0 1 50 712 Tm
+(5.1 Definitions) Tj
+1 0 0 1 50 696 Tm
+() Tj
+1 0 0 1 50 680 Tm
+(For an n x n matrix A, a scalar lambda is an eigenvalue) Tj
+1 0 0 1 50 664 Tm
+(and a nonzero vector v is a corresponding eigenvector if:) Tj
+1 0 0 1 50 648 Tm
+(  Av = lambda * v) Tj
+1 0 0 1 50 632 Tm
+() Tj
+1 0 0 1 50 616 Tm
+(Finding Eigenvalues:) Tj
+1 0 0 1 50 600 Tm
+(  Solve the characteristic equation: det\(A - lambda*I\) = 0) Tj
+1 0 0 1 50 584 Tm
+() Tj
+1 0 0 1 50 568 Tm
+(Example:) Tj
+1 0 0 1 50 552 Tm
+(  A = | 4  1 |) Tj
+1 0 0 1 50 536 Tm
+(      | 2  3 |) Tj
+1 0 0 1 50 520 Tm
+() Tj
+1 0 0 1 50 504 Tm
+(  det\(A - lambda*I\) = \(4-lambda\)\(3-lambda\) - 2*1) Tj
+1 0 0 1 50 488 Tm
+(    = lambda^2 - 7*lambda + 10 = \(lambda-5\)\(lambda-2\) = 0) Tj
+1 0 0 1 50 472 Tm
+(  Eigenvalues: lambda1 = 5, lambda2 = 2) Tj
+1 0 0 1 50 456 Tm
+() Tj
+1 0 0 1 50 440 Tm
+(Finding Eigenvectors:) Tj
+1 0 0 1 50 424 Tm
+(  For each eigenvalue, solve \(A - lambda*I\)v = 0) Tj
+1 0 0 1 50 408 Tm
+() Tj
+1 0 0 1 50 392 Tm
+(  For lambda = 5: \(A - 5I\)v = 0) Tj
+1 0 0 1 50 376 Tm
+(    |-1  1 | |v1|   |0|) Tj
+1 0 0 1 50 360 Tm
+(    | 2 -2 | |v2| = |0|) Tj
+1 0 0 1 50 344 Tm
+(    v1 = v2, so v = t\(1,1\) for any nonzero t) Tj
+1 0 0 1 50 328 Tm
+() Tj
+1 0 0 1 50 312 Tm
+(  For lambda = 2: \(A - 2I\)v = 0) Tj
+1 0 0 1 50 296 Tm
+(    | 2  1 | |v1|   |0|) Tj
+1 0 0 1 50 280 Tm
+(    | 2  1 | |v2| = |0|) Tj
+1 0 0 1 50 264 Tm
+(    v2 = -2*v1, so v = t\(1,-2\) for any nonzero t) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+(5.2 Diagonalization) Tj
+1 0 0 1 50 216 Tm
+() Tj
+1 0 0 1 50 200 Tm
+(A matrix A is diagonalizable if it can be written as:) Tj
+1 0 0 1 50 184 Tm
+(  A = PDP^\(-1\)) Tj
+1 0 0 1 50 168 Tm
+(where D is a diagonal matrix of eigenvalues and P is a) Tj
+1 0 0 1 50 152 Tm
+(matrix whose columns are the corresponding eigenvectors.) Tj
+1 0 0 1 50 136 Tm
+() Tj
+1 0 0 1 50 120 Tm
+(A is diagonalizable if and only if it has n linearly) Tj
+1 0 0 1 50 104 Tm
+(independent eigenvectors.) Tj
+1 0 0 1 50 88 Tm
+() Tj
+1 0 0 1 50 72 Tm
+(Applications:) Tj
+1 0 0 1 50 56 Tm
+(  - Computing matrix powers: A^k = P * D^k * P^\(-1\)) Tj
+ET
+
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 14 0 R /Resources << /Font << /F1 15 0 R >> >> >>
+endobj
+14 0 obj
+<< /Length 165 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  - Solving systems of differential equations) Tj
+1 0 0 1 50 744 Tm
+(  - Principal Component Analysis \(PCA\) in data science) Tj
+ET
+
+endstream
+endobj
+15 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 xref
-0 6
+0 16
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
-0000000115 00000 n 
-0000000241 00000 n 
+0000000147 00000 n 
 0000000274 00000 n 
-0000001078 00000 n 
+0000002559 00000 n 
+0000002686 00000 n 
+0000004877 00000 n 
+0000005004 00000 n 
+0000007298 00000 n 
+0000007426 00000 n 
+0000009686 00000 n 
+0000009815 00000 n 
+0000012080 00000 n 
+0000012209 00000 n 
+0000012426 00000 n 
 trailer
-<< /Size 6 /Root 1 0 R >>
+<< /Size 16 /Root 1 0 R >>
 startxref
-1148
+12497
 %%EOF

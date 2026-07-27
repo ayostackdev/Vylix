@@ -3,62 +3,379 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R] /Count 4 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 11 0 R >> >> >>
 endobj
 4 0 obj
-<< /Length 605 >>
+<< /Length 2260 >>
 stream
 BT
-/F1 14 Tf
-1 0 0 1 50 750 Tm
-(Vylix Demo Material) Tj
-1 0 0 1 50 730 Tm
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(Vylix University - Sample Study Material) Tj
+1 0 0 1 50 744 Tm
 () Tj
-1 0 0 1 50 710 Tm
-(Chapter 1: Hydrocarbons) Tj
-1 0 0 1 50 690 Tm
+1 0 0 1 50 728 Tm
+(CHAPTER 1: STRUCTURE AND BONDING) Tj
+1 0 0 1 50 712 Tm
 () Tj
-1 0 0 1 50 670 Tm
-(Alkanes: single bonds) Tj
-1 0 0 1 50 650 Tm
-(Alkenes: double bonds) Tj
-1 0 0 1 50 630 Tm
-(Alkynes: triple bonds) Tj
-1 0 0 1 50 610 Tm
+1 0 0 1 50 696 Tm
+(1.1 Carbon Chemistry) Tj
+1 0 0 1 50 680 Tm
 () Tj
-1 0 0 1 50 590 Tm
-(Chapter 2: Functional Groups) Tj
-1 0 0 1 50 570 Tm
+1 0 0 1 50 664 Tm
+(Carbon has 4 valence electrons and forms 4 covalent bonds.) Tj
+1 0 0 1 50 648 Tm
+(This gives carbon an extraordinary ability to form diverse) Tj
+1 0 0 1 50 632 Tm
+(molecular structures: chains, branches, and rings.) Tj
+1 0 0 1 50 616 Tm
 () Tj
-1 0 0 1 50 550 Tm
-(Hydroxyl \(-OH\): Alcohols) Tj
-1 0 0 1 50 530 Tm
-(Carbonyl \(C=O\): Aldehydes, Ketones) Tj
-1 0 0 1 50 510 Tm
-(Carboxyl \(-COOH\): Carboxylic Acids) Tj
-1 0 0 1 50 490 Tm
-(Amino \(-NH2\): Amines) Tj
+1 0 0 1 50 600 Tm
+(1.2 Hybridization) Tj
+1 0 0 1 50 584 Tm
+() Tj
+1 0 0 1 50 568 Tm
+(  sp3 hybridization: 4 sigma bonds, tetrahedral \(109.5 degrees\)) Tj
+1 0 0 1 50 552 Tm
+(  Example: methane CH4, ethane C2H6) Tj
+1 0 0 1 50 536 Tm
+() Tj
+1 0 0 1 50 520 Tm
+(  sp2 hybridization: 3 sigma + 1 pi bond, trigonal planar) Tj
+1 0 0 1 50 504 Tm
+(  \(120 degrees\). Example: ethene C2H4, benzene C6H6) Tj
+1 0 0 1 50 488 Tm
+() Tj
+1 0 0 1 50 472 Tm
+(  sp hybridization: 2 sigma + 2 pi bonds, linear \(180 degrees\)) Tj
+1 0 0 1 50 456 Tm
+(  Example: ethyne C2H2 \(acetylene\)) Tj
+1 0 0 1 50 440 Tm
+() Tj
+1 0 0 1 50 424 Tm
+(1.3 Bond Polarity) Tj
+1 0 0 1 50 408 Tm
+() Tj
+1 0 0 1 50 392 Tm
+(Electronegativity increases across a period and decreases) Tj
+1 0 0 1 50 376 Tm
+(down a group. Bond polarity arises from differences in) Tj
+1 0 0 1 50 360 Tm
+(electronegativity between bonded atoms.) Tj
+1 0 0 1 50 344 Tm
+() Tj
+1 0 0 1 50 328 Tm
+(Common bond polarities \(most to least polar\):) Tj
+1 0 0 1 50 312 Tm
+(  O-H > N-H > C-H > C-C) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+() Tj
+1 0 0 1 50 264 Tm
+(CHAPTER 2: HYDROCARBONS) Tj
+1 0 0 1 50 248 Tm
+() Tj
+1 0 0 1 50 232 Tm
+(2.1 Alkanes \(CnH2n+2\)) Tj
+1 0 0 1 50 216 Tm
+() Tj
+1 0 0 1 50 200 Tm
+(Saturated hydrocarbons with only single bonds.) Tj
+1 0 0 1 50 184 Tm
+(Named with prefix based on carbon count:) Tj
+1 0 0 1 50 168 Tm
+(  1C: methane    5C: pentane    9C: nonane) Tj
+1 0 0 1 50 152 Tm
+(  2C: ethane     6C: hexane     10C: decane) Tj
+1 0 0 1 50 136 Tm
+(  3C: propane    7C: heptane) Tj
+1 0 0 1 50 120 Tm
+(  4C: butane     8C: octane) Tj
+1 0 0 1 50 104 Tm
+() Tj
+1 0 0 1 50 88 Tm
+(Properties:) Tj
+1 0 0 1 50 72 Tm
+(  - Nonpolar, insoluble in water) Tj
+1 0 0 1 50 56 Tm
+(  - Low melting/boiling points) Tj
 ET
 
 endstream
 endobj
 5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 11 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 2405 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  - Combust readily \(fuel sources\)) Tj
+1 0 0 1 50 744 Tm
+(  - Unreactive \(only undergo substitution at high T/P\)) Tj
+1 0 0 1 50 728 Tm
+() Tj
+1 0 0 1 50 712 Tm
+(2.2 Alkenes \(CnH2n\)) Tj
+1 0 0 1 50 696 Tm
+() Tj
+1 0 0 1 50 680 Tm
+(Unsaturated hydrocarbons with at least one C=C double bond.) Tj
+1 0 0 1 50 664 Tm
+(Named with '-ene' suffix.) Tj
+1 0 0 1 50 648 Tm
+() Tj
+1 0 0 1 50 632 Tm
+(  ethene \(ethylene\): H2C=CH2) Tj
+1 0 0 1 50 616 Tm
+(  propene \(propylene\): CH3-CH=CH2) Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(Key Reactions:) Tj
+1 0 0 1 50 568 Tm
+(  - Hydrogenation: add H2 across double bond \(with Pt/Pd catalyst\)) Tj
+1 0 0 1 50 552 Tm
+(  - Halogenation: add X2 \(Br2, Cl2\) across double bond) Tj
+1 0 0 1 50 536 Tm
+(  - Hydrohalogenation: add HX \(Markovnikov addition\)) Tj
+1 0 0 1 50 520 Tm
+(  - Hydration: add H2O \(acid-catalyzed, Markovnikov\)) Tj
+1 0 0 1 50 504 Tm
+() Tj
+1 0 0 1 50 488 Tm
+(2.3 Alkynes \(CnH2n-2\)) Tj
+1 0 0 1 50 472 Tm
+() Tj
+1 0 0 1 50 456 Tm
+(Contain at least one C-C triple bond. Named with '-yne' suffix.) Tj
+1 0 0 1 50 440 Tm
+() Tj
+1 0 0 1 50 424 Tm
+(  ethyne \(acetylene\): HC=CH) Tj
+1 0 0 1 50 408 Tm
+() Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(CHAPTER 3: FUNCTIONAL GROUPS) Tj
+1 0 0 1 50 360 Tm
+() Tj
+1 0 0 1 50 344 Tm
+(Functional groups determine the chemical properties of organic) Tj
+1 0 0 1 50 328 Tm
+(molecules. They are specific arrangements of atoms that react) Tj
+1 0 0 1 50 312 Tm
+(in predictable ways.) Tj
+1 0 0 1 50 296 Tm
+() Tj
+1 0 0 1 50 280 Tm
+(3.1 Hydroxyl Group \(-OH\) - Alcohols) Tj
+1 0 0 1 50 264 Tm
+() Tj
+1 0 0 1 50 248 Tm
+(  General formula: R-OH) Tj
+1 0 0 1 50 232 Tm
+(  Classification: primary \(1 degree\), secondary \(2\), tertiary \(3\)) Tj
+1 0 0 1 50 216 Tm
+(  based on how many carbons the -OH carbon is attached to.) Tj
+1 0 0 1 50 200 Tm
+() Tj
+1 0 0 1 50 184 Tm
+(  Properties:) Tj
+1 0 0 1 50 168 Tm
+(    - Polar \(can form hydrogen bonds\)) Tj
+1 0 0 1 50 152 Tm
+(    - Higher boiling points than equivalent alkanes) Tj
+1 0 0 1 50 136 Tm
+(    - Soluble in water \(for small molecules\)) Tj
+1 0 0 1 50 120 Tm
+() Tj
+1 0 0 1 50 104 Tm
+(  Key Reactions:) Tj
+1 0 0 1 50 88 Tm
+(    - Dehydration: alcohol -> alkene \(with H2SO4, heat\)) Tj
+1 0 0 1 50 72 Tm
+(    - Oxidation: primary alcohol -> aldehyde -> carboxylic acid) Tj
+1 0 0 1 50 56 Tm
+(                 secondary alcohol -> ketone) Tj
+ET
+
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 11 0 R >> >> >>
+endobj
+8 0 obj
+<< /Length 2095 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(                 tertiary alcohol -> no reaction) Tj
+1 0 0 1 50 744 Tm
+() Tj
+1 0 0 1 50 728 Tm
+(3.2 Carbonyl Group \(C=O\)) Tj
+1 0 0 1 50 712 Tm
+() Tj
+1 0 0 1 50 696 Tm
+(  Aldehydes \(R-CHO\): carbonyl at end of chain) Tj
+1 0 0 1 50 680 Tm
+(    Formaldehyde: H-CHO) Tj
+1 0 0 1 50 664 Tm
+(    Acetaldehyde: CH3-CHO) Tj
+1 0 0 1 50 648 Tm
+() Tj
+1 0 0 1 50 632 Tm
+(  Ketones \(R-CO-R'\): carbonyl in middle of chain) Tj
+1 0 0 1 50 616 Tm
+(    Acetone: CH3-CO-CH3) Tj
+1 0 0 1 50 600 Tm
+() Tj
+1 0 0 1 50 584 Tm
+(  Both have polar C=O bond, but aldehydes more reactive) Tj
+1 0 0 1 50 568 Tm
+(  than ketones due to less steric hindrance.) Tj
+1 0 0 1 50 552 Tm
+() Tj
+1 0 0 1 50 536 Tm
+(3.3 Carboxyl Group \(-COOH\) - Carboxylic Acids) Tj
+1 0 0 1 50 520 Tm
+() Tj
+1 0 0 1 50 504 Tm
+(  General formula: R-COOH) Tj
+1 0 0 1 50 488 Tm
+(  Weak acids \(donate H+ from -OH group\)) Tj
+1 0 0 1 50 472 Tm
+() Tj
+1 0 0 1 50 456 Tm
+(  Examples:) Tj
+1 0 0 1 50 440 Tm
+(    Formic acid: HCOOH \(found in ant stings\)) Tj
+1 0 0 1 50 424 Tm
+(    Acetic acid: CH3COOH \(vinegar\)) Tj
+1 0 0 1 50 408 Tm
+(    Citric acid: found in citrus fruits) Tj
+1 0 0 1 50 392 Tm
+() Tj
+1 0 0 1 50 376 Tm
+(  pKa values indicate acid strength:) Tj
+1 0 0 1 50 360 Tm
+(    Formic acid: 3.75) Tj
+1 0 0 1 50 344 Tm
+(    Acetic acid: 4.76) Tj
+1 0 0 1 50 328 Tm
+(    \(Lower pKa = stronger acid\)) Tj
+1 0 0 1 50 312 Tm
+() Tj
+1 0 0 1 50 296 Tm
+(3.4 Amino Group \(-NH2\) - Amines) Tj
+1 0 0 1 50 280 Tm
+() Tj
+1 0 0 1 50 264 Tm
+(  General formula: R-NH2 \(primary amine\)) Tj
+1 0 0 1 50 248 Tm
+(                   R2-NH \(secondary\)) Tj
+1 0 0 1 50 232 Tm
+(                   R3-N \(tertiary\)) Tj
+1 0 0 1 50 216 Tm
+() Tj
+1 0 0 1 50 200 Tm
+(  Properties:) Tj
+1 0 0 1 50 184 Tm
+(    - Basic \(accept H+ from water\)) Tj
+1 0 0 1 50 168 Tm
+(    - Good nucleophiles) Tj
+1 0 0 1 50 152 Tm
+(    - Found in amino acids, proteins, DNA bases) Tj
+1 0 0 1 50 136 Tm
+() Tj
+1 0 0 1 50 120 Tm
+() Tj
+1 0 0 1 50 104 Tm
+(CHAPTER 4: STEREOCHEMISTRY) Tj
+1 0 0 1 50 88 Tm
+() Tj
+1 0 0 1 50 72 Tm
+(4.1 Isomers) Tj
+1 0 0 1 50 56 Tm
+() Tj
+ET
+
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 10 0 R /Resources << /Font << /F1 11 0 R >> >> >>
+endobj
+10 0 obj
+<< /Length 1048 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 50 760 Tm
+(  Structural Isomers: same formula, different connectivity) Tj
+1 0 0 1 50 744 Tm
+(  Example: butane and isobutane \(both C4H10\)) Tj
+1 0 0 1 50 728 Tm
+() Tj
+1 0 0 1 50 712 Tm
+(  Stereoisomers: same connectivity, different spatial arrangement) Tj
+1 0 0 1 50 696 Tm
+(    - cis/trans \(geometric\): around C=C or ring) Tj
+1 0 0 1 50 680 Tm
+(    - enantiomers: non-superimposable mirror images) Tj
+1 0 0 1 50 664 Tm
+() Tj
+1 0 0 1 50 648 Tm
+(4.2 Chirality) Tj
+1 0 0 1 50 632 Tm
+() Tj
+1 0 0 1 50 616 Tm
+(  A molecule is chiral if it is not superimposable on its) Tj
+1 0 0 1 50 600 Tm
+(  mirror image. The most common cause is a carbon with four) Tj
+1 0 0 1 50 584 Tm
+(  different substituents \(chiral center or stereocenter\).) Tj
+1 0 0 1 50 568 Tm
+() Tj
+1 0 0 1 50 552 Tm
+(  Enantiomers have identical physical properties but rotate) Tj
+1 0 0 1 50 536 Tm
+(  plane-polarized light in opposite directions.) Tj
+1 0 0 1 50 520 Tm
+() Tj
+1 0 0 1 50 504 Tm
+(  R/S naming: based on priority of substituents \(CIP rules\)) Tj
+ET
+
+endstream
+endobj
+11 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
 xref
-0 6
+0 12
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
-0000000115 00000 n 
-0000000241 00000 n 
-0000000274 00000 n 
-0000000897 00000 n 
+0000000133 00000 n 
+0000000260 00000 n 
+0000002572 00000 n 
+0000002699 00000 n 
+0000005156 00000 n 
+0000005283 00000 n 
+0000007430 00000 n 
+0000007558 00000 n 
+0000008659 00000 n 
 trailer
-<< /Size 6 /Root 1 0 R >>
+<< /Size 12 /Root 1 0 R >>
 startxref
-967
+8730
 %%EOF
