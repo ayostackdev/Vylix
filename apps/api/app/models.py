@@ -655,3 +655,50 @@ class ImportedFile(Base):
         Index("ix_imported_files_drive_file_id", "drive_file_id"),
         Index("ix_imported_files_status", "status"),
     )
+
+
+# ── Flashcards ─────────────────────────────────────────────────────
+
+class FlashcardDeck(Base):
+    __tablename__ = "flashcard_decks"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id"))
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    document_id: Mapped[str | None] = mapped_column(String)
+    course_code: Mapped[str | None] = mapped_column(String)
+    card_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    user: Mapped["User"] = relationship(backref="flashcard_decks")
+
+    __table_args__ = (
+        Index("ix_flashcard_decks_user_id", "user_id"),
+    )
+
+
+class Flashcard(Base):
+    __tablename__ = "flashcards"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    deck_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("flashcard_decks.id", ondelete="CASCADE"))
+    front: Mapped[str] = mapped_column(Text, nullable=False)
+    back: Mapped[str] = mapped_column(Text, nullable=False)
+    ease_factor: Mapped[float] = mapped_column(default=2.5)
+    interval_days: Mapped[int] = mapped_column(Integer, default=0)
+    next_review: Mapped[str | None] = mapped_column(DateTime(timezone=True))
+    review_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_reviewed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    deck: Mapped["FlashcardDeck"] = relationship(back_populates="cards")
+
+    __table_args__ = (
+        Index("ix_flashcards_deck_id", "deck_id"),
+        Index("ix_flashcards_next_review", "next_review"),
+    )
+
+
+FlashcardDeck.cards: Mapped[list["Flashcard"]] = relationship(back_populates="deck", cascade="all, delete-orphan")

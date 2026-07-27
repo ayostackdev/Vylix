@@ -6,10 +6,11 @@ import { AIProfessorTab } from './tabs/AIProfessorTab'
 import { StudyAgentTab } from './tabs/StudyAgentTab'
 import { PracticeTab } from './tabs/PracticeTab'
 import { OfflineVaultTab } from './tabs/OfflineVaultTab'
+import { FlashcardTab } from './tabs/FlashcardTab'
 import { useAuth } from '@/context/auth-context'
 import type { DocumentInfo } from './ThreePanelLayout'
 
-type TabId = 'professor' | 'practice' | 'vault' | 'agent'
+type TabId = 'professor' | 'practice' | 'vault' | 'agent' | 'flashcards'
 
 interface InteractiveSidebarProps {
   selectedDoc: DocumentInfo | null
@@ -59,6 +60,15 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'flashcards',
+      label: 'Cards',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       ),
     },
@@ -161,6 +171,7 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
             <Tabs.Content value="practice" className="h-full"><PracticeTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
             <Tabs.Content value="vault" className="h-full"><OfflineVaultTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
             <Tabs.Content value="agent" className="h-full"><StudyAgentTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
+            <Tabs.Content value="flashcards" className="h-full"><FlashcardTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
 
             {/* Read-only overlay */}
             {isReadOnly && (
