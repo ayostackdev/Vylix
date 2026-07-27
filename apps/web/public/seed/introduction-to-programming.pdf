@@ -1,0 +1,72 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 761 >>
+stream
+BT
+/F1 14 Tf
+1 0 0 1 50 750 Tm
+(Vylix Demo Material) Tj
+1 0 0 1 50 730 Tm
+() Tj
+1 0 0 1 50 710 Tm
+(Module 1: Variables and Data Types) Tj
+1 0 0 1 50 690 Tm
+() Tj
+1 0 0 1 50 670 Tm
+(A variable is a named storage location in memory.) Tj
+1 0 0 1 50 650 Tm
+(Primitive types: int, float, string, boolean) Tj
+1 0 0 1 50 630 Tm
+() Tj
+1 0 0 1 50 610 Tm
+(Module 2: Control Flow) Tj
+1 0 0 1 50 590 Tm
+() Tj
+1 0 0 1 50 570 Tm
+(if/else statements) Tj
+1 0 0 1 50 550 Tm
+(for loops) Tj
+1 0 0 1 50 530 Tm
+(while loops) Tj
+1 0 0 1 50 510 Tm
+() Tj
+1 0 0 1 50 490 Tm
+(Module 3: Functions) Tj
+1 0 0 1 50 470 Tm
+() Tj
+1 0 0 1 50 450 Tm
+(A function is a reusable block of code.) Tj
+1 0 0 1 50 430 Tm
+(def function_name\(parameters\):) Tj
+1 0 0 1 50 410 Tm
+(    return result) Tj
+ET
+
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000274 00000 n 
+0000001053 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1123
+%%EOF

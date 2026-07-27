@@ -1,0 +1,64 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 605 >>
+stream
+BT
+/F1 14 Tf
+1 0 0 1 50 750 Tm
+(Vylix Demo Material) Tj
+1 0 0 1 50 730 Tm
+() Tj
+1 0 0 1 50 710 Tm
+(Chapter 1: Hydrocarbons) Tj
+1 0 0 1 50 690 Tm
+() Tj
+1 0 0 1 50 670 Tm
+(Alkanes: single bonds) Tj
+1 0 0 1 50 650 Tm
+(Alkenes: double bonds) Tj
+1 0 0 1 50 630 Tm
+(Alkynes: triple bonds) Tj
+1 0 0 1 50 610 Tm
+() Tj
+1 0 0 1 50 590 Tm
+(Chapter 2: Functional Groups) Tj
+1 0 0 1 50 570 Tm
+() Tj
+1 0 0 1 50 550 Tm
+(Hydroxyl \(-OH\): Alcohols) Tj
+1 0 0 1 50 530 Tm
+(Carbonyl \(C=O\): Aldehydes, Ketones) Tj
+1 0 0 1 50 510 Tm
+(Carboxyl \(-COOH\): Carboxylic Acids) Tj
+1 0 0 1 50 490 Tm
+(Amino \(-NH2\): Amines) Tj
+ET
+
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000274 00000 n 
+0000000897 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+967
+%%EOF

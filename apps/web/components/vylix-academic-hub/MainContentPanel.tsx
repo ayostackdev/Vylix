@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { offlineStore } from '@/lib/offline-store'
-import { API_BASE } from '@/lib/api-base'
+
 import type { DocumentInfo } from './ThreePanelLayout'
 import { PdfViewerInline } from './PdfViewerInline'
 import { DriveSyncBanner } from './DriveSyncBanner'
@@ -29,6 +29,7 @@ interface Material {
   uploader_avatar: string | null
   processing_status: string
   is_shared: boolean
+  is_seed: boolean
   uploaded_at: string | null
 }
 
@@ -50,6 +51,14 @@ function formatDate(dateStr: string | null): string {
   const d = new Date(dateStr)
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
+
+const SEED_MATERIALS: Material[] = [
+  { id: 'seed-1', file_name: 'Calculus Study Guide.pdf', file_url: '/seed/calculus-study-guide.pdf', file_size: 1315, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-2', file_name: 'Physics Formula Sheet.pdf', file_url: '/seed/physics-formula-sheet.pdf', file_size: 1151, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-3', file_name: 'Introduction to Programming.pdf', file_url: '/seed/introduction-to-programming.pdf', file_size: 1327, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-4', file_name: 'Organic Chemistry Notes.pdf', file_url: '/seed/organic-chemistry-notes.pdf', file_size: 1170, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+  { id: 'seed-5', file_name: 'Linear Algebra Basics.pdf', file_url: '/seed/linear-algebra-basics.pdf', file_size: 1352, topic_id: '', uploader_id: '', uploader_name: 'Vylix Team', uploader_avatar: null, processing_status: 'COMPLETED', is_shared: true, is_seed: true, uploaded_at: null },
+]
 
 export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, isReadOnly = false }: MainContentPanelProps) {
   const { connectDrive, driveConnected, driveError, clearError } = useDrive()
@@ -74,20 +83,27 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       setLoading(true)
       const supabase = getSupabaseBrowserClient()
       const { data: { session } } = await supabase.auth.getSession()
-      const headers: Record<string, string> = {}
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
+
+      if (!session?.access_token) {
+        setDocuments(SEED_MATERIALS)
+        return
       }
+
       const url = selectedCourseId
-        ? `${API_BASE}/api/materials/course/${selectedCourseId}`
-        : `${API_BASE}/api/materials/recent`
-      const res = await fetch(url, { headers })
+        ? `/api/materials/course/${selectedCourseId}`
+        : `/api/materials/recent`
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
       if (res.ok) {
         const data = await res.json()
         setDocuments(data)
+      } else {
+        setDocuments(SEED_MATERIALS)
       }
     } catch (error) {
       console.error('[MainContentPanel] Failed to load materials:', error)
+      setDocuments(SEED_MATERIALS)
     } finally {
       setLoading(false)
     }
@@ -97,11 +113,10 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
     try {
       const supabase = getSupabaseBrowserClient()
       const { data: { session } } = await supabase.auth.getSession()
-      const headers: Record<string, string> = {}
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`
-      }
-      const res = await fetch(`${API_BASE}/api/courses/my`, { headers })
+      if (!session?.access_token) return
+      const res = await fetch(`/api/courses/my`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
       if (res.ok) {
         const data = await res.json()
         setCourses(data)
@@ -133,7 +148,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       const supabase = getSupabaseBrowserClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) return
-      const res = await fetch(`${API_BASE}/api/materials/${doc.id}/share`, {
+      const res = await fetch(`/api/materials/${doc.id}/share`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -172,6 +187,11 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
   }, [selectedDoc])
 
   const handleViewPdf = useCallback(async (materialId: string) => {
+    if (materialId.startsWith('seed-')) {
+      const seed = documents.find((d) => d.id === materialId)
+      if (seed) setViewerUrl(seed.file_url)
+      return
+    }
     try {
       const supabase = getSupabaseBrowserClient()
       const { data: { session } } = await supabase.auth.getSession()
@@ -179,14 +199,14 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`
       }
-      const res = await fetch(`${API_BASE}/api/materials/${materialId}/file`, { headers })
+      const res = await fetch(`/api/materials/${materialId}/file`, { headers })
       if (!res.ok) throw new Error('Failed to get file')
       const { download_url } = await res.json()
       setViewerUrl(download_url)
     } catch (error) {
       console.error('[MainContentPanel] Failed to load PDF:', error)
     }
-  }, [])
+  }, [documents])
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -200,7 +220,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       const formData = new FormData()
       formData.append('file', file)
 
-      const res = await fetch(`${API_BASE}/api/uploads`, {
+      const res = await fetch(`/api/uploads`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: formData,
@@ -484,6 +504,14 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
                             <span className="font-medium">{formatFileSize(doc.file_size)}</span>
                             <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
                             <span>{formatDate(doc.uploaded_at)}</span>
+                            {doc.is_seed && (
+                              <>
+                                <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-600">
+                                  Demo
+                                </span>
+                              </>
+                            )}
                             {doc.uploader_name && (
                               <>
                                 <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />

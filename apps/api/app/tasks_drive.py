@@ -120,7 +120,7 @@ def _import_single(user_id: str, access_token: str, storage, file_id: str, topic
         cur.execute(
             "INSERT INTO materials (id, file_name, file_url, file_path, file_size, topic_id, "
             "uploader_id, processing_status, is_shared, content_hash, uploaded_at) "
-            "VALUES (%s,%s,%s,%s,%s,%s,%s,'QUEUED',true,%s,NOW())",
+            "VALUES (%s,%s,%s,%s,%s,%s,%s,'QUEUED',false,%s,NOW())",
             (material_id, file_meta.name, url, storage_path, len(file_data), topic_id, user_id, content_hash),
         )
         conn.commit()
