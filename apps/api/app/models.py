@@ -662,8 +662,8 @@ class ImportedFile(Base):
 class FlashcardDeck(Base):
     __tablename__ = "flashcard_decks"
 
-    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id"))
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("User.id"))
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     document_id: Mapped[str | None] = mapped_column(String)
@@ -682,8 +682,8 @@ class FlashcardDeck(Base):
 class Flashcard(Base):
     __tablename__ = "flashcards"
 
-    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    deck_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("flashcard_decks.id", ondelete="CASCADE"))
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    deck_id: Mapped[str] = mapped_column(String, ForeignKey("flashcard_decks.id", ondelete="CASCADE"))
     front: Mapped[str] = mapped_column(Text, nullable=False)
     back: Mapped[str] = mapped_column(Text, nullable=False)
     ease_factor: Mapped[float] = mapped_column(default=2.5)
