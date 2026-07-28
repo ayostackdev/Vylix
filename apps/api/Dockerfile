@@ -30,5 +30,6 @@ RUN pip install --no-cache-dir -r requirements-lean.txt
 FROM lean-deps AS api-lean
 COPY app/ app/
 COPY db/ db/
+COPY alembic.ini migrations/ migrations/
 EXPOSE 4000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "4000"]
+CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 4000
