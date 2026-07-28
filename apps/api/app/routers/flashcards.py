@@ -9,7 +9,7 @@ from app.database import get_db
 from app.deps import check_ai_token_quota, CurrentUser, get_current_user
 from app.models import FlashcardDeck, Flashcard
 from app.services.vector_store import VectorStore
-from app.services.gemini import gemini_chat
+from app.services.gemini import chat as gemini_chat
 
 router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 
