@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,12 +20,20 @@ settings = get_settings()
 router = APIRouter(prefix="/materials", tags=["materials"])
 
 
+class TopicRef(BaseModel):
+    id: str
+    title: str
+
+    model_config = {"from_attributes": True}
+
+
 class MaterialOut(BaseModel):
     id: str
     file_name: str
     file_url: str
     file_size: int
     topic_id: str
+    topic: TopicRef | None = None
     uploader_id: str
     uploader_name: str | None = None
     uploader_avatar: str | None = None
@@ -50,9 +58,11 @@ class PastQuestionOut(MaterialOut):
 
 def _material_to_out(m: Material) -> MaterialOut:
     uploader = getattr(m, "uploader", None)
+    topic = getattr(m, "topic", None)
     return MaterialOut(
         id=m.id, file_name=m.file_name, file_url=m.file_url,
         file_size=m.file_size, topic_id=m.topic_id,
+        topic=TopicRef.model_validate(topic) if topic else None,
         uploader_id=m.uploader_id,
         uploader_name=uploader.full_name if uploader else None,
         uploader_avatar=uploader.avatar_url if uploader else None,
@@ -65,10 +75,71 @@ def _material_to_out(m: Material) -> MaterialOut:
     )
 
 
+async def _resolve_topic(
+    db: AsyncSession,
+    course_code: str | None,
+    department_code: str | None,
+    user_id: str,
+) -> str:
+    if not course_code:
+        dept_topic = await db.execute(
+            select(Topic).join(Course, Course.id == Topic.course_id)
+            .where(Course.is_general == True, Topic.is_active == True)
+            .order_by(Topic.last_activity.desc()).limit(1)
+        )
+        topic = dept_topic.scalar_one_or_none()
+        if topic:
+            return topic.id
+        course = await db.execute(
+            select(Course).where(Course.is_general == True).limit(1)
+        )
+        course = course.scalar_one_or_none()
+        if not course:
+            raise HTTPException(status_code=400, detail="No course found. Provide a course code.")
+        topic = Topic(
+            id=str(uuid.uuid4()), title="General Materials",
+            course_id=course.id, author_id=user_id, is_active=True,
+        )
+        db.add(topic)
+        await db.flush()
+        return topic.id
+
+    result = await db.execute(
+        select(Course).where(Course.code.ilike(course_code)).limit(1)
+    )
+    course = result.scalar_one_or_none()
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Course '{course_code}' not found. Check the code or upload without one."
+        )
+
+    result = await db.execute(
+        select(Topic).where(Topic.course_id == course.id, Topic.is_active == True)
+        .order_by(Topic.last_activity.desc()).limit(1)
+    )
+    topic = result.scalar_one_or_none()
+    if topic:
+        return topic.id
+
+    topic = Topic(
+        id=str(uuid.uuid4()), title=course.title,
+        course_id=course.id, author_id=user_id, is_active=True,
+    )
+    db.add(topic)
+    await db.flush()
+    return topic.id
+
+
 @router.post("/upload", response_model=MaterialOut)
 async def upload_material(
-    topic_id: str = Query(...),
     file: UploadFile = File(...),
+    title: str | None = Form(None),
+    course_code: str | None = Form(None),
+    department_code: str | None = Form(None),
+    is_past_question: str | None = Form(None),
+    exam_year: str | None = Form(None),
+    semester: str | None = Form(None),
     user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
@@ -84,9 +155,7 @@ async def upload_material(
     if len(data) > max_bytes:
         raise HTTPException(status_code=400, detail=f"File exceeds {settings.max_upload_mb}MB limit")
 
-    topic = await db.get(Topic, topic_id)
-    if not topic:
-        raise HTTPException(status_code=404, detail="Topic not found")
+    topic_id = await _resolve_topic(db, course_code, department_code, user.id)
 
     material_id = str(uuid.uuid4())
     ext = file.filename.split(".")[-1] if file.filename else "pdf"
@@ -97,13 +166,16 @@ async def upload_material(
 
     material = Material(
         id=material_id,
-        file_name=file.filename or f"material.{ext}",
+        file_name=title or file.filename or f"material.{ext}",
         file_url=url,
         file_path=storage_path,
         file_size=len(data),
         topic_id=topic_id,
         uploader_id=user.id,
         processing_status=MaterialProcessingStatus.QUEUED,
+        is_past_question=is_past_question == "true",
+        exam_year=int(exam_year) if exam_year and exam_year.isdigit() else None,
+        semester=semester if semester in ("FIRST", "SECOND") else None,
     )
     db.add(material)
     await db.flush()
@@ -116,15 +188,8 @@ async def upload_material(
     material.processing_job_id = task.id
     await db.flush()
 
-    return MaterialOut(
-        id=material.id, file_name=material.file_name, file_url=material.file_url,
-        file_size=material.file_size, topic_id=material.topic_id,
-        uploader_id=material.uploader_id,
-        uploader_name=user.user.full_name,
-        uploader_avatar=user.user.avatar_url,
-        processing_status=material.processing_status.value,
-        uploaded_at=str(material.uploaded_at) if material.uploaded_at else None,
-    )
+    await db.refresh(material, ["topic"])
+    return _material_to_out(material)
 
 
 @router.delete("/{material_id}")
@@ -178,7 +243,7 @@ async def list_my_materials(
 ):
     result = await db.execute(
         select(Material)
-        .options(selectinload(Material.uploader))
+        .options(selectinload(Material.uploader), selectinload(Material.topic))
         .where(Material.uploader_id == user.id)
         .order_by(Material.uploaded_at.desc())
     )
@@ -201,7 +266,7 @@ async def list_course_materials(
 
     result = await db.execute(
         select(Material)
-        .options(selectinload(Material.uploader))
+        .options(selectinload(Material.uploader), selectinload(Material.topic))
         .join(Topic, Topic.id == Material.topic_id)
         .where(Topic.course_id == course_id, Topic.is_active == True, Material.is_shared == True)
         .order_by(Material.uploaded_at.desc())
@@ -217,7 +282,7 @@ async def list_recent_materials(
 ):
     query = (
         select(Material)
-        .options(selectinload(Material.uploader))
+        .options(selectinload(Material.uploader), selectinload(Material.topic))
         .join(Topic, Topic.id == Material.topic_id)
         .join(Course, Course.id == Topic.course_id)
         .where(
@@ -249,7 +314,7 @@ async def search_past_questions(
 ):
     query = (
         select(Material, Course.code.label("course_code"), Course.title.label("course_title"))
-        .options(selectinload(Material.uploader))
+        .options(selectinload(Material.uploader), selectinload(Material.topic))
         .join(Topic, Topic.id == Material.topic_id)
         .join(Course, Course.id == Topic.course_id)
         .where(Material.is_past_question == True, Material.is_shared == True)
