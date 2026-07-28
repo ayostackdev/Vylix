@@ -1,3 +1,10 @@
+[project]
+name = "vylix-api"
+version = "2.0.0"
+description = "Vylix API backend"
+requires-python = ">=3.11"
+dependencies = []
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

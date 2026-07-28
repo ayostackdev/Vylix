@@ -55,32 +55,6 @@ DAILY_TOKEN_LIMIT = 15
 PREMIUM_TOKEN_LIMIT = 100
 
 
-async def check_ai_token_quota(
-    current_user: CurrentUser = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-) -> CurrentUser:
-    u = current_user.user
-    now = datetime.now(timezone.utc)
-    today = now.date()
-
-    if u.daily_tokens_reset_at is None or u.daily_tokens_reset_at.date() < today:
-        u.daily_tokens_used = 0
-        u.daily_tokens_reset_at = now
-
-    if u.daily_tokens_used >= u.daily_tokens_limit:
-        raise HTTPException(
-            status_code=429,
-            detail="DAILY_LIMIT_REACHED",
-            headers={"X-Tokens-Reset": "midnight"},
-        )
-
-    u.daily_tokens_used += 1
-    u.daily_tokens_reset_at = now
-    await db.flush()
-
-    return current_user
-
-
 @dataclass
 class CurrentUser:
     id: str
@@ -155,6 +129,32 @@ async def get_current_user(
             await db.flush()
 
     return CurrentUser(id=user.id, email=email, full_name=user.full_name, user=user)
+
+
+async def check_ai_token_quota(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> CurrentUser:
+    u = current_user.user
+    now = datetime.now(timezone.utc)
+    today = now.date()
+
+    if u.daily_tokens_reset_at is None or u.daily_tokens_reset_at.date() < today:
+        u.daily_tokens_used = 0
+        u.daily_tokens_reset_at = now
+
+    if u.daily_tokens_used >= u.daily_tokens_limit:
+        raise HTTPException(
+            status_code=429,
+            detail="DAILY_LIMIT_REACHED",
+            headers={"X-Tokens-Reset": "midnight"},
+        )
+
+    u.daily_tokens_used += 1
+    u.daily_tokens_reset_at = now
+    await db.flush()
+
+    return current_user
 
 
 async def get_optional_user(
