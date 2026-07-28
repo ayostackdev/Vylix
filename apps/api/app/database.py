@@ -7,8 +7,14 @@ from app.db_rls import apply_rls_context
 
 settings = get_settings()
 
+def _async_url(url: str) -> str:
+    url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    url = url.replace("?pgbouncer=true", "")
+    return url
+
+
 engine = create_async_engine(
-    settings.database_url.replace("postgresql://", "postgresql+asyncpg://"),
+    _async_url(settings.database_url),
     echo=settings.environment == "development",
     pool_size=20,
     max_overflow=10,
