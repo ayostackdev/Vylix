@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
-import { API_BASE } from '@/lib/api-base'
+
 
 interface Course {
   id: string
@@ -42,7 +42,7 @@ export function MainSidebar({ selectedCourseId, onSelectCourse, variant = 'deskt
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`
       }
-      const res = await fetch(`${API_BASE}/api/courses/my`, { headers })
+      const res = await fetch(`/api/courses/my`, { headers })
       if (res.ok) {
         const data = await res.json()
         setCourses(data)

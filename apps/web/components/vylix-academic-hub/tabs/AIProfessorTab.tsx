@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { offlineStore } from '@/lib/offline-store'
 import { useAuth } from '@/context/auth-context'
+import { DailyLimitModal } from '@/components/profile/DailyLimitModal'
 
 import type { DocumentInfo } from '../ThreePanelLayout'
 
@@ -28,6 +29,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showLimitModal, setShowLimitModal] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const prevDocRef = useRef<DocumentInfo | null>(selectedDoc)
   const mountedRef = useRef(false)
@@ -111,6 +113,11 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
         }
 
         if (res.status === 429) {
+          const err = await res.json().catch(() => ({}))
+          if (err.detail === 'DAILY_LIMIT_REACHED') {
+            setShowLimitModal(true)
+            return 'You\'ve reached your daily AI query limit. Upgrade to premium for more.'
+          }
           return 'You\'re sending messages too quickly. Please wait a moment before trying again.'
         }
       }
@@ -122,6 +129,11 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
       })
 
       if (res.status === 429) {
+        const err = await res.json().catch(() => ({}))
+        if (err.detail === 'DAILY_LIMIT_REACHED') {
+          setShowLimitModal(true)
+          return 'You\'ve reached your daily AI query limit. Upgrade to premium for more.'
+        }
         return 'You\'re sending messages too quickly. Please wait a moment before trying again.'
       }
 
@@ -168,6 +180,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
   }
 
   return (
+    <>
     <div className="flex flex-col h-full bg-white">
       <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
         <h3 className="text-sm font-semibold text-gray-900 tracking-tight">AI Professor</h3>
@@ -272,5 +285,8 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
         </div>
       </div>
     </div>
+
+      <DailyLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
+    </>
   )
 }

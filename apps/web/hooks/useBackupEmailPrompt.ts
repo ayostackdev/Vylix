@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { API_BASE } from '@/lib/api-base';
+
 import { getVaultMaterials } from '@/lib/vault-store';
 
 const MILESTONES = [3, 8, 15, 25];
@@ -51,7 +51,7 @@ export function useBackupEmailPrompt() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/user/backup-status`, {
+      const res = await fetch(`/api/user/backup-status`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) {

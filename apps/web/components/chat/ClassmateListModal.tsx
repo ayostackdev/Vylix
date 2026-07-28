@@ -1,8 +1,23 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
+import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useClassmates, useCreateConversation, type ConversationDetail } from '@/queries/use-collaboration';
+
+interface College {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface Department {
+  id: string;
+  code: string;
+  name: string;
+}
 
 interface ClassmateListModalProps {
   isOpen: boolean;
@@ -11,11 +26,95 @@ interface ClassmateListModalProps {
 }
 
 export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateListModalProps) {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
+  const qc = useQueryClient();
   const { data: classmates, isLoading } = useClassmates();
   const createConversation = useCreateConversation();
 
-  if (!isOpen) return null;
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [selectedCollegeId, setSelectedCollegeId] = useState('');
+  const [selectedDeptId, setSelectedDeptId] = useState('');
+  const [currentLevel, setCurrentLevel] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const needsProfile = !user?.collegeCode || !user?.departmentCode;
+
+  const fetchColleges = useCallback(async () => {
+    try {
+      const res = await fetch('/api/colleges');
+      if (res.ok) setColleges(await res.json());
+    } catch { /* ignore */ }
+  }, []);
+
+  const fetchDepartments = useCallback(async (collegeId: string) => {
+    try {
+      const res = await fetch(`/api/colleges/${collegeId}/departments`);
+      if (res.ok) setDepartments(await res.json());
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (needsProfile) {
+      fetchColleges();
+      setSelectedCollegeId('');
+      setSelectedDeptId('');
+      setCurrentLevel('');
+      setError(null);
+    }
+  }, [isOpen, needsProfile, fetchColleges]);
+
+  useEffect(() => {
+    if (!selectedCollegeId) {
+      setDepartments([]);
+      setSelectedDeptId('');
+      return;
+    }
+    fetchDepartments(selectedCollegeId);
+  }, [selectedCollegeId, fetchDepartments]);
+
+  const handleSave = useCallback(async () => {
+    if (!selectedCollegeId) { setError('Select your university'); return; }
+    if (!selectedDeptId) { setError('Select your department'); return; }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+
+      const body: Record<string, unknown> = {
+        collegeId: selectedCollegeId,
+        departmentId: selectedDeptId,
+      };
+      if (currentLevel) body.currentLevel = currentLevel;
+
+      const res = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to save');
+      }
+
+      await refreshProfile();
+      qc.invalidateQueries({ queryKey: ['users', 'classmates'] });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSaving(false);
+    }
+  }, [selectedCollegeId, selectedDeptId, currentLevel, refreshProfile, qc]);
 
   const handleStartChat = async (classmate: { id: string; fullName: string }) => {
     try {
@@ -29,6 +128,8 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
       // handled by mutation
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -53,7 +154,77 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
-          {isLoading ? (
+          {needsProfile ? (
+            <div className="space-y-4 py-4">
+              <div className="text-center">
+                <span className="text-3xl mb-2 block">🎓</span>
+                <p className="text-sm font-semibold text-gray-700">Set up your academic profile</p>
+                <p className="text-xs text-gray-500 mt-1">Select your university and department to find coursemates.</p>
+              </div>
+
+              {error && (
+                <div className="rounded-xl bg-red-50 border border-red-200 p-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">University</label>
+                <select
+                  value={selectedCollegeId}
+                  onChange={(e) => { setSelectedCollegeId(e.target.value); setSelectedDeptId(''); }}
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                >
+                  <option value="">Select your university</option>
+                  {colleges.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Department</label>
+                <select
+                  value={selectedDeptId}
+                  onChange={(e) => setSelectedDeptId(e.target.value)}
+                  disabled={!selectedCollegeId}
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
+                >
+                  <option value="">Select your department</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">
+                  Current Level <span className="text-gray-400 font-normal normal-case">(optional)</span>
+                </label>
+                <select
+                  value={currentLevel}
+                  onChange={(e) => setCurrentLevel(e.target.value)}
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                >
+                  <option value="">Select your level</option>
+                  <option value="100L">100L</option>
+                  <option value="200L">200L</option>
+                  <option value="300L">300L</option>
+                  <option value="400L">400L</option>
+                  <option value="500L">500L</option>
+                  <option value="Spillover">Spillover</option>
+                </select>
+              </div>
+
+              <button
+                onClick={handleSave}
+                disabled={saving || !selectedCollegeId || !selectedDeptId}
+                className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : 'Continue'}
+              </button>
+            </div>
+          ) : isLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center gap-3 animate-pulse">

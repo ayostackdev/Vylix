@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useDriveFolders, useDriveFiles, useDriveImport } from '@/queries/use-drive';
-import { API_BASE } from '@/lib/api-base';
+
 
 interface DriveFilePickerModalProps {
   isOpen: boolean;
@@ -42,7 +42,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
 
   const fetchCourses = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/courses/my`);
+      const res = await fetch(`/api/courses/my`);
       if (res.ok) {
         const data = await res.json();
         setCourses(data);

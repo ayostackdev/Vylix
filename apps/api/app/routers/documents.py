@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
-from app.deps import check_ai_rate_limit, get_optional_user, CurrentUser
+from app.deps import check_ai_rate_limit, check_ai_token_quota, get_optional_user, CurrentUser
 from app.services.pdf import compress_pdf
 from app.services.ocr import extract_text_with_tesseract
 from app.services.ingestion import ingest_document, search_documents

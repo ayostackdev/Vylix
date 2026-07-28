@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { BackupEmailModal } from '@/components/auth/BackupEmailModal';
-import { API_BASE } from '@/lib/api-base';
+
 
 export function ProfileBackupBanner() {
   const [hasBackupEmail, setHasBackupEmail] = useState<boolean | null>(null);
@@ -15,7 +15,7 @@ export function ProfileBackupBanner() {
     if (!session) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/user/backup-status`, {
+      const res = await fetch(`/api/user/backup-status`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) {
@@ -34,7 +34,7 @@ export function ProfileBackupBanner() {
   const handleDismiss = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      await fetch(`${API_BASE}/api/user/dismiss-email-prompt`, {
+      await fetch(`/api/user/dismiss-email-prompt`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Confetti from 'react-confetti';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { API_BASE } from '@/lib/api-base';
+
 
 export interface GraduationCelebrationModalProps {
   isOpen: boolean;
@@ -34,7 +34,7 @@ export function GraduationCelebrationModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const res = await fetch(`${API_BASE}/api/user/graduate`, {
+      const res = await fetch(`/api/user/graduate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

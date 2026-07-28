@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { useSearchParams } from 'next/navigation'
 import { DriveFilePickerModal } from './DriveFilePickerModal'
-import { API_BASE } from '@/lib/api-base'
+
 
 type Step = 'welcome' | 'auth' | 'drive' | 'picking' | 'complete'
 
@@ -59,7 +59,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         setIsLoading(false)
         return
       }
-      const res = await fetch(`${API_BASE}/api/google-drive/connect`, {
+      const res = await fetch(`/api/v1/google-drive/connect`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       })
       if (!res.ok) throw new Error('Failed to start Drive connection')

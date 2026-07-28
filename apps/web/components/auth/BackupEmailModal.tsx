@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { API_BASE } from '@/lib/api-base';
+
 
 export interface BackupEmailModalProps {
   isOpen: boolean;
@@ -37,7 +37,7 @@ export function BackupEmailModal({
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
 
-      const res = await fetch(`${API_BASE}/api/user/link-backup-email`, {
+      const res = await fetch(`/api/user/link-backup-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export function BackupEmailModal({
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        await fetch(`${API_BASE}/api/user/dismiss-email-prompt`, {
+        await fetch(`/api/user/dismiss-email-prompt`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

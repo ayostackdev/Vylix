@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { API_BASE } from '@/lib/api-base';
+
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useBackupEmailPrompt } from '@/hooks/useBackupEmailPrompt';
 import { BackupEmailModal } from '@/components/auth/BackupEmailModal';
@@ -43,7 +43,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
 
-      const res = await fetch(`${API_BASE}/api/materials/${id}`, {
+      const res = await fetch(`/api/materials/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
@@ -58,14 +58,13 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
 
   const openFile = useCallback(async (id: string, title: string) => {
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       const headers: Record<string, string> = {};
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
-      const url = `${apiBaseUrl}/api/materials/${id}/file`;
+      const url = `/api/materials/${id}/file`;
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error('Failed to get file');
       const blob = await res.blob();
@@ -85,7 +84,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const res = await fetch(`${API_BASE}/api/materials/my-materials?limit=50`, { headers });
+      const res = await fetch(`/api/materials/my-materials?limit=50`, { headers });
       if (!res.ok) throw new Error('Failed to fetch vault materials');
       const json = await res.json();
       setItems(json.items ?? []);

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { API_BASE } from '@/lib/api-base';
+
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useAuth } from '@/context/auth-context';
 
@@ -58,7 +58,7 @@ export function PastQuestionsView() {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const res = await fetch(`${API_BASE}/api/materials/past-questions?${params.toString()}`, { headers });
+      const res = await fetch(`/api/materials/past-questions?${params.toString()}`, { headers });
       if (!res.ok) throw new Error('Failed to fetch past questions');
       const json = await res.json();
       setItems(json.items ?? []);
@@ -88,7 +88,7 @@ export function PastQuestionsView() {
       if (session?.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
-      const res = await fetch(`${API_BASE}/api/materials/${id}/file`, { headers });
+      const res = await fetch(`/api/materials/${id}/file`, { headers });
       if (!res.ok) throw new Error('Failed to get file');
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
@@ -105,7 +105,7 @@ export function PastQuestionsView() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
 
-      const res = await fetch(`${API_BASE}/api/materials/${id}`, {
+      const res = await fetch(`/api/materials/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       });

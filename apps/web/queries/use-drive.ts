@@ -51,7 +51,7 @@ export function useDriveFolders(folderId: string = 'root') {
   return useQuery({
     queryKey: ['drive-folders', folderId],
     queryFn: () => authFetch(`/api/google-drive/folders?folder_id=${folderId}`) as Promise<DriveFolder[]>,
-    enabled: false,
+    enabled: true,
   });
 }
 

@@ -7,6 +7,7 @@ import { StudyAgentTab } from './tabs/StudyAgentTab'
 import { PracticeTab } from './tabs/PracticeTab'
 import { OfflineVaultTab } from './tabs/OfflineVaultTab'
 import { FlashcardTab } from './tabs/FlashcardTab'
+import { TokenCounter } from '@/components/profile/TokenCounter'
 import { useAuth } from '@/context/auth-context'
 import type { DocumentInfo } from './ThreePanelLayout'
 
@@ -163,6 +164,9 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
                   <span className="text-[10px] sm:text-[11px]">{tab.label}</span>
                 </Tabs.Trigger>
               ))}
+              <div className="flex items-center pl-1">
+                <TokenCounter />
+              </div>
             </div>
           </Tabs.List>
 

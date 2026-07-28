@@ -61,6 +61,10 @@ class Settings(BaseSettings):
     google_redirect_uri: str = Field(default="http://localhost:4000/api/v1/google-drive/callback")
     frontend_url: str = Field(default="http://localhost:3000")
 
+    # Paystack
+    paystack_secret_key: str = Field(default="")
+    paystack_public_key: str = Field(default="")
+
     # Worker
     materials_worker_concurrency: int = Field(default=5)
 

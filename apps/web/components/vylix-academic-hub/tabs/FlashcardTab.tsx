@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/auth-context'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
+import { DailyLimitModal } from '@/components/profile/DailyLimitModal'
 import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface FlashcardTabProps {
@@ -44,6 +45,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
   const [reviewDone, setReviewDone] = useState(false)
   const [reviewed, setReviewed] = useState(0)
   const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null)
+  const [showLimitModal, setShowLimitModal] = useState(false)
 
   const supabase = getSupabaseBrowserClient()
 
@@ -110,6 +112,11 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
         const data = await res.json()
         setDecks((prev) => [data.deck, ...prev])
         setView('decks')
+      } else if (res.status === 429) {
+        const err = await res.json().catch(() => ({}))
+        if (err.detail === 'DAILY_LIMIT_REACHED') {
+          setShowLimitModal(true)
+        }
       }
     } finally {
       setGenerating(false)
@@ -286,6 +293,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
 
   // ── Deck list view ─────────────────────────────────────────────
   return (
+    <>
     <div className="flex flex-col h-full bg-white">
       <div className="px-4 py-3 border-b border-gray-100 shrink-0">
         <div className="flex items-center justify-between">
@@ -342,5 +350,8 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
         )}
       </div>
     </div>
+
+      <DailyLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
+    </>
   )
 }

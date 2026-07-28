@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useProgressiveGating } from '@/context/progressive-gating-context';
 import { useAuth } from '@/context/auth-context';
-import { API_BASE } from '@/lib/api-base';
+
 
 const RE_PROMPT_DAYS = 7;
 
@@ -22,7 +22,7 @@ export function SchoolEmailBanner() {
   const handleDismiss = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      await fetch(`${API_BASE}/api/user/dismiss-school-email-prompt`, {
+      await fetch(`/api/user/dismiss-school-email-prompt`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

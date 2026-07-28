@@ -11,7 +11,7 @@ from app.routers import (
     health, colleges, courses, topics, user, materials,
     qna, gamification, settings as settings_router, collaboration, maintenance,
     documents, analytics, insights, uploads, ws, google_drive, study_agent,
-    digest, flashcards,
+    digest, flashcards, payments,
 )
 
 settings = get_settings()
@@ -80,3 +80,6 @@ app.include_router(digest.router, prefix=settings.api_prefix)
 
 # Flashcards
 app.include_router(flashcards.router, prefix=settings.api_prefix)
+
+# Payments
+app.include_router(payments.router, prefix=settings.api_prefix)

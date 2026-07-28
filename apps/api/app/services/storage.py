@@ -80,10 +80,12 @@ class AppwriteStorage(StorageProvider):
     async def upload(self, bucket: str, path: str, data: bytes, content_type: str) -> str:
         import httpx
         files = {"file": (Path(path).name, data, content_type)}
+        data_fields = {"fileId": "unique()"}
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{self.endpoint}/storage/buckets/{self.bucket_id}/files",
                 headers={k: v for k, v in self.headers.items() if k != "Content-Type"},
+                data=data_fields,
                 files=files,
             )
             resp.raise_for_status()
@@ -97,7 +99,8 @@ class AppwriteStorage(StorageProvider):
                 f"{self.endpoint}/storage/buckets/{self.bucket_id}/files/{path}",
                 headers={k: v for k, v in self.headers.items() if k != "Content-Type"},
             )
-            resp.raise_for_status()
+            if resp.status_code != 404:
+                resp.raise_for_status()
 
     async def get_signed_url(self, bucket: str, path: str, expires_in: int = 3600) -> str:
         import httpx

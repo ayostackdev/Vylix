@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '@/context/auth-context'
 import { useStudyAgent } from '@/queries/use-study-agent'
+import { DailyLimitModal } from '@/components/profile/DailyLimitModal'
 import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface Task {
@@ -32,6 +33,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
   const [tasks, setTasks] = useState<Task[]>([])
   const [log, setLog] = useState<string[]>([])
   const [studyPlan, setStudyPlan] = useState<string | null>(null)
+  const [showLimitModal, setShowLimitModal] = useState(false)
 
   const addLog = useCallback((message: string) => {
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`])
@@ -94,6 +96,13 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error'
       addLog(`Agent error: ${msg}`)
+
+      if (msg.includes('DAILY_LIMIT_REACHED')) {
+        setShowLimitModal(true)
+        addLog('Daily AI query limit reached. Upgrade to premium for more.')
+        return
+      }
+
       addLog('Falling back to local analysis...')
 
       const fallback = buildFallbackPlan(courseCode, docName)
@@ -133,6 +142,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
   }
 
   return (
+    <>
     <div className="flex flex-col h-full bg-white">
       <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
         <div className="flex items-center justify-between">
@@ -269,6 +279,9 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
         )}
       </div>
     </div>
+
+      <DailyLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
+    </>
   )
 }
 

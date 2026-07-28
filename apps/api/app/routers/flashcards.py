@@ -6,7 +6,7 @@ from sqlalchemy import select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.deps import CurrentUser, get_current_user
+from app.deps import check_ai_token_quota, CurrentUser, get_current_user
 from app.models import FlashcardDeck, Flashcard
 from app.services.vector_store import VectorStore
 from app.services.gemini import gemini_chat
@@ -329,7 +329,7 @@ async def get_due_cards(
 @router.post("/generate")
 async def generate_flashcards(
     payload: GenerateRequest,
-    user: CurrentUser = Depends(get_current_user),
+    user: CurrentUser = Depends(check_ai_token_quota),
     db: AsyncSession = Depends(get_db),
 ):
     results = _vector_store.query("key concepts definitions formulas", top_k=5)

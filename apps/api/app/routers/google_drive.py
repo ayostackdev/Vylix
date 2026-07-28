@@ -111,6 +111,7 @@ async def google_callback(
                 account.refresh_token = tokens.refresh_token
             account.token_expires_at = datetime.fromtimestamp(tokens.expires_at, tz=timezone.utc) if tokens.expires_at else None
             account.scope = tokens.scope
+            account.email = google_email
         else:
             account = ConnectedAccount(
                 id=str(uuid.uuid4()),
@@ -121,6 +122,7 @@ async def google_callback(
                 refresh_token=tokens.refresh_token,
                 token_expires_at=datetime.fromtimestamp(tokens.expires_at, tz=timezone.utc) if tokens.expires_at else None,
                 scope=tokens.scope,
+                email=google_email,
             )
             db.add(account)
 
@@ -150,7 +152,7 @@ async def connection_status(
         return ConnectionStatus(connected=False)
     return ConnectionStatus(
         connected=True,
-        email=account.scope,
+        email=account.email or account.provider_user_id,
         connected_at=str(account.created_at) if account.created_at else None,
     )
 

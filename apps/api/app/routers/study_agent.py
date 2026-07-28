@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from app.deps import CurrentUser, get_current_user
+from app.deps import check_ai_token_quota, CurrentUser, get_current_user
 from app.services.academic_agent import run_vylix_academic_agent
 
 router = APIRouter(prefix="/study-agent", tags=["study-agent"])
@@ -27,7 +27,7 @@ class StudyAgentResponse(BaseModel):
 @router.post("/run", response_model=StudyAgentResponse)
 async def run_study_agent(
     payload: StudyAgentRequest,
-    user: CurrentUser = Depends(get_current_user),
+    user: CurrentUser = Depends(check_ai_token_quota),
 ):
     try:
         result = run_vylix_academic_agent(

@@ -13,7 +13,7 @@ from app.database import get_db
 from app.deps import CurrentUser, get_current_user
 from app.models import (
     User, UserEmail, UserProfile, UserPrivacy, UserStreak,
-    PointsTransaction, College, Department,
+    PointsTransaction, College, Department, Subscription,
 )
 from app.schemas import StreakWithPointsOut
 from app.services.storage import get_storage
@@ -315,3 +315,38 @@ async def export_data(
         "contribution_score": u.contribution_score,
         "created_at": str(u.created_at) if u.created_at else None,
     }
+
+
+class AiTokensOut(BaseModel):
+    used: int
+    limit: int
+    remaining: int
+    is_premium: bool
+
+
+@router.get("/ai-tokens", response_model=AiTokensOut)
+async def get_ai_tokens(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    u = user.user
+    now = datetime.now(timezone.utc)
+
+    result = await db.execute(
+        select(Subscription).where(
+            Subscription.user_id == u.id,
+            Subscription.status == "active",
+            Subscription.expires_at > now,
+        ).limit(1)
+    )
+    active_sub = result.scalar_one_or_none()
+
+    is_premium = active_sub is not None
+    limit = 100 if is_premium else 15
+
+    return AiTokensOut(
+        used=u.daily_tokens_used,
+        limit=limit,
+        remaining=max(0, limit - u.daily_tokens_used),
+        is_premium=is_premium,
+    )
