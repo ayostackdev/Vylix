@@ -32,6 +32,9 @@ pandas>=2.2.0
 scikit-learn>=1.5.0
 google-genai>=1.0.0
 
+# JWT
+PyJWT>=2.8.0
+
 # Rate limiting
 slowapi>=0.1.9
 
