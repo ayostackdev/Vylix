@@ -171,6 +171,7 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
     if (messages && messages.length > 0 && user) {
       markRead.mutate({ conversationId, messageId: messages[messages.length - 1].id });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, messages?.length]);
 
   const handleSend = async () => {

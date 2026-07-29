@@ -13,7 +13,7 @@ from app.database import get_db
 from app.deps import CurrentUser, get_current_user
 from app.models import (
     User, UserEmail, UserProfile, UserPrivacy, UserStreak,
-    PointsTransaction, College, Department, Subscription,
+    PointsTransaction, University, Department, Subscription,
 )
 from app.schemas import StreakWithPointsOut
 from app.services.storage import get_storage
@@ -43,6 +43,7 @@ class UserProfileOut(BaseModel):
     created_at: str | None = None
     college_name: str | None = None
     department_name: str | None = None
+    department_code: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -73,25 +74,28 @@ async def get_profile(
     u = user.user
     college_name = None
     department_name = None
-    if u.college_id:
-        college = await db.get(College, u.college_id)
-        if college:
-            college_name = college.name
+    department_code = None
+    if u.university_id:
+        university = await db.get(University, u.university_id)
+        if university:
+            college_name = university.name
     if u.department_id:
         dept = await db.get(Department, u.department_id)
         if dept:
             department_name = dept.name
+            department_code = dept.code
 
     return UserProfileOut(
         id=u.id, full_name=u.full_name, matric_number=u.matric_number,
         entry_year=u.entry_year, current_level=u.current_level,
         school_email=u.school_email, status=u.status.value,
-        college_id=u.college_id, department_id=u.department_id,
+        college_id=u.university_id, department_id=u.department_id,
         bio=u.bio, avatar_url=u.avatar_url, contribution_score=u.contribution_score,
         email_prompt_dismissed_at=str(u.email_prompt_dismissed_at) if u.email_prompt_dismissed_at else None,
         school_email_prompt_dismissed_at=str(u.school_email_prompt_dismissed_at) if u.school_email_prompt_dismissed_at else None,
         created_at=str(u.created_at) if u.created_at else None,
         college_name=college_name, department_name=department_name,
+        department_code=department_code,
     )
 
 
@@ -109,7 +113,7 @@ async def update_profile(
     if payload.entry_year is not None:
         u.entry_year = payload.entry_year
     if payload.college_id is not None:
-        u.college_id = payload.college_id
+        u.university_id = payload.college_id
     if payload.department_id is not None:
         u.department_id = payload.department_id
     if payload.current_level is not None:
@@ -309,7 +313,7 @@ async def export_data(
         "entry_year": u.entry_year,
         "current_level": u.current_level,
         "status": u.status.value,
-        "college_id": u.college_id,
+        "college_id": u.university_id,
         "department_id": u.department_id,
         "bio": u.bio,
         "contribution_score": u.contribution_score,

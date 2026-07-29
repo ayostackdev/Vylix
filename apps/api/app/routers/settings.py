@@ -138,11 +138,11 @@ async def public_profile(
         dept = await db.get(Department, u.department_id)
         if dept:
             dept_name = dept.name
-    if u.college_id:
-        from app.models import College
-        college = await db.get(College, u.college_id)
-        if college:
-            college_name = college.name
+    if u.university_id:
+        from app.models import University
+        university = await db.get(University, u.university_id)
+        if university:
+            college_name = university.name
     return PublicProfileOut(
         id=u.id, full_name=u.full_name, avatar_url=u.avatar_url,
         bio=u.bio, contribution_score=u.contribution_score,

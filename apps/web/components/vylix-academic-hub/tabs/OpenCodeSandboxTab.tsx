@@ -129,7 +129,7 @@ export function OpenCodeSandboxTab() {
               className="bg-gray-900 rounded-xl p-3 max-h-40 overflow-y-auto font-mono text-xs min-h-[60px]"
             >
               {output.length === 0 ? (
-                <span className="text-gray-500 italic">Click "Run" to execute your code...</span>
+                <span className="text-gray-500 italic">Click &quot;Run&quot; to execute your code...</span>
               ) : (
                 output.map((line, i) => (
                   <div

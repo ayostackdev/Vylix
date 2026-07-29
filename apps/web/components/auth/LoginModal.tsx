@@ -191,7 +191,7 @@ export function LoginModal() {
         <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50/35 px-6 py-4">
           <p className="text-xs text-gray-700">
             <strong>Registration Required:</strong> You can browse materials and posts
-            without signing in, but you'll need to register to upload, comment, or participate.
+            without signing in, but you&apos;ll need to register to upload, comment, or participate.
           </p>
         </div>
       </div>

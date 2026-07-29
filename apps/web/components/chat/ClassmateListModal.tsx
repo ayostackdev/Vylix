@@ -7,10 +7,17 @@ import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useClassmates, useCreateConversation, type ConversationDetail } from '@/queries/use-collaboration';
 
+interface University {
+  id: string;
+  code: string;
+  name: string;
+}
+
 interface College {
   id: string;
   code: string;
   name: string;
+  durationYears: number;
 }
 
 interface Department {
@@ -31,26 +38,35 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
   const { data: classmates, isLoading } = useClassmates();
   const createConversation = useCreateConversation();
 
+  const [universities, setUniversities] = useState<University[]>([]);
   const [colleges, setColleges] = useState<College[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [selectedUniId, setSelectedUniId] = useState('');
   const [selectedCollegeId, setSelectedCollegeId] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState('');
   const [currentLevel, setCurrentLevel] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const needsProfile = !user?.collegeCode || !user?.departmentCode;
+  const needsProfile = !user?.collegeId || !user?.departmentCode;
 
-  const fetchColleges = useCallback(async () => {
+  const fetchUniversities = useCallback(async () => {
     try {
       const res = await fetch('/api/colleges');
+      if (res.ok) setUniversities(await res.json());
+    } catch { /* ignore */ }
+  }, []);
+
+  const fetchColleges = useCallback(async (universityId: string) => {
+    try {
+      const res = await fetch(`/api/colleges/${universityId}/colleges`);
       if (res.ok) setColleges(await res.json());
     } catch { /* ignore */ }
   }, []);
 
   const fetchDepartments = useCallback(async (collegeId: string) => {
     try {
-      const res = await fetch(`/api/colleges/${collegeId}/departments`);
+      const res = await fetch(`/api/colleges/colleges/${collegeId}/departments`);
       if (res.ok) setDepartments(await res.json());
     } catch { /* ignore */ }
   }, []);
@@ -58,13 +74,25 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
   useEffect(() => {
     if (!isOpen) return;
     if (needsProfile) {
-      fetchColleges();
+      fetchUniversities();
+      setSelectedUniId('');
       setSelectedCollegeId('');
       setSelectedDeptId('');
       setCurrentLevel('');
       setError(null);
     }
-  }, [isOpen, needsProfile, fetchColleges]);
+  }, [isOpen, needsProfile, fetchUniversities]);
+
+  useEffect(() => {
+    if (!selectedUniId) {
+      setColleges([]);
+      setSelectedCollegeId('');
+      setDepartments([]);
+      setSelectedDeptId('');
+      return;
+    }
+    fetchColleges(selectedUniId);
+  }, [selectedUniId, fetchColleges]);
 
   useEffect(() => {
     if (!selectedCollegeId) {
@@ -76,7 +104,8 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
   }, [selectedCollegeId, fetchDepartments]);
 
   const handleSave = useCallback(async () => {
-    if (!selectedCollegeId) { setError('Select your university'); return; }
+    if (!selectedUniId) { setError('Select your university'); return; }
+    if (!selectedCollegeId) { setError('Select your college'); return; }
     if (!selectedDeptId) { setError('Select your department'); return; }
 
     setSaving(true);
@@ -88,7 +117,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
       if (!session) throw new Error('No active session');
 
       const body: Record<string, unknown> = {
-        collegeId: selectedCollegeId,
+        collegeId: selectedUniId,
         departmentId: selectedDeptId,
       };
       if (currentLevel) body.currentLevel = currentLevel;
@@ -114,7 +143,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
     } finally {
       setSaving(false);
     }
-  }, [selectedCollegeId, selectedDeptId, currentLevel, refreshProfile, qc]);
+  }, [selectedUniId, selectedCollegeId, selectedDeptId, currentLevel, refreshProfile, qc]);
 
   const handleStartChat = async (classmate: { id: string; fullName: string }) => {
     try {
@@ -171,17 +200,31 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">University</label>
                 <select
-                  value={selectedCollegeId}
-                  onChange={(e) => { setSelectedCollegeId(e.target.value); setSelectedDeptId(''); }}
+                  value={selectedUniId}
+                  onChange={(e) => { setSelectedUniId(e.target.value); setSelectedCollegeId(''); setSelectedDeptId(''); }}
                   className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
                 >
-                  <option value="">Select your university</option>
+                  <option value="">{universities.length === 0 ? 'No universities loaded' : 'Select your university'}</option>
+                  {universities.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">College / Faculty</label>
+                <select
+                  value={selectedCollegeId}
+                  onChange={(e) => { setSelectedCollegeId(e.target.value); setSelectedDeptId(''); }}
+                  disabled={!selectedUniId}
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
+                >
+                  <option value="">{colleges.length === 0 ? 'No colleges loaded' : 'Select your college'}</option>
                   {colleges.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">Department</label>
                 <select
@@ -190,7 +233,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
                   disabled={!selectedCollegeId}
                   className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
                 >
-                  <option value="">Select your department</option>
+                  <option value="">{departments.length === 0 ? 'No departments loaded' : 'Select your department'}</option>
                   {departments.map((d) => (
                     <option key={d.id} value={d.id}>{d.name}</option>
                   ))}
@@ -218,7 +261,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
 
               <button
                 onClick={handleSave}
-                disabled={saving || !selectedCollegeId || !selectedDeptId}
+                disabled={saving || !selectedUniId || !selectedDeptId}
                 className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Continue'}

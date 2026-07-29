@@ -36,10 +36,6 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
     }
   }, [])
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
   const loadData = async () => {
     try {
       const mats = await getVaultMaterials()
@@ -55,6 +51,10 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
       }
     } catch { toast.error('Failed to load storage info'); }
   }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   const handleDelete = async (id: string) => {
     const updated = await deleteVaultMaterial(id)
@@ -81,7 +81,7 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {!isOnline && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <p className="text-xs font-medium text-amber-800">You're offline</p>
+            <p className="text-xs font-medium text-amber-800">You&apos;re offline</p>
             <p className="text-xs text-amber-600 mt-1">
               You can still access your saved materials and chat history.
             </p>
@@ -95,7 +95,7 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
               <div className="text-3xl mb-2">📦</div>
               <p className="text-xs text-gray-400">No materials saved offline yet</p>
               <p className="text-xs text-gray-400 mt-1">
-                Click "Save Offline" on any document to access it without internet
+                Click &quot;Save Offline&quot; on any document to access it without internet
               </p>
             </div>
           ) : (
@@ -147,7 +147,7 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-4">
             <p className="text-xs font-medium text-blue-800">💡 Offline Tip</p>
             <p className="text-xs text-blue-700 mt-1">
-              Materials in the vault are stored on your device. They're available even without internet —
+              Materials in the vault are stored on your device.               They&apos;re available even without internet —
               perfect for studying on campus during network outages or low data.
             </p>
           </div>

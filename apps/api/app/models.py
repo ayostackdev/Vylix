@@ -47,26 +47,45 @@ class RSVPStatus(str, enum.Enum):
     MAYBE = "MAYBE"
     DECLINED = "DECLINED"
 
+# ── University / College / Department / Course ─────────────────────
 
-# ── College / Department / Course ──────────────────────────────────
+
+class DepartmentCatalog(Base):
+    __tablename__ = "department_catalog"
+
+    code: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+
 
 class College(Base):
     __tablename__ = "colleges"
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    code: Mapped[str] = mapped_column(String, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    duration_years: Mapped[int] = mapped_column(Integer, server_default="4")
+    university_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("universities.id", ondelete="CASCADE"))
+
+    university: Mapped["University"] = relationship(back_populates="colleges")
+    departments: Mapped[list["Department"]] = relationship(back_populates="college", cascade="all, delete-orphan")
+
+
+class University(Base):
+    __tablename__ = "universities"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
     code: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    duration_years: Mapped[int] = mapped_column(Integer, default=4)
 
-    departments: Mapped[list["Department"]] = relationship(back_populates="college", cascade="all, delete-orphan")
-    users: Mapped[list["User"]] = relationship(back_populates="college")
+    colleges: Mapped[list["College"]] = relationship(back_populates="university", cascade="all, delete-orphan")
+    users: Mapped[list["User"]] = relationship(back_populates="university")
 
 
 class Department(Base):
     __tablename__ = "departments"
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    code: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(String, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     college_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("colleges.id", ondelete="CASCADE"))
 
@@ -112,7 +131,7 @@ class User(Base):
     school_email: Mapped[str | None] = mapped_column(String)
     status: Mapped[UserStatus] = mapped_column(Enum(UserStatus), default=UserStatus.STUDENT)
     graduated_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    college_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("colleges.id", ondelete="RESTRICT"))
+    university_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("universities.id", ondelete="RESTRICT"))
     department_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("departments.id", ondelete="RESTRICT"))
     bio: Mapped[str | None] = mapped_column(Text)
     avatar_url: Mapped[str | None] = mapped_column(String)
@@ -127,7 +146,7 @@ class User(Base):
     last_active_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     user_streak_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("user_streaks.id"))
 
-    college: Mapped["College | None"] = relationship(back_populates="users")
+    university: Mapped["University | None"] = relationship(back_populates="users")
     department: Mapped["Department | None"] = relationship(back_populates="users")
     topics_created: Mapped[list["Topic"]] = relationship("Topic", back_populates="author", foreign_keys="Topic.author_id")
     materials: Mapped[list["Material"]] = relationship(back_populates="uploader")
@@ -150,7 +169,7 @@ class User(Base):
 
     __table_args__ = (
         Index("ix_users_department_id", "department_id"),
-        Index("ix_users_college_id", "college_id"),
+        Index("ix_users_university_id", "university_id"),
         Index("ix_users_current_level", "current_level"),
         Index("ix_users_status", "status"),
     )

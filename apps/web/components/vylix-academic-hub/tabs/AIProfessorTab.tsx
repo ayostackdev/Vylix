@@ -74,6 +74,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
         }
 
     setMessages((msgs) => [...msgs, announcement])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDoc?.id])
 
   const callAI = useCallback(async (userMessage: string) => {

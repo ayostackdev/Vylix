@@ -7,6 +7,12 @@ import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useStreakAndPoints, useUserBadges } from '@/queries/use-gamification';
 
+interface University {
+  id: string;
+  code: string;
+  name: string;
+}
+
 interface College {
   id: string;
   code: string;
@@ -40,8 +46,10 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { data: badges } = useUserBadges();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [universities, setUniversities] = useState<University[]>([]);
   const [colleges, setColleges] = useState<College[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [selectedUniId, setSelectedUniId] = useState('');
   const [selectedCollegeId, setSelectedCollegeId] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState('');
   const [currentLevel, setCurrentLevel] = useState('');
@@ -50,11 +58,22 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchColleges = useCallback(async () => {
+  const fetchUniversities = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       const res = await fetch('/api/colleges', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) setUniversities(await res.json());
+    } catch { toast.error('Failed to load universities'); }
+  }, [supabase]);
+
+  const fetchColleges = useCallback(async (universityId: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const res = await fetch(`/api/colleges/${universityId}/colleges`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) setColleges(await res.json());
@@ -65,7 +84,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      const res = await fetch(`/api/colleges/${collegeId}/departments`, {
+      const res = await fetch(`/api/colleges/colleges/${collegeId}/departments`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (res.ok) setDepartments(await res.json());
@@ -74,29 +93,44 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
   useEffect(() => {
     if (!isOpen) return;
-    fetchColleges();
-  }, [isOpen, fetchColleges]);
+    fetchUniversities();
+  }, [isOpen, fetchUniversities]);
 
   useEffect(() => {
-    if (!selectedCollegeId) return;
+    if (!selectedUniId) {
+      setColleges([]);
+      setSelectedCollegeId('');
+      setDepartments([]);
+      setSelectedDeptId('');
+      return;
+    }
+    fetchColleges(selectedUniId);
+  }, [selectedUniId, fetchColleges]);
+
+  useEffect(() => {
+    if (!selectedCollegeId) {
+      setDepartments([]);
+      setSelectedDeptId('');
+      return;
+    }
     fetchDepartments(selectedCollegeId);
   }, [selectedCollegeId, fetchDepartments]);
 
   useEffect(() => {
-    if (!isOpen || colleges.length === 0 || !user?.collegeCode) return;
-    const matched = colleges.find((c) => c.code === user.collegeCode);
-    if (matched && matched.id !== selectedCollegeId) {
-      setSelectedCollegeId(matched.id);
+    if (!isOpen || universities.length === 0 || !user?.collegeId) return;
+    const matched = universities.find((u) => u.id === user.collegeId);
+    if (matched && matched.id !== selectedUniId) {
+      setSelectedUniId(matched.id);
     }
-  }, [isOpen, colleges, user?.collegeCode]);
+  }, [isOpen, universities, user?.collegeId, selectedUniId]);
 
-  const enterEditMode = () => {
+  const enterEditMode = async () => {
     setFullName(user?.fullName || '');
     setCurrentLevel(user?.currentLevel || '');
-    const matchedCollege = colleges.find((c) => c.code === user?.collegeCode);
-    setSelectedCollegeId(matchedCollege?.id || '');
-    const matchedDept = departments.find((d) => d.code === user?.departmentCode);
-    setSelectedDeptId(matchedDept?.id || '');
+    const matchedUni = universities.find((u) => u.id === user?.collegeId);
+    setSelectedUniId(matchedUni?.id || '');
+    setSelectedCollegeId('');
+    setSelectedDeptId('');
     setError('');
     setIsEditing(true);
   };
@@ -163,7 +197,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       const body: Record<string, unknown> = {};
       if (fullName.trim()) body.fullName = fullName.trim();
       if (currentLevel) body.currentLevel = currentLevel;
-      if (selectedCollegeId) body.collegeId = selectedCollegeId;
+      if (selectedUniId) body.collegeId = selectedUniId;
       if (selectedDeptId) body.departmentId = selectedDeptId;
 
       const res = await fetch('/api/user/profile', {
@@ -187,7 +221,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     } finally {
       setSaving(false);
     }
-  }, [supabase, fullName, currentLevel, selectedCollegeId, selectedDeptId, refreshProfile]);
+  }, [supabase, fullName, currentLevel, selectedUniId, selectedDeptId, refreshProfile]);
 
   if (!isOpen) return null;
 
@@ -338,16 +372,34 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">College</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">University</label>
+                <select
+                  value={selectedUniId}
+                  onChange={(e) => {
+                    setSelectedUniId(e.target.value);
+                    setSelectedCollegeId('');
+                    setSelectedDeptId('');
+                  }}
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                >
+                  <option value="">{universities.length === 0 ? 'No universities loaded' : 'Select University'}</option>
+                  {universities.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">College / Faculty</label>
                 <select
                   value={selectedCollegeId}
                   onChange={(e) => {
                     setSelectedCollegeId(e.target.value);
                     setSelectedDeptId('');
                   }}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  disabled={!selectedUniId}
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
                 >
-                  <option value="">Select College</option>
+                  <option value="">{colleges.length === 0 ? 'No colleges loaded' : 'Select College'}</option>
                   {colleges.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
@@ -361,7 +413,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   disabled={!selectedCollegeId}
                   className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
                 >
-                  <option value="">Select Department</option>
+                  <option value="">{departments.length === 0 ? 'No departments loaded' : 'Select Department'}</option>
                   {departments.map((d) => (
                     <option key={d.id} value={d.id}>{d.name}</option>
                   ))}
@@ -432,7 +484,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 )}
                 {user.collegeName && (
                   <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 col-span-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">College</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">University</p>
                     <p className="mt-1 font-semibold text-gray-900 text-sm">{user.collegeName}</p>
                   </div>
                 )}

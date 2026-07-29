@@ -16,7 +16,7 @@ interface User {
   schoolEmail?: string;
   schoolEmailPromptDismissedAt?: string;
   graduatedAt?: string;
-  collegeCode?: string;
+  collegeId?: string;
   collegeName?: string;
   departmentCode?: string;
   departmentName?: string;
@@ -58,8 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (!res.ok) return;
-      const json = await res.json();
-      const profile = json.data;
+      const profile = await res.json();
       if (profile) {
         setUser((prev) =>
           prev && prev.id === userId
@@ -74,10 +73,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 schoolEmail: profile.schoolEmail,
                 schoolEmailPromptDismissedAt: profile.schoolEmailPromptDismissedAt,
                 graduatedAt: profile.graduatedAt,
-                collegeCode: profile.college?.code,
-                collegeName: profile.college?.name,
-                departmentCode: profile.department?.code,
-                departmentName: profile.department?.name,
+                collegeId: profile.college_id,
+                collegeName: profile.college_name,
+                departmentCode: profile.department_code,
+                departmentName: profile.department_name,
               }
             : prev
         );
@@ -85,18 +84,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Profile fetch is non-critical
     }
-  }, []);
+  }, [supabaseClient.auth]);
 
-  const buildBaseUser = useCallback((sessionUser: any): User => ({
-    id: sessionUser.id,
-    email: sessionUser.email ?? '',
-    fullName:
-      sessionUser.user_metadata?.full_name ??
-      sessionUser.user_metadata?.name ??
-      sessionUser.email?.split('@')[0] ??
-      'Student',
-    avatarUrl: sessionUser.user_metadata?.avatar_url ?? sessionUser.user_metadata?.picture ?? undefined,
-  }), []);
+  const buildBaseUser = useCallback((sessionUser: any): User => {
+    return {
+      id: sessionUser.id,
+      email: sessionUser.email ?? '',
+      fullName:
+        sessionUser.user_metadata?.full_name ??
+        sessionUser.user_metadata?.name ??
+        sessionUser.email?.split('@')[0] ??
+        'Student',
+      avatarUrl: sessionUser.user_metadata?.avatar_url ?? sessionUser.user_metadata?.picture ?? undefined,
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;

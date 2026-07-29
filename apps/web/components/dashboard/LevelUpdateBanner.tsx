@@ -82,7 +82,7 @@ export function LevelUpdateBanner() {
               disabled={isLoading}
               className="rounded-full px-4 py-2 text-sm font-semibold border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 transition-all disabled:opacity-50"
             >
-              I've Graduated! 🎓
+              I&apos;ve Graduated! 🎓
             </button>
           </div>
         </div>

@@ -104,6 +104,8 @@ export function useChatSocket({ conversationId, userId, enabled = true, otherUse
       }
     })();
 
+    const timeouts = typingTimeouts.current;
+
     return () => {
       cancelled = true;
       getRealtimeSocket().then((socket) => {
@@ -116,10 +118,11 @@ export function useChatSocket({ conversationId, userId, enabled = true, otherUse
         socket.off('connect');
         socket.off('disconnect');
         socket.off('pulse:event');
-        typingTimeouts.current.forEach((t) => clearTimeout(t));
-        typingTimeouts.current.clear();
+        timeouts.forEach((t) => clearTimeout(t));
+        timeouts.clear();
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, userId, enabled]);
 
   return { connected, otherOnline, typingUsers };

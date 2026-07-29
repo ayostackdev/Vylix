@@ -29,17 +29,6 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
   const { data: files, isLoading: filesLoading } = useDriveFiles(currentFolderId);
   const importMutation = useDriveImport();
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchCourses();
-      setCurrentFolderId('root');
-      setFolderPath([{ id: 'root', name: 'My Drive' }]);
-      setSelectedFiles(new Set());
-      setSelectedCourseId('');
-      setError(null);
-    }
-  }, [isOpen]);
-
   const fetchCourses = async () => {
     try {
       const res = await fetch(`/api/courses/my`);
@@ -52,6 +41,17 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
       // Non-critical
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchCourses();
+      setCurrentFolderId('root');
+      setFolderPath([{ id: 'root', name: 'My Drive' }]);
+      setSelectedFiles(new Set());
+      setSelectedCourseId('');
+      setError(null);
+    }
+  }, [isOpen]);
 
   const handleFolderClick = (folderId: string, folderName: string) => {
     setCurrentFolderId(folderId);
