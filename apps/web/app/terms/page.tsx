@@ -103,7 +103,7 @@ export default function TermsOfService() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">12. Contact</h2>
             <p>
               For questions about these Terms, contact us at{' '}
-              <a href="mailto:ayostackdev@gmail.com" className="text-blue-600 hover:underline">
+              <a href="mailto:ayostackdev@gmail.com" className="text-indigo-600 hover:underline">
                 ayostackdev@gmail.com
               </a>
             </p>

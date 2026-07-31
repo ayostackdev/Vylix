@@ -108,10 +108,10 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
             {selectedDoc && (
               <button
                 onClick={() => isReadOnly ? promptLogin('take quizzes') : startQuiz(selectedDoc.courseId)}
-                className="w-full text-left p-3 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
+                className="w-full text-left p-3 rounded-xl bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition-colors"
               >
-                <p className="font-medium text-sm text-blue-800">{selectedDoc.courseCode}</p>
-                <p className="text-xs text-blue-600">{selectedDoc.name}</p>
+                <p className="font-medium text-sm text-indigo-800">{selectedDoc.courseCode}</p>
+                <p className="text-xs text-indigo-600">{selectedDoc.name}</p>
               </button>
             )}
 
@@ -123,8 +123,8 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
                   onClick={() => isReadOnly ? promptLogin('take quizzes') : startQuiz(courseId)}
                   className={`w-full text-left p-3 rounded-xl border transition-colors ${
                     isSelected
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-white border-gray-200 hover:border-blue-300'
+                      ? 'bg-indigo-50 border-indigo-200'
+                      : 'bg-white border-gray-200 hover:border-indigo-300'
                   }`}
                 >
                   <p className="font-medium text-sm text-gray-900">{qs[0]?.courseCode || courseId}</p>
@@ -152,7 +152,7 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
         {view === 'quiz' && currentQuestion && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+              <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
                 {currentQuestion.topic}
               </span>
               {currentQuestion.year && (
@@ -167,13 +167,13 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
 
             <div className="space-y-2">
               {currentQuestion.options.map((opt, i) => {
-                let bg = 'bg-white border-gray-200 hover:border-blue-300'
+                let bg = 'bg-white border-gray-200 hover:border-indigo-300'
                 if (showAnswer) {
                   if (i === currentQuestion.correctIndex) bg = 'bg-emerald-50 border-emerald-400 text-emerald-800'
                   else if (i === selectedAnswer && i !== currentQuestion.correctIndex) bg = 'bg-red-50 border-red-400 text-red-800'
                   else bg = 'bg-gray-50 border-gray-200 text-gray-400'
                 } else if (selectedAnswer === i) {
-                  bg = 'bg-blue-50 border-blue-300'
+                  bg = 'bg-indigo-50 border-indigo-300'
                 }
                 return (
                   <button
@@ -190,9 +190,9 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
             </div>
 
             {showAnswer && (
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                <p className="text-xs font-medium text-blue-800 mb-1">Explanation:</p>
-                <p className="text-xs text-blue-700">{currentQuestion.explanation}</p>
+              <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+                <p className="text-xs font-medium text-indigo-800 mb-1">Explanation:</p>
+                <p className="text-xs text-indigo-700">{currentQuestion.explanation}</p>
                 {selectedAnswer !== currentQuestion.correctIndex && (
                   <p className="text-xs font-medium text-red-600 mt-2">
                     You answered {String.fromCharCode(65 + (selectedAnswer || 0))}. The correct answer is {String.fromCharCode(65 + currentQuestion.correctIndex)}.
@@ -204,7 +204,7 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
             {showAnswer && (
               <button
                 onClick={nextQuestion}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-medium text-sm hover:shadow-md transition-all"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-sm hover:shadow-md transition-all"
               >
                 {currentIndex < total - 1 ? 'Next Question →' : 'See Results'}
               </button>
@@ -222,7 +222,7 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
                 <div
                   key={i}
                   className={`w-2 h-2 rounded-full ${
-                    i === currentIndex ? 'bg-blue-500' :
+                    i === currentIndex ? 'bg-indigo-500' :
                     i < (answers.length > 0 ? answers.findIndex(a => a.question.id === questions[currentIndex].id) : currentIndex)
                       ? (answers[i]?.correct ? 'bg-emerald-400' : 'bg-red-400')
                       : 'bg-gray-300'
@@ -236,7 +236,7 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
         {view === 'result' && (
           <div className="space-y-4">
             <div className="text-center py-6">
-              <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500 mb-2">
+              <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 mb-2">
                 {score}/{total}
               </div>
               <p className="text-sm text-gray-500">

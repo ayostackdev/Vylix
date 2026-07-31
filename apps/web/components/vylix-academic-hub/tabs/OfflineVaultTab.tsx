@@ -144,9 +144,9 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
         </div>
 
         {vaultMaterials.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mt-4">
-            <p className="text-xs font-medium text-blue-800">💡 Offline Tip</p>
-            <p className="text-xs text-blue-700 mt-1">
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3 mt-4">
+            <p className="text-xs font-medium text-indigo-800">💡 Offline Tip</p>
+            <p className="text-xs text-indigo-700 mt-1">
               Materials in the vault are stored on your device.               They&apos;re available even without internet —
               perfect for studying on campus during network outages or low data.
             </p>

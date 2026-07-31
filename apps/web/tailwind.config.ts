@@ -14,18 +14,23 @@ const config: Config = {
       },
       colors: {
         app: {
-          bg: '#f8fafc',
-          sidebar: 'rgba(255, 255, 255, 0.95)',
-          card: 'rgba(255, 255, 255, 0.9)',
-          'card-border': '#e2e8f0',
+          bg: '#f6f7fb',
+          sidebar: 'rgba(255, 255, 255, 0.92)',
+          card: 'rgba(255, 255, 255, 0.92)',
+          'card-border': '#e7e7f3',
         },
         navy: {
-          DEFAULT: '#0f172a',
-          strong: '#020617',
+          DEFAULT: '#13183a',
+          strong: '#0b0e24',
         },
         primary: {
-          DEFAULT: '#3b82f6',
-          dark: '#1e40af',
+          DEFAULT: '#7c3aed',
+          dark: '#5b21b6',
+        },
+        gold: {
+          DEFAULT: '#c9a227',
+          soft: '#e8d48b',
+          deep: '#96760f',
         },
         success: {
           DEFAULT: '#10b981',
@@ -37,12 +42,12 @@ const config: Config = {
           DEFAULT: '#ef4444',
         },
         text: {
-          primary: '#0f172a',
-          secondary: '#475569',
-          tertiary: '#64748b',
+          primary: '#13183a',
+          secondary: '#4b527a',
+          tertiary: '#6d7393',
         },
         border: {
-          DEFAULT: '#e2e8f0',
+          DEFAULT: '#e6e8f2',
         },
       },
       fontFamily: {

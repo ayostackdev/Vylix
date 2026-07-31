@@ -20,12 +20,12 @@ export function TokenCounter() {
           ? 'bg-red-50 text-red-600'
           : isLow
           ? 'bg-amber-50 text-amber-600'
-          : 'bg-blue-50 text-blue-600'
+          : 'bg-indigo-50 text-indigo-600'
       }`}
       title={`${remaining} of ${data.daily_tokens_limit} AI queries remaining today`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${
-        isExhausted ? 'bg-red-500' : isLow ? 'bg-amber-500' : 'bg-blue-500'
+        isExhausted ? 'bg-red-500' : isLow ? 'bg-amber-500' : 'bg-indigo-500'
       }`} />
       {remaining}/{data.daily_tokens_limit}
     </div>

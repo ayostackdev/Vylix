@@ -78,7 +78,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   return (
     <div className="flex min-h-dvh items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto relative">
       {/* Premium animated mesh background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-indigo-950 to-emerald-950">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0B0E1A] via-[#171234] to-[#2E0A3D]">
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: 'radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.2) 0%, transparent 50%), radial-gradient(ellipse at 40% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)',
           backgroundSize: '200% 200%',
@@ -94,8 +94,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
       <div className="w-full max-w-md mx-auto premium-fade-in relative z-10">
         {/* Premium Logo */}
         <div className="text-center mb-8 sm:mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 mb-4 shadow-2xl shadow-blue-500/10 premium-fade-in">
-            <span className="text-3xl sm:text-4xl font-black text-gradient" style={{ WebkitTextFillColor: 'transparent', background: 'linear-gradient(135deg, #60a5fa, #34d399)', WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>V</span>
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 mb-4 shadow-2xl shadow-indigo-600/10 premium-fade-in">
+            <span className="text-3xl sm:text-4xl font-black text-gradient" style={{ WebkitTextFillColor: 'transparent', background: 'linear-gradient(135deg, #818cf8, #e879f9)', WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>V</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight premium-slide-up">Vylix Academic Hub</h1>
           <p className="text-xs sm:text-sm text-white/40 mt-1.5 font-medium premium-slide-up" style={{ animationDelay: '100ms' }}>Clear the clutter, master your course.</p>
@@ -138,7 +138,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         <div className="bg-white/[0.07] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/[0.08] shadow-2xl shadow-black/20 premium-slide-up" style={{ animationDelay: '300ms' }}>
           {step === 'welcome' && (
             <div className="premium-fade-in text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5">
                 <span className="text-3xl">📚</span>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-2.5 tracking-tight">Welcome to Vylix Academic Hub</h2>
@@ -147,7 +147,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               </p>
               <button
                 onClick={() => setStep('auth')}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold text-sm btn-glow shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm btn-glow shadow-lg shadow-indigo-600/25 hover:shadow-xl hover:shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 Get Started
               </button>
@@ -198,7 +198,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           {step === 'drive' && (
             <div className="premium-fade-in">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/10">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-indigo-600/10">
                   <span className="text-3xl">☁️</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">Connect Your Drive</h2>
@@ -215,7 +215,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               <button
                 onClick={handleConnectDrive}
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold text-sm btn-glow shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
+                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm btn-glow shadow-lg shadow-indigo-600/25 hover:shadow-xl hover:shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
               >
                 {isLoading ? (
                   <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -237,7 +237,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
           {step === 'picking' && (
             <div className="premium-fade-in text-center">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/10">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-white/10 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-indigo-600/10">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -248,7 +248,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               </p>
               <button
                 onClick={() => setStep('complete')}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold text-sm btn-glow shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm btn-glow shadow-lg shadow-indigo-600/25 hover:shadow-xl hover:shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 Open File Picker
               </button>
@@ -269,7 +269,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
               <p className="text-xs sm:text-sm text-white/50 mb-6">Your courses are ready. Let&apos;s start learning!</p>
               <button
                 onClick={handleComplete}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-bold text-sm btn-glow shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-sm btn-glow shadow-lg shadow-indigo-600/25 hover:shadow-xl hover:shadow-indigo-600/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 Go to Dashboard
               </button>

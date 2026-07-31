@@ -14,7 +14,7 @@ export const ScrollArea = React.forwardRef<
       orientation="vertical"
       className="flex w-2.5 touch-none select-none border-l border-l-transparent p-[1px]"
     >
-      <ScrollAreaPrimitive.Thumb className="relative flex-1 rounded-full bg-blue-400/50" />
+      <ScrollAreaPrimitive.Thumb className="relative flex-1 rounded-full bg-indigo-400/50" />
     </ScrollAreaPrimitive.Scrollbar>
   </ScrollAreaPrimitive.Root>
 ));

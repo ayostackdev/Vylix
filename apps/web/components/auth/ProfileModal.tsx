@@ -33,7 +33,7 @@ export interface ProfileModalProps {
 
 const RARITY_COLORS: Record<string, string> = {
   COMMON: 'bg-gray-100 border-gray-200 text-gray-600',
-  RARE: 'bg-blue-50 border-blue-200 text-blue-600',
+  RARE: 'bg-indigo-50 border-indigo-200 text-indigo-600',
   EPIC: 'bg-purple-50 border-purple-200 text-purple-600',
   LEGENDARY: 'bg-amber-50 border-amber-200 text-amber-600',
 };
@@ -228,8 +228,8 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   if (!user) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 p-8 text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto" />
+        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-indigo-100 p-8 text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto" />
           <p className="mt-4 text-sm text-gray-500">Loading profile...</p>
         </div>
       </div>
@@ -244,9 +244,9 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 overflow-hidden animate-fade-in max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-indigo-100 overflow-hidden animate-fade-in max-h-[90vh] flex flex-col">
         {/* Header with gradient */}
-        <div className="bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-6 text-center shrink-0">
+        <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-6 text-center shrink-0">
           <div className="flex justify-center mb-3">
             <button
               onClick={() => fileInputRef.current?.click()}
@@ -304,10 +304,10 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   <p className="text-lg font-black text-gray-900 mt-1">{streak}</p>
                   <p className="text-[9px] font-bold uppercase tracking-wider text-orange-600">Day Streak</p>
                 </div>
-                <div className="rounded-xl bg-gradient-to-br from-blue-50 to-sky-50/80 border border-blue-200/60 p-3 text-center">
+                <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50/80 border border-indigo-200/60 p-3 text-center">
                   <span className="text-lg">💰</span>
                   <p className="text-lg font-black text-gray-900 mt-1">{points.toLocaleString()}</p>
-                  <p className="text-[9px] font-bold uppercase tracking-wider text-blue-600">Points</p>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-indigo-600">Points</p>
                 </div>
                 <div className="rounded-xl bg-gradient-to-br from-purple-50 to-violet-50/80 border border-purple-200/60 p-3 text-center">
                   <span className="text-lg">🏅</span>
@@ -368,7 +368,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
                 />
               </div>
               <div>
@@ -380,7 +380,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     setSelectedCollegeId('');
                     setSelectedDeptId('');
                   }}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
                 >
                   <option value="">{universities.length === 0 ? 'No universities loaded' : 'Select University'}</option>
                   {universities.map((u) => (
@@ -397,7 +397,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                     setSelectedDeptId('');
                   }}
                   disabled={!selectedUniId}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:opacity-50"
                 >
                   <option value="">{colleges.length === 0 ? 'No colleges loaded' : 'Select College'}</option>
                   {colleges.map((c) => (
@@ -411,7 +411,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   value={selectedDeptId}
                   onChange={(e) => setSelectedDeptId(e.target.value)}
                   disabled={!selectedCollegeId}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:opacity-50"
                 >
                   <option value="">{departments.length === 0 ? 'No departments loaded' : 'Select Department'}</option>
                   {departments.map((d) => (
@@ -424,7 +424,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 <select
                   value={currentLevel}
                   onChange={(e) => setCurrentLevel(e.target.value)}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
                 >
                   <option value="">Select Level</option>
                   <option value="100L">100L</option>
@@ -446,7 +446,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
                 >
                   {saving ? (
                     <svg className="animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24" fill="none">
@@ -460,37 +460,37 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           ) : (
             <>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Status</p>
+                <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Status</p>
                   <p className="mt-1 font-semibold text-gray-900 text-sm">{user.status === 'ALUMNI' ? '🎓 Alumni' : '🎒 Student'}</p>
                 </div>
                 {user.currentLevel && (
-                  <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Level</p>
+                  <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Level</p>
                     <p className="mt-1 font-semibold text-gray-900 text-sm">{user.currentLevel}</p>
                   </div>
                 )}
                 {user.matricNumber && (
-                  <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Matric No</p>
+                  <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Matric No</p>
                     <p className="mt-1 font-semibold text-gray-900 text-sm">{user.matricNumber}</p>
                   </div>
                 )}
                 {user.entryYear && (
-                  <div className="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Started</p>
+                  <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Started</p>
                     <p className="mt-1 font-semibold text-gray-900 text-sm">{user.entryYear}</p>
                   </div>
                 )}
                 {user.collegeName && (
-                  <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 col-span-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">University</p>
+                  <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3 col-span-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">University</p>
                     <p className="mt-1 font-semibold text-gray-900 text-sm">{user.collegeName}</p>
                   </div>
                 )}
                 {user.departmentName && (
-                  <div className="rounded-xl bg-blue-50 border border-blue-100 p-3 col-span-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Department</p>
+                  <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3 col-span-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Department</p>
                     <p className="mt-1 font-semibold text-gray-900 text-sm">{user.departmentName}</p>
                   </div>
                 )}
@@ -505,7 +505,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
               <div className="flex gap-3 pt-1">
                 <button
                   onClick={enterEditMode}
-                  className="flex-1 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-100 transition-colors"
+                  className="flex-1 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-bold text-indigo-700 hover:bg-indigo-100 transition-colors"
                 >
                   Edit Profile
                 </button>
@@ -527,7 +527,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
         <div className="p-4 pt-0 shrink-0">
           <button
             onClick={onClose}
-            className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-opacity"
+            className="w-full rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-opacity"
           >
             Close
           </button>

@@ -84,8 +84,8 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 flex flex-col max-h-[85vh]">
-        <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50/35 px-6 py-4 shrink-0">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-indigo-100 flex flex-col max-h-[85vh]">
+        <div className="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50/35 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-black text-gray-900">
@@ -99,7 +99,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
             </div>
             <button
               onClick={handleClose}
-              className="rounded-lg p-1.5 text-gray-500 hover:bg-blue-50 transition"
+              className="rounded-lg p-1.5 text-gray-500 hover:bg-indigo-50 transition"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -112,9 +112,9 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
           <div className="p-6 space-y-4">
             <button
               onClick={() => { setType('DIRECT'); setStep('members'); }}
-              className="w-full flex items-center gap-4 rounded-xl border border-blue-100 bg-white p-4 text-left hover:border-blue-300 hover:bg-blue-50/50 transition-all group"
+              className="w-full flex items-center gap-4 rounded-xl border border-indigo-100 bg-white p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/50 transition-all group"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center shadow-sm shadow-blue-500/20 group-hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-sm shadow-indigo-600/20 group-hover:shadow-md transition-shadow">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -127,7 +127,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
 
             <button
               onClick={() => { setType('GROUP'); setStep('members'); }}
-              className="w-full flex items-center gap-4 rounded-xl border border-blue-100 bg-white p-4 text-left hover:border-blue-300 hover:bg-blue-50/50 transition-all group"
+              className="w-full flex items-center gap-4 rounded-xl border border-indigo-100 bg-white p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/50 transition-all group"
             >
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-sm shadow-emerald-500/20 group-hover:shadow-md transition-shadow">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +150,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g., CSC 201 Study Group"
-                    className="w-full rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                   />
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -161,8 +161,8 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
                       onClick={() => setTitle(s.name)}
                       className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-all ${
                         title === s.name
-                          ? 'border-blue-300 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-blue-200 hover:bg-blue-50/50'
+                          ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
+                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-indigo-200 hover:bg-indigo-50/50'
                       }`}
                     >
                       <span>{s.icon}</span>
@@ -181,12 +181,12 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Type a name or matric number..."
-                className="w-full rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-200"
+                className="w-full rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                 autoFocus
               />
 
               {searchQuery.trim().length >= 2 && (
-                <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-blue-100 bg-white shadow-lg">
+                <div className="mt-2 max-h-40 overflow-y-auto rounded-xl border border-indigo-100 bg-white shadow-lg">
                   {searching ? (
                     <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
                       <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -203,7 +203,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
                         key={u.id}
                         type="button"
                         onClick={() => handleSelectUser(u)}
-                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-blue-50 transition"
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-indigo-50 transition"
                       >
                         <Avatar className="h-9 w-9 shrink-0">
                           <AvatarImage src={u.avatarUrl ?? undefined} />
@@ -234,7 +234,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
                   {selectedUsers.map((u) => (
                     <span
                       key={u.id}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[1px] shadow-sm"
                     >
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-900">
                         {u.fullName}
@@ -252,18 +252,18 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
               </div>
             )}
 
-            <div className="flex gap-3 px-6 py-4 mt-auto border-t border-blue-100">
+            <div className="flex gap-3 px-6 py-4 mt-auto border-t border-indigo-100">
               <button
                 type="button"
                 onClick={() => { if (step === 'members' && type === 'GROUP') { setStep('type'); } else { handleClose(); } }}
-                className="flex-1 rounded-xl border border-blue-100 px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-blue-50 transition"
+                className="flex-1 rounded-xl border border-indigo-100 px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-indigo-50 transition"
               >
                 {step === 'members' && type === 'GROUP' ? 'Back' : 'Cancel'}
               </button>
               <button
                 type="submit"
                 disabled={createConversation.isPending || selectedUsers.length === 0}
-                className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-40"
+                className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-40"
               >
                 {createConversation.isPending ? 'Creating...' : type === 'GROUP' ? 'Create Group' : 'Start Chat'}
               </button>

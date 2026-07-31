@@ -22,7 +22,7 @@ export function DailyDigestCard() {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
       {/* Greeting + Streak */}
-      <div className="p-5 pb-3" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
+      <div className="p-5 pb-3" style={{ background: 'linear-gradient(135deg, #f5f3fe 0%, #f0eefb 100%)' }}>
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-base font-bold text-gray-900 tracking-tight">{digest.greeting}</h2>
@@ -40,9 +40,9 @@ export function DailyDigestCard() {
               </div>
             )}
             {digest.total_points > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/60">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#fbf5dd] to-[#f6ecc8] border border-[#e6d59b]">
                 <span className="text-sm">⭐</span>
-                <span className="text-xs font-bold text-blue-600">{digest.total_points}</span>
+                <span className="text-xs font-bold text-[#96760f]">{digest.total_points}</span>
               </div>
             )}
           </div>
@@ -55,7 +55,7 @@ export function DailyDigestCard() {
               {presence.classmates_active.slice(0, 3).map((c) => (
                 <div
                   key={c.user_id}
-                  className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-400 to-emerald-400 border-2 border-white flex items-center justify-center text-[7px] font-bold text-white"
+                  className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 border-2 border-white flex items-center justify-center text-[7px] font-bold text-white"
                   title={c.full_name}
                 >
                   {c.full_name.charAt(0)}
@@ -80,7 +80,7 @@ export function DailyDigestCard() {
             {digest.courses_with_activity.slice(0, 3).map((c) => (
               <div key={c.course_id} className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white text-[8px] font-bold shrink-0">
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-[8px] font-bold shrink-0">
                     {c.course_code.slice(0, 2)}
                   </div>
                   <div className="min-w-0">
@@ -89,7 +89,7 @@ export function DailyDigestCard() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {c.new_materials > 0 && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600">
                       {c.new_materials} material{c.new_materials > 1 ? 's' : ''}
                     </span>
                   )}

@@ -63,15 +63,15 @@ export function GraduationCelebrationModal({
           recycle={false}
           numberOfPieces={500}
           gravity={0.15}
-          colors={['#2563eb', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444']}
+          colors={['#6366f1', '#7c3aed', '#d946ef', '#f59e0b', '#10b981', '#ef4444']}
         />
       )}
 
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-purple-100 overflow-hidden animate-fade-in">
-          <div className="bg-gradient-to-r from-purple-700 via-violet-600 to-pink-500 p-6 text-center">
+          <div className="bg-gradient-to-r from-[#a27f15] via-[#c9a227] to-[#e3c15a] p-6 text-center">
             <div className="text-4xl mb-2">🎓🎉</div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-xl font-bold text-[#0b0e24]">
               You Actually Made It!
             </h2>
           </div>

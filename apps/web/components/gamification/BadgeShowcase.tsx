@@ -5,7 +5,7 @@ import { useAuth } from '@/context/auth-context';
 
 const RARITY_COLORS: Record<string, { bg: string; border: string; text: string }> = {
   COMMON: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-600' },
-  RARE: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600' },
+  RARE: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-600' },
   EPIC: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-600' },
   LEGENDARY: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-600' },
 };
@@ -24,7 +24,7 @@ export function BadgeShowcase() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-bold text-gray-900 tracking-tight">Badges</h3>
         {badges && badges.length > 0 && (

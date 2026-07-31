@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -164,6 +164,10 @@ class User(Base):
     streak: Mapped["UserStreak | None"] = relationship(back_populates="users", uselist=False)
     points_transactions: Mapped[list["PointsTransaction"]] = relationship(back_populates="user")
     reward_purchases: Mapped[list["UserRewardPurchase"]] = relationship(back_populates="user")
+    material_unlocks: Mapped[list["MaterialUnlock"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan",
+        foreign_keys="MaterialUnlock.user_id",
+    )
     questions_asked: Mapped[list["TopicQuestion"]] = relationship("TopicQuestion", back_populates="author", foreign_keys="TopicQuestion.author_id")
     answers_provided: Mapped[list["QuestionAnswer"]] = relationship("QuestionAnswer", back_populates="author", foreign_keys="QuestionAnswer.author_id")
 
@@ -320,6 +324,7 @@ class Material(Base):
 
     topic: Mapped["Topic"] = relationship(back_populates="materials")
     uploader: Mapped["User"] = relationship(back_populates="materials")
+    unlocks: Mapped[list["MaterialUnlock"]] = relationship(back_populates="material", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_materials_processing_status", "processing_status"),
@@ -328,6 +333,27 @@ class Material(Base):
         Index("ix_materials_topic_id_uploaded_at", "topic_id", "uploaded_at"),
         Index("ix_materials_topic_id_is_seed", "topic_id", "is_seed"),
         Index("ix_materials_is_seed", "is_seed"),
+    )
+
+
+class MaterialUnlock(Base):
+    __tablename__ = "material_unlocks"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    material_id: Mapped[str] = mapped_column(String(36), ForeignKey("materials.id", ondelete="CASCADE"))
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"))
+    referrer_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id", ondelete="SET NULL"))
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    material: Mapped["Material"] = relationship(back_populates="unlocks")
+    user: Mapped["User"] = relationship(back_populates="material_unlocks", foreign_keys=[user_id])
+    referrer: Mapped["User | None"] = relationship("User", foreign_keys=[referrer_id])
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "material_id", name="uq_material_unlocks_user_material"),
+        Index("ix_material_unlocks_material_id", "material_id"),
+        Index("ix_material_unlocks_user_id", "user_id"),
+        Index("ix_material_unlocks_referrer_id", "referrer_id"),
     )
 
 
@@ -687,7 +713,7 @@ class FlashcardDeck(Base):
     __tablename__ = "flashcard_decks"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("User.id"))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"))
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     document_id: Mapped[str | None] = mapped_column(String)
@@ -697,6 +723,7 @@ class FlashcardDeck(Base):
     updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(backref="flashcard_decks")
+    cards: Mapped[list["Flashcard"]] = relationship(back_populates="deck", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_flashcard_decks_user_id", "user_id"),
@@ -723,9 +750,6 @@ class Flashcard(Base):
         Index("ix_flashcards_deck_id", "deck_id"),
         Index("ix_flashcards_next_review", "next_review"),
     )
-
-
-FlashcardDeck.cards: Mapped[list["Flashcard"]] = relationship(back_populates="deck", cascade="all, delete-orphan")
 
 
 # ── Subscriptions (Paystack Premium) ──────────────────────────────

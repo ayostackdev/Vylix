@@ -162,8 +162,8 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-blue-100 flex flex-col max-h-[80vh]">
-        <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-emerald-50/35 px-6 py-4 shrink-0">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-indigo-100 flex flex-col max-h-[80vh]">
+        <div className="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50/35 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-black text-gray-900">Classmates</h2>
@@ -173,7 +173,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
             </div>
             <button
               onClick={onClose}
-              className="rounded-lg p-1.5 text-gray-500 hover:bg-blue-50 transition"
+              className="rounded-lg p-1.5 text-gray-500 hover:bg-indigo-50 transition"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -202,7 +202,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
                 <select
                   value={selectedUniId}
                   onChange={(e) => { setSelectedUniId(e.target.value); setSelectedCollegeId(''); setSelectedDeptId(''); }}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
                 >
                   <option value="">{universities.length === 0 ? 'No universities loaded' : 'Select your university'}</option>
                   {universities.map((u) => (
@@ -217,7 +217,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
                   value={selectedCollegeId}
                   onChange={(e) => { setSelectedCollegeId(e.target.value); setSelectedDeptId(''); }}
                   disabled={!selectedUniId}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:opacity-50"
                 >
                   <option value="">{colleges.length === 0 ? 'No colleges loaded' : 'Select your college'}</option>
                   {colleges.map((c) => (
@@ -231,7 +231,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
                   value={selectedDeptId}
                   onChange={(e) => setSelectedDeptId(e.target.value)}
                   disabled={!selectedCollegeId}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:opacity-50"
                 >
                   <option value="">{departments.length === 0 ? 'No departments loaded' : 'Select your department'}</option>
                   {departments.map((d) => (
@@ -247,7 +247,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
                 <select
                   value={currentLevel}
                   onChange={(e) => setCurrentLevel(e.target.value)}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
                 >
                   <option value="">Select your level</option>
                   <option value="100L">100L</option>
@@ -262,7 +262,7 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
               <button
                 onClick={handleSave}
                 disabled={saving || !selectedUniId || !selectedDeptId}
-                className="w-full rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-50"
+                className="w-full rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Continue'}
               </button>
@@ -294,9 +294,9 @@ export function ClassmateListModal({ isOpen, onClose, onCreated }: ClassmateList
                   key={cm.id}
                   onClick={() => handleStartChat(cm)}
                   disabled={createConversation.isPending}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-blue-50 transition disabled:opacity-50"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-indigo-50 transition disabled:opacity-50"
                 >
-                  <Avatar className="h-10 w-10 shrink-0 shadow-sm ring-2 ring-blue-100">
+                  <Avatar className="h-10 w-10 shrink-0 shadow-sm ring-2 ring-indigo-100">
                     <AvatarImage src={cm.avatarUrl ?? undefined} />
                     <AvatarFallback className="bg-green-50 font-bold text-gray-900 text-sm">
                       {cm.fullName.charAt(0)}

@@ -132,12 +132,12 @@ export function PastQuestionsView() {
     <section className="space-y-5 sm:space-y-8">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[1px] shadow-sm">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 font-bold text-[11px] uppercase tracking-wider text-gray-900">
               Exam prep
             </span>
           </div>
-          <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 bg-clip-text text-transparent mb-3">
+          <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent mb-3">
             Past Questions
           </h2>
           <p className="cp-body max-w-2xl sm:text-base">
@@ -177,10 +177,10 @@ export function PastQuestionsView() {
       </div>
 
       {/* Content */}
-      <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
+      <div className="rounded-[1.75rem] border border-violet-100 bg-white p-5 shadow-sm">
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-200 border-t-blue-600" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-200 border-t-blue-600" />
           </div>
         ) : error ? (
           <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
@@ -199,18 +199,18 @@ export function PastQuestionsView() {
               return (
                 <div
                   key={item.id}
-                  className="flex flex-col gap-2 rounded-[1.25rem] border border-sky-100 bg-blue-50 p-4 transition-all hover:-translate-y-0.5 hover:border-sky-200 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-2 rounded-[1.25rem] border border-violet-100 bg-indigo-50 p-4 transition-all hover:-translate-y-0.5 hover:border-violet-200 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="cp-card-title text-gray-900 truncate">{item.fileName}</p>
                       {item.examYear && (
-                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                        <span className="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-800">
                           {item.examYear}
                         </span>
                       )}
                       {item.semester && (
-                        <span className="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">
+                        <span className="inline-flex items-center rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-800">
                           {item.semester === 'FIRST' ? '1st Sem' : '2nd Sem'}
                         </span>
                       )}
@@ -230,7 +230,7 @@ export function PastQuestionsView() {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => openFile(item.id, item.fileName)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-xs font-bold text-white hover:shadow-md transition-shadow"
+                      className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2 text-xs font-bold text-white hover:shadow-md transition-shadow"
                     >
                       📖 View
                     </button>

@@ -60,7 +60,7 @@ export function ChatPanel({ documentId, documentTitle, onClose }: ChatPanelProps
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40">
       <div className="flex flex-col w-full max-w-lg h-[80vh] sm:h-[70vh] bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 text-white">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 text-white">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-lg">💬</span>
             <div className="min-w-0">
@@ -85,7 +85,7 @@ export function ChatPanel({ documentId, documentTitle, onClose }: ChatPanelProps
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
                   msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-br-md'
+                    ? 'bg-indigo-600 text-white rounded-br-md'
                     : 'bg-gray-100 text-gray-800 rounded-bl-md'
                 }`}
               >
@@ -113,7 +113,7 @@ export function ChatPanel({ documentId, documentTitle, onClose }: ChatPanelProps
               <button
                 key={i}
                 onClick={() => sendMessage(q)}
-                className="text-xs bg-blue-50 text-blue-700 rounded-full px-3 py-1.5 border border-blue-200 hover:bg-blue-100 transition-colors"
+                className="text-xs bg-indigo-50 text-indigo-700 rounded-full px-3 py-1.5 border border-indigo-200 hover:bg-indigo-100 transition-colors"
               >
                 {q}
               </button>
@@ -130,12 +130,12 @@ export function ChatPanel({ documentId, documentTitle, onClose }: ChatPanelProps
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question about this document..."
               disabled={loading}
-              className="flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="rounded-xl bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2.5 text-white font-semibold text-sm hover:shadow-md disabled:opacity-50 transition-all"
+              className="rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-white font-semibold text-sm hover:shadow-md disabled:opacity-50 transition-all"
             >
               Send
             </button>

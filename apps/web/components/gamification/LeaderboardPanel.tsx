@@ -19,7 +19,7 @@ export function LeaderboardPanel() {
   const medals = ['🥇', '🥈', '🥉'];
 
   return (
-    <div className="rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-indigo-100 bg-white shadow-sm overflow-hidden">
       <div className="px-4 pt-4 pb-2">
         <h3 className="text-sm font-bold text-gray-900 tracking-tight">Leaderboard</h3>
       </div>
@@ -73,7 +73,7 @@ export function LeaderboardPanel() {
                 <div
                   key={entry.user_id}
                   className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
-                    isMe ? 'bg-blue-50 ring-1 ring-blue-200' : 'hover:bg-gray-50'
+                    isMe ? 'bg-indigo-50 ring-1 ring-indigo-200' : 'hover:bg-gray-50'
                   }`}
                 >
                   <span className="w-5 text-center text-sm shrink-0">
@@ -88,11 +88,11 @@ export function LeaderboardPanel() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-semibold truncate ${isMe ? 'text-blue-700' : 'text-gray-900'}`}>
-                      {entry.full_name} {isMe && <span className="text-[10px] font-bold text-blue-500">(you)</span>}
+                    <p className={`text-xs font-semibold truncate ${isMe ? 'text-indigo-700' : 'text-gray-900'}`}>
+                      {entry.full_name} {isMe && <span className="text-[10px] font-bold text-indigo-500">(you)</span>}
                     </p>
                   </div>
-                  <span className={`text-xs font-bold shrink-0 ${tab === 'streaks' ? 'text-orange-600' : 'text-blue-600'}`}>
+                  <span className={`text-xs font-bold shrink-0 ${tab === 'streaks' ? 'text-orange-600' : 'text-indigo-600'}`}>
                     {entry.value.toLocaleString()}{tab === 'streaks' ? 'd' : ' pts'}
                   </span>
                 </div>

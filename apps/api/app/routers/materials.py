@@ -12,7 +12,10 @@ from sqlalchemy.orm import selectinload
 from app.core.config import get_settings
 from app.database import get_db
 from app.deps import CurrentUser, get_current_user, get_optional_user
-from app.models import Material, Topic, Course, User, Department, MaterialProcessingStatus
+from app.models import (
+    Material, Topic, Course, User, Department, MaterialProcessingStatus,
+    MaterialUnlock, PointsTransaction,
+)
 from app.services.storage import get_storage
 from app.tasks import process_material_task
 
@@ -59,6 +62,12 @@ class PastQuestionOut(MaterialOut):
 class MaterialListOut(BaseModel):
     items: list[MaterialOut]
     total: int
+
+
+class MaterialDetailOut(MaterialOut):
+    course_id: str | None = None
+    course_code: str | None = None
+    course_title: str | None = None
 
 
 class PastQuestionListOut(BaseModel):
@@ -386,6 +395,99 @@ async def search_past_questions(
         for m, cc, ct in rows
     ]
     return PastQuestionListOut(items=items, total=total)
+
+
+class UnlockRequest(BaseModel):
+    referrer_id: str | None = None
+    share_url: str | None = None
+
+
+REFERRAL_POINTS = 10
+
+
+@router.get("/{material_id}", response_model=MaterialDetailOut)
+async def get_material_detail(
+    material_id: str,
+    user: CurrentUser | None = Depends(get_optional_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Material, Course.code.label("course_code"), Course.title.label("course_title"), Course.id.label("course_id"))
+        .options(selectinload(Material.uploader), selectinload(Material.topic))
+        .join(Topic, Topic.id == Material.topic_id)
+        .join(Course, Course.id == Topic.course_id)
+        .where(Material.id == material_id)
+    )
+    row = result.first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Material not found")
+
+    m, course_code, course_title, course_id = row
+    if not user and not m.is_shared:
+        raise HTTPException(status_code=403, detail="Material is private")
+
+    out = _material_to_out(m)
+    return MaterialDetailOut(
+        **out.model_dump(),
+        course_id=course_id,
+        course_code=course_code,
+        course_title=course_title,
+    )
+
+
+@router.post("/{material_id}/unlock")
+async def unlock_material(
+    material_id: str,
+    payload: UnlockRequest,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    material = await db.get(Material, material_id)
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found")
+    if not material.is_shared:
+        raise HTTPException(status_code=403, detail="Material is private")
+
+    if material.uploader_id == user.id:
+        return {"unlocked": True, "already": False, "points_awarded": 0}
+
+    existing = await db.execute(
+        select(MaterialUnlock).where(
+            MaterialUnlock.user_id == user.id,
+            MaterialUnlock.material_id == material_id,
+        )
+    )
+    if existing.scalar_one_or_none():
+        return {"unlocked": True, "already": True, "points_awarded": 0}
+
+    referrer_id = None
+    points_awarded = 0
+    if payload.referrer_id and payload.referrer_id != user.id:
+        referrer = await db.get(User, payload.referrer_id)
+        if referrer:
+            already_rewarded = await db.execute(
+                select(func.count())
+                .select_from(MaterialUnlock)
+                .where(
+                    MaterialUnlock.user_id == user.id,
+                    MaterialUnlock.referrer_id == payload.referrer_id,
+                )
+            )
+            if already_rewarded.scalar_one() == 0:
+                referrer.contribution_score += REFERRAL_POINTS
+                db.add(PointsTransaction(
+                    user_id=referrer.id,
+                    amount=REFERRAL_POINTS,
+                    reason="referral_unlock",
+                    description="A new student unlocked a shared material via your link",
+                    related_id=material_id,
+                ))
+                points_awarded = REFERRAL_POINTS
+                referrer_id = payload.referrer_id
+
+    db.add(MaterialUnlock(user_id=user.id, material_id=material_id, referrer_id=referrer_id))
+    await db.flush()
+    return {"unlocked": True, "already": False, "points_awarded": points_awarded}
 
 
 @router.get("/{material_id}/file")

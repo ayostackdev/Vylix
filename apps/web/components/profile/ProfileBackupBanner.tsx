@@ -63,7 +63,7 @@ export function ProfileBackupBanner() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="shrink-0 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-xs font-bold text-white hover:opacity-90 transition-opacity"
+            className="shrink-0 rounded-lg bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2 text-xs font-bold text-white hover:opacity-90 transition-opacity"
           >
             Link Email
           </button>
