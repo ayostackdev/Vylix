@@ -28,5 +28,5 @@ async def apply_rls_context(session: AsyncSession) -> None:
     user_id = get_current_user_id()
     if user_id:
         await session.execute(
-            text("SET LOCAL app.current_user_id = :uid"), {"uid": user_id}
+            text("SELECT set_config('app.current_user_id', :uid, true)"), {"uid": user_id}
         )
