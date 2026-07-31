@@ -9,6 +9,7 @@ from starlette.responses import Response
 
 from app.core.config import get_settings
 from app.db_rls import set_current_user_id
+from app.security import decode_access_token
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -17,20 +18,12 @@ _ACTIVITY_PATHS = {"/api/v1/"}
 _ACTIVITY_EXCLUDE = {"/api/v1/health", "/api/v1/ws"}
 
 
-def _extract_user_id(request: Request) -> str | None:
+async def _extract_user_id(request: Request) -> str | None:
     auth = request.headers.get("authorization", "")
     if not auth.startswith("Bearer "):
         return None
-    if not settings.supabase_jwt_secret:
-        return None
     try:
-        import jwt
-
-        token = auth[7:]
-        payload = jwt.decode(
-            token, settings.supabase_jwt_secret,
-            algorithms=["HS256"], audience="authenticated",
-        )
+        payload = await decode_access_token(auth[7:])
         return payload.get("sub")
     except Exception:
         return None
@@ -44,7 +37,7 @@ class ActivityTrackingMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        user_id = _extract_user_id(request)
+        user_id = await _extract_user_id(request)
         set_current_user_id(user_id)
         request.state.user_id = user_id or ""
 

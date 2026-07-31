@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import hmac
 import json
 import logging
 import time
+import uuid
 from dataclasses import dataclass
+from urllib.parse import urlencode
 
 import httpx
 
@@ -118,8 +122,33 @@ def get_auth_url(state: str) -> str:
         "prompt": "consent",
         "state": state,
     }
-    query = "&".join(f"{k}={v}" for k, v in params.items())
-    return f"{GOOGLE_AUTH_URL}?{query}"
+    return f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
+
+
+def sign_state(user_id: str) -> str:
+    """Return an HMAC-signed OAuth state token embedding the user id."""
+    nonce = uuid.uuid4().hex
+    payload = f"{user_id}:{nonce}"
+    sig = hmac.new(
+        settings.google_client_secret.encode(), payload.encode(), hashlib.sha256
+    ).hexdigest()
+    return f"{payload}:{sig}"
+
+
+def verify_state(state: str) -> str | None:
+    """Verify a signed state token and return the embedded user id, or None."""
+    parts = state.split(":")
+    if len(parts) != 3:
+        return None
+    user_id, nonce, sig = parts
+    expected = hmac.new(
+        settings.google_client_secret.encode(),
+        f"{user_id}:{nonce}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    if not hmac.compare_digest(expected, sig):
+        return None
+    return user_id
 
 
 async def exchange_code(code: str) -> GoogleTokens:

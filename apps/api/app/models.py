@@ -139,7 +139,7 @@ class User(Base):
     school_email_prompt_dismissed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     email_prompt_dismissed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     daily_tokens_used: Mapped[int] = mapped_column(Integer, default=0)
-    daily_tokens_limit: Mapped[int] = mapped_column(Integer, default=15)
+    daily_tokens_limit: Mapped[int] = mapped_column(Integer, default=50)
     daily_tokens_reset_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

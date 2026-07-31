@@ -1,33 +1,24 @@
 import logging
 
-import jwt
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from app.websocket import manager
-from app.core.config import get_settings
+from app.security import decode_access_token
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
 
 router = APIRouter(tags=["websocket"])
 
 AUTH_FAILED_CODE = 4001
 
 
-def _verify_ws_token(token: str | None) -> str | None:
+async def _verify_ws_token(token: str | None) -> str | None:
     """Verify JWT and return user_id, or None if invalid."""
     if not token:
         return None
-    if not settings.supabase_jwt_secret:
-        return None
     try:
-        payload = jwt.decode(
-            token,
-            settings.supabase_jwt_secret,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
+        payload = await decode_access_token(token)
         return payload.get("sub")
-    except jwt.InvalidTokenError:
+    except Exception:
         return None
 
 
@@ -38,7 +29,7 @@ async def pulse_websocket(
     department_id: str | None = Query(default=None),
     token: str | None = Query(default=None),
 ):
-    verified_user_id = _verify_ws_token(token)
+    verified_user_id = await _verify_ws_token(token)
     if not verified_user_id:
         logger.warning("WebSocket auth failed: invalid or missing token")
         await websocket.close(code=AUTH_FAILED_CODE, reason="Authentication required")

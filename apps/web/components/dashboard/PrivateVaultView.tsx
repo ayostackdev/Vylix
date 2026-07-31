@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
@@ -20,14 +21,26 @@ interface VaultMaterial {
   topic: { title: string } | null;
 }
 
-export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
-  const [items, setItems] = useState<VaultMaterial[]>([]);
-  const [loading, setLoading] = useState(true);
+async function fetchVaultMaterials(): Promise<VaultMaterial[]> {
+  const headers: Record<string, string> = {};
+  const supabase = getSupabaseBrowserClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
+  const res = await fetch(`/api/materials/my-materials?limit=50`, { headers });
+  if (!res.ok) throw new Error('Failed to fetch vault materials');
+  const json = await res.json();
+  return json.items ?? [];
+}
+
+export function PrivateVaultView() {
+  const queryClient = useQueryClient();
   const [chatDocument, setChatDocument] = useState<{ id: string; title: string } | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerTitle, setViewerTitle] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const {
     showModal,
     checkAfterSave,
@@ -36,9 +49,17 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
     handleSuccess,
   } = useBackupEmailPrompt();
 
-  const handleDelete = useCallback(async (id: string) => {
-    setDeletingId(id);
-    try {
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ['vault-materials'],
+    queryFn: fetchVaultMaterials,
+  });
+
+  useEffect(() => {
+    checkAfterSave();
+  }, [checkAfterSave]);
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
@@ -47,14 +68,16 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
-
       if (!res.ok) throw new Error('Failed to delete');
-
-      setItems((prev) => prev.filter((item) => item.id !== id));
+      return id;
+    },
+    onSuccess: () => {
       setConfirmDeleteId(null);
-    } catch { toast.error('Failed to delete material'); }
-    setDeletingId(null);
-  }, []);
+      queryClient.invalidateQueries({ queryKey: ['vault-materials'] });
+      queryClient.invalidateQueries({ queryKey: ['past-questions'] });
+    },
+    onError: () => toast.error('Failed to delete material'),
+  });
 
   const openFile = useCallback(async (id: string, title: string) => {
     try {
@@ -74,36 +97,8 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
     } catch { toast.error('Failed to open file'); }
   }, []);
 
-  const fetchVault = useCallback(async () => {
-    setLoading(true);
-    try {
-      const headers: Record<string, string> = {};
-      const supabase = getSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-
-      const res = await fetch(`/api/materials/my-materials?limit=50`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch vault materials');
-      const json = await res.json();
-      setItems(json.items ?? []);
-    } catch {
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchVault();
-    checkAfterSave();
-  }, [fetchVault, checkAfterSave, refreshKey]);
-
-  useEffect(() => {
-    return () => {
-      if (viewerUrl?.startsWith('blob:')) URL.revokeObjectURL(viewerUrl);
-    };
+  const revokeViewerUrl = useCallback(() => {
+    if (viewerUrl?.startsWith('blob:')) URL.revokeObjectURL(viewerUrl);
   }, [viewerUrl]);
 
   const totalSize = items.reduce((acc, i) => acc + (i.fileSize || 0), 0);
@@ -143,7 +138,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
             >
               <p className="cp-label">{stat.label}</p>
               <p className="mt-3 text-3xl font-black tracking-tight text-gray-900">
-                {loading ? '...' : stat.value}
+                {isLoading ? '...' : stat.value}
               </p>
             </article>
           ))}
@@ -155,12 +150,13 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
           </div>
 
           <div className="mt-5 grid gap-3">
-            {loading ? (
+            {isLoading ? (
               <p className="text-sm text-slate-400">Loading...</p>
             ) : items.length === 0 ? (
               <p className="text-sm text-slate-400">No materials yet. Upload from the Past Questions tab.</p>
             ) : (
               items.map((item) => {
+                const isDeleting = deleteMutation.isPending && deleteMutation.variables === item.id;
                 return (
                   <div
                     key={item.id}
@@ -186,15 +182,15 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
                       {confirmDeleteId === item.id ? (
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => handleDelete(item.id)}
-                            disabled={deletingId === item.id}
+                            onClick={() => deleteMutation.mutate(item.id)}
+                            disabled={isDeleting}
                             className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
                           >
-                            {deletingId === item.id ? '...' : 'Confirm'}
+                            {isDeleting ? '...' : 'Confirm'}
                           </button>
                           <button
                             onClick={() => setConfirmDeleteId(null)}
-                            disabled={deletingId === item.id}
+                            disabled={isDeleting}
                             className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-[11px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
                           >
                             Cancel
@@ -229,7 +225,7 @@ export function PrivateVaultView({ refreshKey = 0 }: { refreshKey?: number }) {
             <div className="flex items-center justify-between gap-2 bg-black/80 px-3 py-2 sm:px-4 sm:py-3">
               <p className="min-w-0 truncate text-xs font-semibold text-white sm:text-sm">{viewerTitle}</p>
               <button
-                onClick={() => { setViewerUrl(null); setViewerTitle(''); }}
+                onClick={() => { setViewerUrl(null); setViewerTitle(''); revokeViewerUrl(); }}
                 className="shrink-0 rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-white hover:bg-white/20 transition-colors sm:px-4 sm:py-1.5 sm:text-sm"
               >
                 Close

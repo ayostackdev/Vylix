@@ -56,7 +56,7 @@ services:
     build:
       context: ./apps/api
       target: worker
-    command: celery -A app.tasks.celery_app beat --loglevel=info
+    command: celery -A app.core.celery_app.celery_app beat --loglevel=info
     env_file:
       - .env.production
     environment:

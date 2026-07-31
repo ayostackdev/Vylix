@@ -56,6 +56,16 @@ class PastQuestionOut(MaterialOut):
     course_title: str | None = None
 
 
+class MaterialListOut(BaseModel):
+    items: list[MaterialOut]
+    total: int
+
+
+class PastQuestionListOut(BaseModel):
+    items: list[PastQuestionOut]
+    total: int
+
+
 def _material_to_out(m: Material) -> MaterialOut:
     uploader = getattr(m, "uploader", None)
     topic = getattr(m, "topic", None)
@@ -236,18 +246,31 @@ async def toggle_share(
     return _material_to_out(material)
 
 
-@router.get("/my-materials", response_model=list[MaterialOut])
+@router.get("/my-materials", response_model=MaterialListOut)
 async def list_my_materials(
     user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
 ):
+    total = (
+        await db.execute(
+            select(func.count())
+            .select_from(Material)
+            .where(Material.uploader_id == user.id)
+        )
+    ).scalar_one()
+
     result = await db.execute(
         select(Material)
         .options(selectinload(Material.uploader), selectinload(Material.topic))
         .where(Material.uploader_id == user.id)
         .order_by(Material.uploaded_at.desc())
+        .offset(offset)
+        .limit(limit)
     )
-    return [_material_to_out(m) for m in result.scalars().all()]
+    items = [_material_to_out(m) for m in result.scalars().all()]
+    return MaterialListOut(items=items, total=total)
 
 
 @router.get("/course/{course_id}", response_model=list[MaterialOut])
@@ -302,7 +325,7 @@ async def list_recent_materials(
     return [_material_to_out(m) for m in result.scalars().all()]
 
 
-@router.get("/past-questions", response_model=list[PastQuestionOut])
+@router.get("/past-questions", response_model=PastQuestionListOut)
 async def search_past_questions(
     course_code: str = Query(default=""),
     year: int | None = Query(default=None),
@@ -312,27 +335,42 @@ async def search_past_questions(
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):
+    filters = [Material.is_past_question == True, Material.is_shared == True]
+    if course_code:
+        filters.append(Course.code.ilike(f"%{course_code}%"))
+    if year:
+        filters.append(Material.exam_year == year)
+    if semester:
+        filters.append(Material.semester == semester)
+    if department_code:
+        filters.append(Department.code == department_code)
+
+    count_query = (
+        select(func.count())
+        .select_from(Material)
+        .join(Topic, Topic.id == Material.topic_id)
+        .join(Course, Course.id == Topic.course_id)
+        .where(*filters)
+    )
+    if department_code:
+        count_query = count_query.join(Department, Department.id == Course.department_id)
+    total = (await db.execute(count_query)).scalar_one()
+
     query = (
         select(Material, Course.code.label("course_code"), Course.title.label("course_title"))
         .options(selectinload(Material.uploader), selectinload(Material.topic))
         .join(Topic, Topic.id == Material.topic_id)
         .join(Course, Course.id == Topic.course_id)
-        .where(Material.is_past_question == True, Material.is_shared == True)
+        .where(*filters)
     )
-    if course_code:
-        query = query.where(Course.code.ilike(f"%{course_code}%"))
-    if year:
-        query = query.where(Material.exam_year == year)
-    if semester:
-        query = query.where(Material.semester == semester)
     if department_code:
-        query = query.join(Department, Department.id == Course.department_id).where(Department.code == department_code)
+        query = query.join(Department, Department.id == Course.department_id)
 
     query = query.order_by(Material.uploaded_at.desc()).offset((page - 1) * limit).limit(limit)
     result = await db.execute(query)
     rows = result.all()
 
-    return [
+    items = [
         PastQuestionOut(
             id=m.id, file_name=m.file_name, file_url=m.file_url, file_size=m.file_size,
             topic_id=m.topic_id, uploader_id=m.uploader_id,
@@ -347,6 +385,7 @@ async def search_past_questions(
         )
         for m, cc, ct in rows
     ]
+    return PastQuestionListOut(items=items, total=total)
 
 
 @router.get("/{material_id}/file")

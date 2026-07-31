@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
@@ -16,69 +17,93 @@ interface PastQuestion {
   processingStatus: string;
   summary: string | null;
   uploadedAt: string;
+  uploader_id: string;
+  uploader_name: string | null;
+  uploader_avatar: string | null;
   topic: {
     id: string;
     title: string;
     course: { id: string; code: string; title: string } | null;
   } | null;
-  uploader: { id: string; fullName: string; avatarUrl: string | null };
+}
+
+interface PastQuestionPage {
+  items: PastQuestion[];
+  total: number;
+}
+
+const LIMIT = 20;
+
+async function fetchPastQuestions(params: {
+  page: number;
+  searchCourse: string;
+  searchYear: string;
+  searchSemester: string;
+}): Promise<PastQuestionPage> {
+  const q = new URLSearchParams();
+  q.set('page', params.page.toString());
+  q.set('limit', LIMIT.toString());
+  if (params.searchCourse) q.set('courseCode', params.searchCourse.toUpperCase());
+  if (params.searchYear) q.set('year', params.searchYear);
+  if (params.searchSemester) q.set('semester', params.searchSemester);
+
+  const headers: Record<string, string> = {};
+  const supabase = getSupabaseBrowserClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
+  const res = await fetch(`/api/materials/past-questions?${q.toString()}`, { headers });
+  if (!res.ok) throw new Error('Failed to fetch past questions');
+  return res.json();
 }
 
 export function PastQuestionsView() {
   const { user } = useAuth();
-  const [items, setItems] = useState<PastQuestion[]>([]);
-  const [total, setTotal] = useState(0);
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchCourse, setSearchCourse] = useState('');
   const [searchYear, setSearchYear] = useState('');
   const [searchSemester, setSearchSemester] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerTitle, setViewerTitle] = useState('');
-  const limit = 20;
 
-  const fetchPastQuestions = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = new URLSearchParams();
-      params.set('page', page.toString());
-      params.set('limit', limit.toString());
-      if (searchCourse) params.set('courseCode', searchCourse.toUpperCase());
-      if (searchYear) params.set('year', searchYear);
-      if (searchSemester) params.set('semester', searchSemester);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['past-questions', page, searchCourse, searchYear, searchSemester],
+    queryFn: () => fetchPastQuestions({ page, searchCourse, searchYear, searchSemester }),
+  });
 
-      const headers: Record<string, string> = {};
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
+      if (!session) throw new Error('No session');
+
+      const res = await fetch(`/api/materials/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to delete material');
       }
-
-      const res = await fetch(`/api/materials/past-questions?${params.toString()}`, { headers });
-      if (!res.ok) throw new Error('Failed to fetch past questions');
-      const json = await res.json();
-      setItems(json.items ?? []);
-      setTotal(json.total ?? 0);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load past questions');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, searchCourse, searchYear, searchSemester]);
-
-  useEffect(() => {
-    fetchPastQuestions();
-  }, [fetchPastQuestions]);
-
-  useEffect(() => {
-    return () => {
-      if (viewerUrl?.startsWith('blob:')) URL.revokeObjectURL(viewerUrl);
-    };
-  }, [viewerUrl]);
+      return id;
+    },
+    onSuccess: () => {
+      setConfirmDeleteId(null);
+      queryClient.invalidateQueries({ queryKey: ['past-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['vault-materials'] });
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to delete material');
+    },
+  });
 
   const openFile = useCallback(async (id: string, title: string) => {
     try {
@@ -97,34 +122,11 @@ export function PastQuestionsView() {
     } catch { toast.error('Failed to open file'); }
   }, []);
 
-  const handleDelete = useCallback(async (id: string) => {
-    setDeletingId(id);
-    setError(null);
-    try {
-      const supabase = getSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session');
-
-      const res = await fetch(`/api/materials/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to delete material');
-      }
-
-      setItems((prev) => prev.filter((item) => item.id !== id));
-      setConfirmDeleteId(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete');
-    } finally {
-      setDeletingId(null);
-    }
-  }, []);
-
-  const totalPages = Math.ceil(total / limit);
+  useEffect(() => {
+    return () => {
+      if (viewerUrl?.startsWith('blob:')) URL.revokeObjectURL(viewerUrl);
+    };
+  }, [viewerUrl]);
 
   return (
     <section className="space-y-5 sm:space-y-8">
@@ -176,12 +178,14 @@ export function PastQuestionsView() {
 
       {/* Content */}
       <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-200 border-t-blue-600" />
           </div>
         ) : error ? (
-          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">{error}</div>
+          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800">
+            {error instanceof Error ? error.message : 'Failed to load past questions'}
+          </div>
         ) : items.length === 0 ? (
           <div className="py-12 text-center">
             <span className="text-4xl">📝</span>
@@ -190,74 +194,77 @@ export function PastQuestionsView() {
           </div>
         ) : (
           <div className="grid gap-3">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col gap-2 rounded-[1.25rem] border border-sky-100 bg-blue-50 p-4 transition-all hover:-translate-y-0.5 hover:border-sky-200 sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="cp-card-title text-gray-900 truncate">{item.fileName}</p>
-                    {item.examYear && (
-                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
-                        {item.examYear}
-                      </span>
+            {items.map((item) => {
+              const isDeleting = deleteMutation.isPending && deleteMutation.variables === item.id;
+              return (
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-2 rounded-[1.25rem] border border-sky-100 bg-blue-50 p-4 transition-all hover:-translate-y-0.5 hover:border-sky-200 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="cp-card-title text-gray-900 truncate">{item.fileName}</p>
+                      {item.examYear && (
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                          {item.examYear}
+                        </span>
+                      )}
+                      {item.semester && (
+                        <span className="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">
+                          {item.semester === 'FIRST' ? '1st Sem' : '2nd Sem'}
+                        </span>
+                      )}
+                    </div>
+                    {item.topic?.course && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {item.topic.course.code} — {item.topic.course.title}
+                      </p>
                     )}
-                    {item.semester && (
-                      <span className="inline-flex items-center rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">
-                        {item.semester === 'FIRST' ? '1st Sem' : '2nd Sem'}
-                      </span>
+                    {item.summary && (
+                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{item.summary}</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      {(item.fileSize / 1024 / 1024).toFixed(1)} MB • Uploaded by {item.uploader_name}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => openFile(item.id, item.fileName)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-xs font-bold text-white hover:shadow-md transition-shadow"
+                    >
+                      📖 View
+                    </button>
+                    {user?.id === item.uploader_id && (
+                      confirmDeleteId === item.id ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => deleteMutation.mutate(item.id)}
+                            disabled={isDeleting}
+                            className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                          >
+                            {isDeleting ? '...' : 'Confirm'}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(null)}
+                            disabled={isDeleting}
+                            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteId(item.id)}
+                          className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          🗑 Delete
+                        </button>
+                      )
                     )}
                   </div>
-                  {item.topic?.course && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      {item.topic.course.code} — {item.topic.course.title}
-                    </p>
-                  )}
-                  {item.summary && (
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{item.summary}</p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-1">
-                    {(item.fileSize / 1024 / 1024).toFixed(1)} MB • Uploaded by {item.uploader.fullName}
-                  </p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => openFile(item.id, item.fileName)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 px-4 py-2 text-xs font-bold text-white hover:shadow-md transition-shadow"
-                  >
-                    📖 View
-                  </button>
-                  {user?.id === item.uploader.id && (
-                    confirmDeleteId === item.id ? (
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          disabled={deletingId === item.id}
-                          className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
-                        >
-                          {deletingId === item.id ? '...' : 'Confirm'}
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteId(null)}
-                          disabled={deletingId === item.id}
-                          className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setConfirmDeleteId(item.id)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        🗑 Delete
-                      </button>
-                    )
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

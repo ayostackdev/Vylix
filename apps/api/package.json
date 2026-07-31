@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "python -m uvicorn app.main:app --reload",
     "start": "python -m uvicorn app.main:app",
-    "worker": "python -m celery -A app.core.celery_app.celery_app worker --loglevel=info"
+    "worker": "python -m celery -A app.core.celery_app.celery_app worker --loglevel=info",
+    "beat": "python -m celery -A app.core.celery_app.celery_app beat --loglevel=info"
   }
 }

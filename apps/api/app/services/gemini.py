@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from app.core.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash"
 
@@ -13,6 +16,7 @@ API_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-f
 def _call(prompt: str, system_instruction: str | None = None) -> str | None:
     settings = get_settings()
     if not settings.gemini_api_key:
+        logger.warning("GEMINI_API_KEY is not configured; skipping Gemini call")
         return None
 
     url = f"{API_BASE}:generateContent?key={settings.gemini_api_key}"
@@ -33,8 +37,17 @@ def _call(prompt: str, system_instruction: str | None = None) -> str | None:
     try:
         with urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read())
-            return result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text")
-    except (URLError, json.JSONDecodeError, KeyError, IndexError):
+    except HTTPError as e:
+        logger.error("Gemini API returned HTTP %s (%s)", e.code, e.reason)
+        return None
+    except (URLError, TimeoutError, json.JSONDecodeError) as e:
+        logger.error("Gemini API call failed: %s", e)
+        return None
+
+    try:
+        return result["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError):
+        logger.warning("Gemini response contained no text: %s", json.dumps(result)[:500])
         return None
 
 

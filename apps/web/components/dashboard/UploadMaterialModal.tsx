@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { queryClient } from '@/lib/query-client';
 import { useAuth } from '@/context/auth-context';
 
 interface UploadMaterialModalProps {
@@ -163,6 +164,8 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
       }
 
       setProgress(100);
+      queryClient.invalidateQueries({ queryKey: ['vault-materials'] });
+      queryClient.invalidateQueries({ queryKey: ['past-questions'] });
       setTimeout(() => {
         reset();
         onSuccess();

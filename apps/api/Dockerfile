@@ -19,7 +19,7 @@ FROM base AS worker
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ app/
-CMD ["celery", "-A", "app.tasks.celery_app", "worker", "--loglevel=info", "--concurrency=5"]
+CMD ["celery", "-A", "app.core.celery_app.celery_app", "worker", "--loglevel=info", "--concurrency=5"]
 
 # Lean production target (no torch, easyocr, docling, transformers)
 # This is the DEFAULT target — Docker builds this when no target is specified

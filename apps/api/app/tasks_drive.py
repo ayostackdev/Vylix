@@ -20,6 +20,9 @@ def _run_async(coro):
 
 
 def _get_user_token(user_id: str) -> tuple[str, str | None]:
+    """Get a valid Google access token, refreshing it if expired."""
+    from app.services import google_drive
+
     with get_connection() as conn, conn.cursor() as cur:
         cur.execute(
             "SELECT access_token, refresh_token, token_expires_at "
@@ -29,7 +32,29 @@ def _get_user_token(user_id: str) -> tuple[str, str | None]:
         row = cur.fetchone()
     if not row:
         raise RuntimeError(f"No Google Drive connection for user {user_id}")
-    return row["access_token"], row.get("refresh_token")
+
+    access_token = row["access_token"]
+    refresh_token = row.get("refresh_token")
+    expires_at = row.get("token_expires_at")
+
+    if expires_at is not None:
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if expires_at < datetime.now(timezone.utc):
+            if not refresh_token:
+                raise RuntimeError("Google Drive token expired, please reconnect")
+            new_tokens = _run_async(google_drive.refresh_access_token(refresh_token))
+            access_token = new_tokens.access_token
+            new_expires = datetime.fromtimestamp(new_tokens.expires_at, tz=timezone.utc) if new_tokens.expires_at else None
+            with get_connection() as conn, conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE connected_accounts SET access_token = %s, token_expires_at = %s "
+                    "WHERE user_id = %s AND provider = 'google'",
+                    (access_token, new_expires, user_id),
+                )
+                conn.commit()
+
+    return access_token, refresh_token
 
 
 def _file_already_imported(user_id: str, drive_file_id: str) -> bool:

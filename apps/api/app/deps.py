@@ -5,10 +5,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 
-import json
-
-import jwt
-import httpx
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
@@ -17,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.database import get_db
 from app.models import User, UserEmail
+from app.security import decode_access_token
 
 settings = get_settings()
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -65,54 +62,8 @@ class CurrentUser:
     user: User
 
 
-_jwks_cache: tuple[str, list[dict]] | None = None
-
-
-async def _fetch_jwks() -> list[dict]:
-    global _jwks_cache
-    supabase_url = settings.supabase_url
-    if not supabase_url:
-        raise HTTPException(status_code=500, detail="SUPABASE_URL not configured")
-    if _jwks_cache and _jwks_cache[0] == supabase_url:
-        return _jwks_cache[1]
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(f"{supabase_url}/auth/v1/.well-known/jwks.json", timeout=10)
-        resp.raise_for_status()
-        keys = resp.json().get("keys", [])
-    _jwks_cache = (supabase_url, keys)
-    return keys
-
-
 async def _decode_jwt_payload(token: str) -> dict:
-    unverified = jwt.get_unverified_header(token)
-    alg = unverified.get("alg", "HS256")
-
-    if alg == "HS256":
-        jwt_secret = settings.supabase_jwt_secret
-        if not jwt_secret:
-            raise HTTPException(status_code=500, detail="SUPABASE_JWT_SECRET not set")
-        try:
-            return jwt.decode(token, jwt_secret, algorithms=["HS256"], audience="authenticated")
-        except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail="Token has expired")
-        except jwt.InvalidAudienceError:
-            raise HTTPException(status_code=401, detail="Invalid token audience")
-        except jwt.InvalidSignatureError:
-            raise HTTPException(status_code=401, detail="Invalid token signature")
-        except jwt.DecodeError:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
-    if alg == "RS256":
-        keys = await _fetch_jwks()
-        for key in keys:
-            public_key = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(key))
-            try:
-                return jwt.decode(token, public_key, algorithms=["RS256"], audience="authenticated")
-            except jwt.InvalidSignatureError:
-                continue
-        raise HTTPException(status_code=401, detail="Invalid token signature")
-
-    raise HTTPException(status_code=401, detail=f"Unsupported algorithm: {alg}")
+    return await decode_access_token(token)
 
 
 async def get_current_user(

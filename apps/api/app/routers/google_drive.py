@@ -70,7 +70,7 @@ async def connect_google_drive(
     user: CurrentUser = Depends(get_current_user),
 ):
     """Start Google OAuth flow. Returns URL to redirect user to."""
-    state = f"{user.id}:{uuid.uuid4()}"
+    state = google_drive.sign_state(user.id)
     auth_url = google_drive.get_auth_url(state)
     return ConnectResponse(auth_url=auth_url)
 
@@ -93,7 +93,7 @@ async def google_callback(
         google_email = user_info.get("email")
         google_id = user_info.get("id")
 
-        user_id = state.split(":")[0] if ":" in state else None
+        user_id = google_drive.verify_state(state)
         if not user_id:
             return RedirectResponse(url=f"{frontend_base}/onboarding?drive=error&detail=invalid_state")
 

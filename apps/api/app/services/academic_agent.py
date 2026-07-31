@@ -23,7 +23,9 @@ _vector_store: VectorStore | None = None
 def _get_client() -> genai.Client:
     global _client
     if _client is None:
-        _client = genai.Client()
+        if not settings.gemini_api_key:
+            raise RuntimeError("GEMINI_API_KEY is not configured")
+        _client = genai.Client(api_key=settings.gemini_api_key)
     return _client
 
 
