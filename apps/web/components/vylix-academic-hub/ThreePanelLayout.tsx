@@ -7,6 +7,7 @@ import { InteractiveSidebar } from './InteractiveSidebar'
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode'
 import { ProfileModal } from '@/components/auth/ProfileModal'
 import { CollaborationView } from '@/components/chat/CollaborationView'
+import { FlashcardTab } from './tabs/FlashcardTab'
 import { useAuth } from '@/context/auth-context'
 
 export interface DocumentInfo {
@@ -16,7 +17,7 @@ export interface DocumentInfo {
   courseCode: string
 }
 
-type MobileView = 'courses' | 'content' | 'chat' | 'tools'
+type MobileView = 'courses' | 'content' | 'chat' | 'tools' | 'flashcards'
 
 export function ThreePanelLayout() {
   const { user, isAuthenticated, promptLogin } = useAuth()
@@ -27,7 +28,7 @@ export function ThreePanelLayout() {
   const [showTools, setShowTools] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
 
-  const activeView = mobileView === 'chat' ? 'chat' : 'courses'
+  const activeView = mobileView === 'chat' ? 'chat' : mobileView === 'flashcards' ? 'flashcards' : 'courses'
 
   const initials = (user?.fullName || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 
@@ -198,6 +199,19 @@ export function ThreePanelLayout() {
             </svg>
             Chat
           </button>
+          <button
+            onClick={() => { setShowTools(false); setMobileView('flashcards') }}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 ${
+              activeView === 'flashcards'
+                ? 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-sm shadow-blue-500/20'
+                : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-700'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            Cards
+          </button>
         </div>
 
         {/* Sidebar content */}
@@ -211,6 +225,10 @@ export function ThreePanelLayout() {
         {activeView === 'chat' ? (
           <div className="flex-1 overflow-hidden">
             <CollaborationView />
+          </div>
+        ) : activeView === 'flashcards' ? (
+          <div className="flex-1 flex flex-col min-h-0 p-3 sm:p-4">
+            <FlashcardTab selectedDoc={selectedDoc} isReadOnly={!isAuthenticated} />
           </div>
         ) : (
           <MainContentPanel
@@ -275,20 +293,16 @@ export function ThreePanelLayout() {
             <div className="bottom-nav-dot" />
           </button>
 
-          {isAuthenticated && (
-            <button
-              onClick={() => setShowProfile(true)}
-              className="bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative text-gray-400"
-            >
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white text-[8px] font-bold overflow-hidden">
-                {user?.avatarUrl ? (
-                  <img src={user.avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
-                ) : initials}
-              </div>
-              <span className="text-[10px] font-semibold">Profile</span>
-              <div className="bottom-nav-dot" />
-            </button>
-          )}
+          <button
+            onClick={() => { setShowTools(false); setMobileView('flashcards') }}
+            className={`bottom-nav-item flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl relative ${mobileView === 'flashcards' ? 'is-active' : 'text-gray-400'}`}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span className="text-[10px] font-semibold">Cards</span>
+            <div className="bottom-nav-dot" />
+          </button>
         </div>
       </nav>
     </div>
