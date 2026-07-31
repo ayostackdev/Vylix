@@ -18,6 +18,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 url = settings.direct_url.replace("%", "%%")
+url = url.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)
 url = url.replace("postgresql://", "postgresql+psycopg://", 1)
 url = url.replace("?pgbouncer=true", "")
 config.set_main_option("sqlalchemy.url", url)
