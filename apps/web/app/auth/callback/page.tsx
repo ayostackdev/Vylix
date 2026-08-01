@@ -65,8 +65,8 @@ function CallbackContent() {
   }, [router, searchParams, restoreSessionFromHash]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-indigo-50 via-violet-50 to-fuchsia-50">
-      <div className="rounded-2xl border border-indigo-100 bg-white p-8 shadow-lg text-center">
+    <div className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50">
+      <div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-lg text-center">
         <div className="mb-4 text-4xl">
           {message.includes('successfully') ? '✅' : message.includes('failed') || message.includes('error') ? '❌' : '🔄'}
         </div>
@@ -79,8 +79,8 @@ function CallbackContent() {
 export default function AuthCallbackPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-indigo-50 via-violet-50 to-fuchsia-50">
-        <div className="rounded-2xl border border-indigo-100 bg-white p-8 shadow-lg text-center">
+      <div className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-blue-50 via-sky-50 to-cyan-50">
+        <div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-lg text-center">
           <div className="mb-4 text-4xl">🔄</div>
           <p className="text-gray-700 font-medium">Completing sign in...</p>
         </div>

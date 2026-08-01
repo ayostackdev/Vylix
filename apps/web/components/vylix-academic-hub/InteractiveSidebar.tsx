@@ -98,7 +98,7 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
         {/* Mobile close bar */}
         <div className="flex items-center justify-between px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] divider-premium md:hidden shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-sm shadow-indigo-600/20">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-sm shadow-blue-600/20">
               <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -117,16 +117,16 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
 
         {/* Active document banner */}
         {selectedDoc && (
-          <div className="px-4 py-2.5 bg-gradient-to-r from-indigo-50/80 to-violet-50/40 border-b border-indigo-100/50 shrink-0">
+          <div className="px-4 py-2.5 bg-gradient-to-r from-blue-50/80 to-sky-50/40 border-b border-blue-100/50 shrink-0">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-md bg-indigo-500/10 flex items-center justify-center shrink-0">
-                <svg className="w-3 h-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-5 h-5 rounded-md bg-blue-500/10 flex items-center justify-center shrink-0">
+                <svg className="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">{selectedDoc.courseCode}</p>
-                <p className="text-[11px] text-indigo-500/80 truncate font-medium">{selectedDoc.name}</p>
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{selectedDoc.courseCode}</p>
+                <p className="text-[11px] text-blue-500/80 truncate font-medium">{selectedDoc.name}</p>
               </div>
             </div>
           </div>
@@ -146,7 +146,7 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
                   value={tab.id}
                   className={`tabbar-item flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 min-h-[36px] sm:min-h-[38px] text-[10px] sm:text-[11px] font-semibold transition-all relative whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'is-active text-indigo-700'
+                      ? 'is-active text-blue-700'
                       : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50/50'
                   }`}
                 >
@@ -173,7 +173,7 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
                 <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pointer-events-auto">
                   <button
                     onClick={() => promptLogin('unlock AI tools')}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-bold shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white text-sm font-bold shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />

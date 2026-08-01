@@ -61,7 +61,10 @@ class SupabaseStorage(StorageProvider):
                 json={"expiresIn": expires_in},
             )
             resp.raise_for_status()
-            return resp.json()["signedUrl"]
+            signed_url = resp.json().get("signedURL") or resp.json().get("signedUrl")
+            if signed_url.startswith("/"):
+                signed_url = f"{self.base_url}{signed_url}"
+            return signed_url
 
 
 class AppwriteStorage(StorageProvider):

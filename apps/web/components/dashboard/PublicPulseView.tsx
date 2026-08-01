@@ -48,19 +48,19 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
         </div>
       </div>
 
-      <article className="rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-5 shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
+      <article className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
         <div className="flex items-center justify-between gap-3">
           <h3 className="cp-card-title text-gray-900">Live Feed</h3>
           <div className="flex items-center gap-2">
             <span className={`h-3 w-3 rounded-full shadow-sm shadow-green-300/30 ${realtime.connected ? 'animate-pulse bg-green-500' : 'bg-slate-400'}`} />
-            <span className="cp-pill rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-violet-700">
+            <span className="cp-pill rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sky-700">
               {realtime.connected ? `${realtime.presenceCount} live` : 'Connecting...'}
             </span>
           </div>
         </div>
         <div className="mt-5 grid gap-3">
           {realtime.items.length === 0 ? (
-            <div className="rounded-[1.25rem] border border-dashed border-indigo-200 bg-white px-6 py-8 text-center">
+            <div className="rounded-[1.25rem] border border-dashed border-blue-200 bg-white px-6 py-8 text-center">
               <p className="text-sm text-gray-600">No recent activity in your department</p>
               <p className="mt-1 text-xs text-gray-500">Events will appear here when materials are uploaded or processed</p>
             </div>
@@ -84,7 +84,7 @@ export function PublicPulseView({ isReadOnly = false }: PublicPulseViewProps) {
           )}
         </div>
         {realtime.lastEvent && (
-          <p className="mt-4 rounded-2xl border border-indigo-100 bg-white px-4 py-3 text-xs text-slate-700 shadow-sm">
+          <p className="mt-4 rounded-2xl border border-blue-100 bg-white px-4 py-3 text-xs text-slate-700 shadow-sm">
             Live update: {realtime.lastEvent.title}
             {realtime.lastEvent.message ? ` · ${realtime.lastEvent.message}` : ''}
           </p>

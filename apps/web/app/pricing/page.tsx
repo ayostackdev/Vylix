@@ -94,7 +94,7 @@ export default function PricingPage() {
     <div className="min-h-screen bg-[#f6f7fb]">
       <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <button onClick={() => router.push('/')} className="text-sm font-bold text-gray-900 hover:text-indigo-600 transition-colors">
+          <button onClick={() => router.push('/')} className="text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors">
             Vylix
           </button>
         </div>

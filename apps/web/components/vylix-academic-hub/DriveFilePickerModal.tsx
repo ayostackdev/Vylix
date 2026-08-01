@@ -115,8 +115,8 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-indigo-100 animate-scale-in max-h-[85vh] flex flex-col">
-        <div className="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50/35 px-6 py-4 shrink-0">
+      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl border border-blue-100 animate-scale-in max-h-[85vh] flex flex-col">
+        <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-sky-50/35 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
@@ -149,7 +149,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
             <select
               value={selectedCourseId}
               onChange={(e) => setSelectedCourseId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               disabled={importing}
             >
               {courses.length === 0 ? (
@@ -170,7 +170,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
                 <button
                   onClick={() => handleBreadcrumbClick(index)}
                   disabled={importing}
-                  className={`hover:text-indigo-600 transition-colors font-medium ${
+                  className={`hover:text-blue-600 transition-colors font-medium ${
                     index === folderPath.length - 1 ? 'text-gray-900' : ''
                   }`}
                 >
@@ -203,7 +203,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
                     key={folder.id}
                     onClick={() => handleFolderClick(folder.id, folder.name)}
                     disabled={importing}
-                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left disabled:opacity-50"
+                    className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-left disabled:opacity-50"
                   >
                     <svg className="w-5 h-5 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
@@ -225,7 +225,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
                     key={file.id}
                     className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer ${
                       selectedFiles.has(file.id)
-                        ? 'border-indigo-400 bg-indigo-50'
+                        ? 'border-sky-400 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
@@ -234,7 +234,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
                       checked={selectedFiles.has(file.id)}
                       onChange={() => toggleFileSelection(file.id)}
                       disabled={importing}
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <div className="w-8 h-10 rounded bg-gradient-to-br from-red-400 to-orange-400 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
                       PDF
@@ -263,7 +263,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
 
           {/* Selected Count */}
           {selectedFiles.size > 0 && (
-            <div className="text-sm text-indigo-600 font-medium">
+            <div className="text-sm text-blue-600 font-medium">
               {selectedFiles.size} file{selectedFiles.size !== 1 ? 's' : ''} selected
             </div>
           )}
@@ -280,7 +280,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
           <button
             onClick={handleImport}
             disabled={importing || selectedFiles.size === 0}
-            className="flex-1 rounded-lg bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white transition-all hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2.5 text-sm font-bold text-white transition-all hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {importing ? (
               <span className="flex items-center justify-center gap-2">

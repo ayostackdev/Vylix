@@ -128,8 +128,8 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
         </div>
         <div className="flex-1 flex items-center justify-center p-6 text-center">
           <div>
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center mx-auto mb-4 ring-1 ring-indigo-100/50">
-              <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center mx-auto mb-4 ring-1 ring-blue-100/50">
+              <svg className="w-8 h-8 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
@@ -162,8 +162,8 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {tasks.length === 0 && !studyPlan && (
           <div className="text-center py-8">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center mx-auto mb-4 ring-1 ring-indigo-100/50">
-              <svg className="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center mx-auto mb-4 ring-1 ring-blue-100/50">
+              <svg className="w-7 h-7 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
@@ -174,7 +174,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
             <button
               onClick={handleStart}
               disabled={agent.isPending}
-              className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-sm hover:shadow-md transition-all disabled:opacity-50"
+              className="mt-4 w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white font-medium text-sm hover:shadow-md transition-all disabled:opacity-50"
             >
               {agent.isPending ? (
                 <span className="inline-flex items-center gap-2">
@@ -197,7 +197,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
               <div
                 key={task.id}
                 className={`flex items-center gap-3 p-2.5 rounded-xl text-sm border transition-all ${
-                  task.status === 'in_progress' ? 'bg-indigo-50 border-indigo-200 animate-pulse' :
+                  task.status === 'in_progress' ? 'bg-blue-50 border-blue-200 animate-pulse' :
                   task.status === 'completed' ? 'bg-emerald-50 border-emerald-200' :
                   task.status === 'failed' ? 'bg-red-50 border-red-200' :
                   'bg-gray-50 border-gray-200 opacity-60'
@@ -205,7 +205,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
               >
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                   task.status === 'completed' ? 'bg-emerald-500 text-white' :
-                  task.status === 'in_progress' ? 'bg-indigo-500 text-white' :
+                  task.status === 'in_progress' ? 'bg-blue-500 text-white' :
                   'bg-gray-300 text-white'
                 }`}>
                   {task.status === 'completed' ? (
@@ -226,14 +226,14 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
         )}
 
         {studyPlan && (
-          <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200 rounded-xl p-4 mt-4">
+          <div className="bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200 rounded-xl p-4 mt-4">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
                 <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-xs font-bold text-indigo-800">Your Personalized Study Plan</p>
+              <p className="text-xs font-bold text-blue-800">Your Personalized Study Plan</p>
             </div>
             <div className="text-xs text-gray-700 whitespace-pre-wrap leading-relaxed">
               {studyPlan}
@@ -255,7 +255,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
         {!agent.isPending && tasks.length > 0 && !studyPlan && (
           <button
             onClick={handleStart}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-medium text-sm hover:shadow-md transition-all"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white font-medium text-sm hover:shadow-md transition-all"
           >
             Restart Agent
           </button>
@@ -265,7 +265,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
           <div className="space-y-2">
             <button
               onClick={handleStart}
-              className="w-full py-3 rounded-xl border border-indigo-200 bg-white text-indigo-600 font-medium text-sm hover:bg-indigo-50 transition-all"
+              className="w-full py-3 rounded-xl border border-blue-200 bg-white text-blue-600 font-medium text-sm hover:bg-blue-50 transition-all"
             >
               Re-run Agent
             </button>

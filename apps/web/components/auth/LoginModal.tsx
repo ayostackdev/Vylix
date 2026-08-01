@@ -48,7 +48,7 @@ export function LoginModal() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-green-100">
         {/* Header */}
-        <div className="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50/35 px-6 py-4">
+        <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-sky-50/35 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent mb-3">
@@ -80,7 +80,7 @@ export function LoginModal() {
           )}
 
           {success && (
-            <div className="rounded-lg bg-gradient-to-br from-indigo-50 to-violet-50/35 p-3 text-sm text-green-800 border border-indigo-100 font-medium">
+            <div className="rounded-lg bg-gradient-to-br from-blue-50 to-sky-50/35 p-3 text-sm text-green-800 border border-blue-100 font-medium">
               {success}
             </div>
           )}
@@ -95,7 +95,7 @@ export function LoginModal() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@funaab.edu.ng"
-              className="w-full rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               disabled={isLoading}
             />
             {isSignUp && (
@@ -115,7 +115,7 @@ export function LoginModal() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-blue-100 bg-blue-50 px-4 py-2.5 text-gray-900 placeholder-gray-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               disabled={isLoading}
             />
           </div>
@@ -124,7 +124,7 @@ export function LoginModal() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-lg bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 py-2.5 font-bold text-white transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 py-2.5 font-bold text-white transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading
               ? 'Processing...'
@@ -136,7 +136,7 @@ export function LoginModal() {
           {/* Divider */}
           <div className="relative my-2">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-indigo-100" />
+              <div className="w-full border-t border-blue-100" />
             </div>
             <div className="relative flex justify-center">
               <span className="bg-white px-3 text-xs text-gray-500">or</span>
@@ -167,7 +167,7 @@ export function LoginModal() {
           </button>
 
           {/* Toggle Sign Up / Sign In */}
-          <div className="border-t border-indigo-100 pt-4 text-center">
+          <div className="border-t border-blue-100 pt-4 text-center">
             <p className="cp-body text-sm">
               {isSignUp
                 ? 'Already have an account? '
@@ -188,7 +188,7 @@ export function LoginModal() {
         </form>
 
         {/* Info Box */}
-        <div className="border-t border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50/35 px-6 py-4">
+        <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 to-sky-50/35 px-6 py-4">
           <p className="text-xs text-gray-700">
             <strong>Registration Required:</strong> You can browse materials and posts
             without signing in, but you&apos;ll need to register to upload, comment, or participate.

@@ -16,7 +16,7 @@ export function PdfViewerInline({ fileUrl, onClose }: PdfViewerInlineProps) {
         <p className="text-xs text-gray-400">{numPages > 0 ? `${numPages} pages` : 'Loading...'}</p>
         <button
           onClick={onClose}
-          className="text-xs text-indigo-600 hover:text-indigo-800"
+          className="text-xs text-blue-600 hover:text-blue-800"
         >
           Back to list
         </button>

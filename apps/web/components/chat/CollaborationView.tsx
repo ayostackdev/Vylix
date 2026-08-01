@@ -60,8 +60,8 @@ export function CollaborationView() {
 
   return (
     <>
-      <div className="flex flex-1 min-h-0 overflow-hidden rounded-[1.5rem] border border-indigo-100 bg-white shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
-        <div className={`w-full border-r border-indigo-100 lg:w-80 lg:block ${showMobileList ? 'block' : 'hidden'}`}>
+      <div className="flex flex-1 min-h-0 overflow-hidden rounded-[1.5rem] border border-blue-100 bg-white shadow-[0_12px_30px_rgba(59,130,246,0.08)]">
+        <div className={`w-full border-r border-blue-100 lg:w-80 lg:block ${showMobileList ? 'block' : 'hidden'}`}>
           <ConversationList
             selectedId={selectedId}
             onSelect={handleSelect}
@@ -81,8 +81,8 @@ export function CollaborationView() {
           ) : (
             <div className="flex h-full items-center justify-center">
               <div className="text-center px-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center mx-auto mb-4 ring-1 ring-indigo-100/50">
-                  <svg className="w-8 h-8 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center mx-auto mb-4 ring-1 ring-blue-100/50">
+                  <svg className="w-8 h-8 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
@@ -93,7 +93,7 @@ export function CollaborationView() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2 mt-5">
                   <button
                     onClick={() => setShowClassmates(true)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-4 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-50 transition-all"
+                    className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white px-4 py-2.5 text-xs font-bold text-blue-700 hover:bg-blue-50 transition-all"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -102,7 +102,7 @@ export function CollaborationView() {
                   </button>
                   <button
                     onClick={() => setShowNewModal(true)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -19,6 +20,7 @@ from app.models import (
 from app.services.storage import get_storage
 from app.tasks import process_material_task
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 router = APIRouter(prefix="/materials", tags=["materials"])
 
@@ -165,7 +167,7 @@ async def upload_material(
     if user.user.status.value == "ALUMNI":
         raise HTTPException(status_code=403, detail="Alumni cannot upload materials")
 
-    allowed = {"application/pdf", "image/jpeg", "image/png"}
+    allowed = {"application/pdf", "image/jpeg", "image/jpg", "image/png"}
     if file.content_type not in allowed:
         raise HTTPException(status_code=400, detail="Only PDF, JPEG, PNG allowed")
 
@@ -181,7 +183,16 @@ async def upload_material(
     storage_path = f"materials/{material_id}.{ext}"
 
     storage = get_storage()
-    url = await storage.upload(settings.supabase_storage_bucket, storage_path, data, file.content_type)
+    try:
+        url = await storage.upload(
+            settings.supabase_storage_bucket, storage_path, data, file.content_type
+        )
+    except Exception as exc:
+        logger.warning("Storage upload failed for %s: %s", file.filename, exc)
+        raise HTTPException(
+            status_code=502,
+            detail="Could not save file to storage. Please try again.",
+        ) from exc
 
     material = Material(
         id=material_id,
@@ -199,12 +210,17 @@ async def upload_material(
     db.add(material)
     await db.flush()
 
-    task = process_material_task.delay(
-        material_id=material.id,
-        file_url=url,
-        file_name=material.file_name,
-    )
-    material.processing_job_id = task.id
+    try:
+        task = process_material_task.delay(
+            material_id=material.id,
+            file_url=url,
+            file_name=material.file_name,
+        )
+        material.processing_job_id = task.id
+    except Exception:
+        logger.exception(
+            "Could not enqueue processing for material %s; it will stay QUEUED", material.id
+        )
     await db.flush()
 
     await db.refresh(material, ["topic"])

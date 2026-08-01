@@ -73,7 +73,7 @@ function MessageBubble({
         <div
           className={`relative rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
             isOwn
-              ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 text-white'
+              ? 'bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 text-white'
               : 'bg-gray-100 text-gray-900'
           }`}
         >
@@ -82,7 +82,7 @@ function MessageBubble({
               <input
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full rounded-lg border border-indigo-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-sky-400"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -95,7 +95,7 @@ function MessageBubble({
               <div className="flex gap-2">
                 <button
                   onClick={handleSaveEdit}
-                  className="rounded-lg bg-indigo-600 px-3 py-1 text-xs font-bold text-white hover:bg-indigo-700 transition"
+                  className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-bold text-white hover:bg-blue-700 transition"
                 >
                   Save
                 </button>
@@ -125,7 +125,7 @@ function MessageBubble({
                 setEditContent(message.content);
                 setIsEditing(true);
               }}
-              className="text-[10px] font-semibold text-gray-500 hover:text-indigo-600 transition"
+              className="text-[10px] font-semibold text-gray-500 hover:text-blue-600 transition"
             >
               Edit
             </button>
@@ -205,17 +205,17 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b border-indigo-100 px-4 py-3">
+      <div className="flex items-center gap-3 border-b border-blue-100 px-4 py-3">
         <button
           onClick={onBack}
-          className="rounded-lg p-1.5 text-gray-600 hover:bg-indigo-50 transition lg:hidden"
+          className="rounded-lg p-1.5 text-gray-600 hover:bg-blue-50 transition lg:hidden"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         {otherUser && (
-          <Avatar className="h-9 w-9 shrink-0 shadow-sm ring-2 ring-indigo-100">
+          <Avatar className="h-9 w-9 shrink-0 shadow-sm ring-2 ring-blue-100">
             <AvatarImage src={otherUser.avatarUrl ?? undefined} />
             <AvatarFallback className="bg-green-50 text-sm font-bold text-gray-900">
               {otherUser.fullName.charAt(0)}
@@ -285,7 +285,7 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
         </div>
       </div>
 
-      <div className="border-t border-indigo-100 px-4 py-3">
+      <div className="border-t border-blue-100 px-4 py-3">
         <div className="mx-auto max-w-3xl">
           <form
             onSubmit={(e) => {
@@ -298,13 +298,13 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
             value={input}
             onChange={handleInputChange}
             placeholder="Type a message..."
-            className="flex-1 rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-200"
+            className="flex-1 rounded-xl border border-blue-100 bg-blue-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-200"
             disabled={sendMessage.isPending}
           />
           <button
             type="submit"
             disabled={!input.trim() || sendMessage.isPending}
-            className="rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-40"
+            className="rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:shadow-lg disabled:opacity-40"
           >
             {sendMessage.isPending ? (
               <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">

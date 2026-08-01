@@ -98,7 +98,7 @@ export function OpenCodeSandboxTab() {
             <button
               onClick={handleRun}
               disabled={isRunning}
-              className="text-xs py-2 px-4 min-h-[44px] rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] font-medium transition-all duration-200 disabled:opacity-50"
+              className="text-xs py-2 px-4 min-h-[44px] rounded-lg bg-gradient-to-r from-blue-600 to-sky-500 text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] font-medium transition-all duration-200 disabled:opacity-50"
             >
               {isRunning ? 'Running...' : 'Run'}
             </button>
@@ -111,7 +111,7 @@ export function OpenCodeSandboxTab() {
           <textarea
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            className="w-full h-full resize-none font-mono text-sm bg-gray-900 text-gray-100 rounded-xl p-4 border-0 focus:ring-1 focus:ring-indigo-500"
+            className="w-full h-full resize-none font-mono text-sm bg-gray-900 text-gray-100 rounded-xl p-4 border-0 focus:ring-1 focus:ring-blue-500"
             spellCheck={false}
           />
         </div>

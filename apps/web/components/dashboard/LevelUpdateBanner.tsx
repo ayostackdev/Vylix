@@ -49,7 +49,7 @@ export function LevelUpdateBanner() {
   if (!user || user.status !== 'STUDENT' || hasCurrentSessionLevel) return null;
 
   return (
-    <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50/50 p-5 shadow-sm animate-fade-in">
+    <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-sky-50/50 p-5 shadow-sm animate-fade-in">
       <div className="flex items-start gap-3">
         <span className="text-2xl">🚀</span>
         <div className="min-w-0 flex-1">
@@ -72,7 +72,7 @@ export function LevelUpdateBanner() {
                 key={lvl}
                 onClick={() => handleSelect(lvl)}
                 disabled={isLoading}
-                className="rounded-full px-4 py-2 text-sm font-semibold transition-all border bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-50"
+                className="rounded-full px-4 py-2 text-sm font-semibold transition-all border bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50 disabled:opacity-50"
               >
                 {lvl}
               </button>

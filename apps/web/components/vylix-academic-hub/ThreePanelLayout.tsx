@@ -60,7 +60,7 @@ export function ThreePanelLayout() {
               </button>
             )}
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-600/20">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-md shadow-blue-600/20">
                 <span className="text-white text-[11px] font-black">V</span>
               </div>
               <span className="text-sm font-bold tracking-tight">
@@ -72,7 +72,7 @@ export function ThreePanelLayout() {
             {!isAuthenticated && (
               <button
                 onClick={() => promptLogin('unlock all features')}
-                className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm shadow-indigo-600/20 active:scale-95 transition-all"
+                className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-sm shadow-blue-600/20 active:scale-95 transition-all"
               >
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -83,7 +83,7 @@ export function ThreePanelLayout() {
             {isAuthenticated && (
               <button
                 onClick={() => setShowProfile(true)}
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-[11px] font-bold shadow-md shadow-indigo-600/20 active:scale-95 transition-all"
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center text-white text-[11px] font-bold shadow-md shadow-blue-600/20 active:scale-95 transition-all"
               >
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
@@ -122,7 +122,7 @@ export function ThreePanelLayout() {
           <div className="absolute left-0 top-0 bottom-0 w-[85vw] max-w-sm sidebar-premium shadow-2xl drawer-enter flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] divider-premium">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-600/20">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-md shadow-blue-600/20">
                   <span className="text-white text-xs font-black">V</span>
                 </div>
                 <span className="text-sm font-bold text-gray-900">Courses</span>
@@ -149,7 +149,7 @@ export function ThreePanelLayout() {
         {/* Top bar with user identity and nav */}
         <div className="flex items-center justify-between px-3 py-2.5 divider-premium shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-600/20">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-md shadow-blue-600/20">
               <span className="text-white text-[11px] font-black">V</span>
             </div>
             <span className="text-xs font-bold tracking-tight text-gray-700">Vylix</span>
@@ -159,7 +159,7 @@ export function ThreePanelLayout() {
               onClick={() => setShowProfile(true)}
               className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-gray-100/80 active:bg-gray-200/60 transition-colors group"
             >
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm shadow-indigo-600/20 overflow-hidden">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center text-white text-[10px] font-bold shadow-sm shadow-blue-600/20 overflow-hidden">
                 {user?.avatarUrl ? (
                   <img src={user.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
                 ) : initials}
@@ -177,7 +177,7 @@ export function ThreePanelLayout() {
             onClick={() => setMobileView('content')}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 ${
               activeView === 'courses'
-                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm shadow-indigo-600/20'
+                ? 'bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-sm shadow-blue-600/20'
                 : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-700'
             }`}
           >
@@ -190,7 +190,7 @@ export function ThreePanelLayout() {
             onClick={() => { if (!isAuthenticated) { promptLogin('chat with classmates'); return } setMobileView('chat') }}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 ${
               activeView === 'chat'
-                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm shadow-indigo-600/20'
+                ? 'bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-sm shadow-blue-600/20'
                 : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-700'
             }`}
           >
@@ -203,7 +203,7 @@ export function ThreePanelLayout() {
             onClick={() => { setShowTools(false); setMobileView('flashcards') }}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold transition-all duration-200 ${
               activeView === 'flashcards'
-                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm shadow-indigo-600/20'
+                ? 'bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-sm shadow-blue-600/20'
                 : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-700'
             }`}
           >

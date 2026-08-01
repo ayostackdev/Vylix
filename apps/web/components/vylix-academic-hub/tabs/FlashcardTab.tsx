@@ -140,7 +140,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
         <p className="text-xs text-gray-400 mb-4 max-w-[220px]">Sign in to create flashcards and track your progress with spaced repetition.</p>
         <button
           onClick={() => promptLogin('use flashcards')}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-bold shadow-md"
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white text-xs font-bold shadow-md"
         >
           Sign In
         </button>
@@ -161,7 +161,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           {generating ? (
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-50 to-violet-100 flex items-center justify-center mx-auto animate-pulse">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-50 to-sky-100 flex items-center justify-center mx-auto animate-pulse">
                 <span className="text-xl">✨</span>
               </div>
               <p className="text-sm font-medium text-gray-600">Generating flashcards...</p>
@@ -169,7 +169,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-50 to-violet-100 flex items-center justify-center mx-auto">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-50 to-sky-100 flex items-center justify-center mx-auto">
                 <span className="text-2xl">🤖</span>
               </div>
               <div>
@@ -183,7 +183,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
               <button
                 onClick={generateFromDoc}
                 disabled={!selectedDoc}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-500 text-white text-xs font-bold shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white text-xs font-bold shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Generate 8 Cards
               </button>
@@ -214,7 +214,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
         {/* Progress bar */}
         <div className="px-4 pt-3 shrink-0">
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full transition-all duration-300" style={{ width: `${((currentIdx + 1) / cards.length) * 100}%` }} />
+            <div className="h-full bg-gradient-to-r from-blue-600 to-sky-500 rounded-full transition-all duration-300" style={{ width: `${((currentIdx + 1) / cards.length) * 100}%` }} />
           </div>
         </div>
 
@@ -229,7 +229,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
             <p className="text-xs text-gray-400 mb-6">Keep going — consistency builds mastery.</p>
             <button
               onClick={() => setView('decks')}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-bold shadow-md"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white text-xs font-bold shadow-md"
             >
               Back to Decks
             </button>
@@ -244,7 +244,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
             >
               <div className={`transition-all duration-300 ${flipped ? '[transform:rotateY(180deg)]' : ''}`} style={{ transformStyle: 'preserve-3d' }}>
                 <div style={{ backfaceVisibility: 'hidden' }} className={flipped ? 'invisible absolute inset-0' : ''}>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 mb-2">Question</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-blue-500 mb-2">Question</p>
                   <p className="text-sm font-medium text-gray-900 leading-relaxed">{card.front}</p>
                 </div>
                 <div style={{ backfaceVisibility: 'hidden' }} className={!flipped ? 'invisible absolute inset-0' : ''}>
@@ -273,7 +273,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
                 </button>
                 <button
                   onClick={() => reviewCard(2)}
-                  className="flex-1 py-2.5 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-bold border border-indigo-100 hover:bg-indigo-100 transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-colors"
                 >
                   Good
                 </button>
@@ -301,7 +301,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
           <button
             onClick={() => setView('generate')}
             disabled={!selectedDoc}
-            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-violet-500 text-white text-[10px] font-bold shadow-sm disabled:opacity-40"
+            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 text-white text-[10px] font-bold shadow-sm disabled:opacity-40"
           >
             + Generate
           </button>
@@ -314,7 +314,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {decks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-50 to-fuchsia-100 flex items-center justify-center mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-50 to-cyan-100 flex items-center justify-center mb-3">
               <span className="text-xl">🧠</span>
             </div>
             <p className="text-xs font-semibold text-gray-600 mb-1">No flashcard decks yet</p>
@@ -330,7 +330,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
                 <button onClick={() => openDeck(deck)} className="flex-1 text-left">
                   <p className="text-xs font-bold text-gray-900 truncate">{deck.title}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md">
+                    <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md">
                       {deck.card_count} cards
                     </span>
                     {deck.course_code && (

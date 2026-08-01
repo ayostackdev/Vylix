@@ -13,11 +13,19 @@ logger = logging.getLogger(__name__)
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash"
 
 
+class GeminiError(Exception):
+    """Raised when the Gemini API cannot be reached or returns an error."""
+
+    def __init__(self, detail: str, status_code: int | None = None) -> None:
+        super().__init__(detail)
+        self.detail = detail
+        self.status_code = status_code
+
+
 def _call(prompt: str, system_instruction: str | None = None) -> str | None:
     settings = get_settings()
     if not settings.gemini_api_key:
-        logger.warning("GEMINI_API_KEY is not configured; skipping Gemini call")
-        return None
+        raise GeminiError("GEMINI_API_KEY is not configured")
 
     url = f"{API_BASE}:generateContent?key={settings.gemini_api_key}"
 
@@ -38,17 +46,26 @@ def _call(prompt: str, system_instruction: str | None = None) -> str | None:
         with urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read())
     except HTTPError as e:
-        logger.error("Gemini API returned HTTP %s (%s)", e.code, e.reason)
-        return None
-    except (URLError, TimeoutError, json.JSONDecodeError) as e:
+        error_body = e.read().decode(errors="replace")[:500]
+        logger.error("Gemini API returned HTTP %s (%s): %s", e.code, e.reason, error_body)
+        if e.code in (400, 401, 403):
+            raise GeminiError(
+                "Gemini API rejected the request. Check that the API key is valid and has access to the gemini-2.0-flash model.",
+                status_code=e.code,
+            )
+        raise GeminiError(f"Gemini API returned HTTP {e.code} ({e.reason})", status_code=e.code)
+    except (URLError, TimeoutError) as e:
         logger.error("Gemini API call failed: %s", e)
-        return None
+        raise GeminiError(f"Gemini API could not be reached: {e}")
+    except json.JSONDecodeError as e:
+        logger.error("Gemini API returned invalid JSON: %s", e)
+        raise GeminiError("Gemini API returned an invalid response")
 
     try:
         return result["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):
         logger.warning("Gemini response contained no text: %s", json.dumps(result)[:500])
-        return None
+        raise GeminiError("Gemini API returned an empty response")
 
 
 def generate_insights(text: str, department_code: str) -> dict[str, Any] | None:
@@ -66,7 +83,11 @@ def generate_insights(text: str, department_code: str) -> dict[str, Any] | None:
         "Generate summary, questions, and tips as JSON."
     )
 
-    result = _call(prompt, system_instruction=system)
+    try:
+        result = _call(prompt, system_instruction=system)
+    except GeminiError as exc:
+        logger.error("Insights generation failed: %s", exc)
+        return None
     if not result:
         return None
 

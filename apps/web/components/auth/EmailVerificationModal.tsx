@@ -165,7 +165,7 @@ export function EmailVerificationModal({
             </div>
           ) : showOtp ? (
             <>
-              <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-3 text-sm text-indigo-800">
+              <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
                 A verification code was sent to <strong>{email}</strong>. Enter it below.
               </div>
 

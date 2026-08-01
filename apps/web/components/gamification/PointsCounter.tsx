@@ -11,10 +11,10 @@ export function PointsCounter() {
 
   const points = stats?.total_points ?? 0;
   const level = points >= 1000 ? 'Platinum' : points >= 500 ? 'Gold' : points >= 200 ? 'Silver' : 'Bronze';
-  const levelColor = points >= 1000 ? 'from-violet-500 to-purple-500' : points >= 500 ? 'from-yellow-500 to-amber-500' : points >= 200 ? 'from-gray-400 to-gray-500' : 'from-orange-400 to-orange-500';
+  const levelColor = points >= 1000 ? 'from-sky-500 to-sky-600' : points >= 500 ? 'from-yellow-500 to-amber-500' : points >= 200 ? 'from-gray-400 to-gray-500' : 'from-orange-400 to-orange-500';
 
   return (
-    <div className="rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
       <div className="flex items-center gap-3">
         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${levelColor} flex items-center justify-center shadow-sm`}>
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

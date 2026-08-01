@@ -54,7 +54,7 @@ export function InstallPrompt() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6 animate-in fade-in slide-in-from-bottom-4">
-      <div className="rounded-2xl bg-white border border-indigo-200 shadow-xl p-4 sm:p-6 max-w-sm">
+      <div className="rounded-2xl bg-white border border-blue-200 shadow-xl p-4 sm:p-6 max-w-sm">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 text-2xl">📱</div>
           <div className="flex-1">
@@ -65,13 +65,13 @@ export function InstallPrompt() {
             <div className="flex gap-2">
               <button
                 onClick={handleInstall}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 text-white rounded-lg font-bold transition-colors hover:shadow-md"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 text-white rounded-lg font-bold transition-colors hover:shadow-md"
               >
                 Install
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-4 py-2 bg-white text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text rounded-lg font-bold hover:bg-indigo-50 border border-indigo-200 transition-colors"
+                className="px-4 py-2 bg-white text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text rounded-lg font-bold hover:bg-blue-50 border border-blue-200 transition-colors"
               >
                 Maybe later
               </button>

@@ -99,11 +99,11 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
     formData.append('file', file);
     const autoTitle = titleFromFilename(file.name);
     formData.append('title', autoTitle);
-    if (courseCode.trim()) formData.append('courseCode', courseCode.trim().toUpperCase());
-    if (user?.departmentCode) formData.append('departmentCode', user.departmentCode);
+    if (courseCode.trim()) formData.append('course_code', courseCode.trim().toUpperCase());
+    if (user?.departmentCode) formData.append('department_code', user.departmentCode);
     if (isPastQuestion) {
-      formData.append('isPastQuestion', 'true');
-      if (examYear) formData.append('examYear', examYear);
+      formData.append('is_past_question', 'true');
+      if (examYear) formData.append('exam_year', examYear);
       if (semester) formData.append('semester', semester);
     }
 
@@ -124,7 +124,11 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
         } else {
           try {
             const body = JSON.parse(xhr.responseText);
-            reject(new Error(body.message || body.error || `"${file.name}" failed`));
+            const detail = body.detail;
+            const message = typeof detail === 'string'
+              ? detail
+              : detail?.message || body.message || body.error || `"${file.name}" failed`;
+            reject(new Error(message));
           } catch {
             reject(new Error(`"${file.name}" failed (${xhr.status})`));
           }
@@ -182,8 +186,8 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-indigo-100 animate-scale-in">
-        <div className="border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-violet-50/35 px-6 py-4">
+      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-blue-100 animate-scale-in">
+        <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-sky-50/35 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
@@ -215,10 +219,10 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
             onClick={() => fileInputRef.current?.click()}
             className={`relative cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-all ${
               dragOver
-                ? 'border-indigo-400 bg-indigo-50'
+                ? 'border-sky-400 bg-blue-50'
                 : files.length > 0
                   ? 'border-emerald-300 bg-emerald-50/30'
-                  : 'border-indigo-200 bg-indigo-50/50 hover:border-indigo-300 hover:bg-indigo-50'
+                  : 'border-blue-200 bg-blue-50/50 hover:border-blue-300 hover:bg-blue-50'
             }`}
           >
             <input
@@ -286,7 +290,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
               value={courseCode}
               onChange={(e) => setCourseCode(e.target.value)}
               placeholder="e.g. CSC311"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               disabled={uploading}
             />
           </div>
@@ -297,7 +301,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
               id="isPastQuestion"
               checked={isPastQuestion}
               onChange={(e) => setIsPastQuestion(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               disabled={uploading}
             />
             <label htmlFor="isPastQuestion" className="text-sm font-medium text-gray-700">
@@ -312,7 +316,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
                 <select
                   value={examYear}
                   onChange={(e) => setExamYear(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                   disabled={uploading}
                 >
                   <option value="">Select year</option>
@@ -326,7 +330,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
                 <select
                   value={semester}
                   onChange={(e) => setSemester(e.target.value as 'FIRST' | 'SECOND')}
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                   disabled={uploading}
                 >
                   <option value="">Select</option>
@@ -365,7 +369,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
             <button
               onClick={handleUpload}
               disabled={uploading || files.length === 0}
-              className="flex-1 rounded-lg bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white transition-all hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed press-effect"
+              className="flex-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2.5 text-sm font-bold text-white transition-all hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed press-effect"
             >
               {uploading ? `Uploading ${currentFileIndex + 1}/${files.length}` : `Upload ${files.length > 0 ? `(${files.length} file${files.length > 1 ? 's' : ''})` : ''}`}
             </button>

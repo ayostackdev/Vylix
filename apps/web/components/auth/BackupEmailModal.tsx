@@ -86,8 +86,8 @@ export function BackupEmailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-violet-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-5">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-sky-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 p-5">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white">
               Your Vault is growing! 🚀
@@ -137,7 +137,7 @@ export function BackupEmailModal({
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@gmail.com"
                   disabled={isLoading}
-                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm placeholder-gray-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:opacity-50"
+                  className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm placeholder-gray-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-50"
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   We will never share your email. Your vault stays private.
@@ -155,7 +155,7 @@ export function BackupEmailModal({
                 <button
                   onClick={handleLink}
                   disabled={isLoading || !email.trim()}
-                  className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
                 >
                   {isLoading ? 'Linking...' : 'Link Email & Get 50 Points'}
                 </button>

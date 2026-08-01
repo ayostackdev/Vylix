@@ -68,7 +68,7 @@ export function GraduationCelebrationModal({
       )}
 
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-purple-100 overflow-hidden animate-fade-in">
+        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-sky-100 overflow-hidden animate-fade-in">
           <div className="bg-gradient-to-r from-[#a27f15] via-[#c9a227] to-[#e3c15a] p-6 text-center">
             <div className="text-4xl mb-2">🎓🎉</div>
             <h2 className="text-xl font-bold text-[#0b0e24]">
@@ -79,9 +79,9 @@ export function GraduationCelebrationModal({
           <div className="p-6 space-y-4 text-center">
             {done ? (
               <>
-                <div className="rounded-xl bg-purple-50 border border-purple-200 p-5">
-                  <p className="text-purple-900 font-bold text-lg mb-1">🎊 Alumni Status Activated!</p>
-                  <p className="text-purple-700 text-sm">
+                <div className="rounded-xl bg-sky-50 border border-sky-200 p-5">
+                  <p className="text-sky-900 font-bold text-lg mb-1">🎊 Alumni Status Activated!</p>
+                  <p className="text-sky-700 text-sm">
                     Your account has been converted to <strong>Alumni Status</strong>.
                     You keep all your notes, vault items, and access forever.
                   </p>
@@ -91,7 +91,7 @@ export function GraduationCelebrationModal({
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-full rounded-xl bg-gradient-to-r from-purple-700 via-violet-600 to-pink-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-opacity"
+                  className="w-full rounded-xl bg-gradient-to-r from-sky-700 via-sky-600 to-pink-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 transition-opacity"
                 >
                   Go to Dashboard
                 </button>
@@ -120,7 +120,7 @@ export function GraduationCelebrationModal({
                   <button
                     onClick={handleCelebrate}
                     disabled={isLoading}
-                    className="flex-1 rounded-xl bg-gradient-to-r from-purple-700 via-violet-600 to-pink-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    className="flex-1 rounded-xl bg-gradient-to-r from-sky-700 via-sky-600 to-pink-500 px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
                   >
                     {isLoading ? 'Converting...' : '🎉 Yes, I Graduated!'}
                   </button>

@@ -13,7 +13,7 @@ from app.services.pdf import compress_pdf
 from app.services.ocr import extract_text_with_tesseract
 from app.services.ingestion import ingest_document, search_documents
 from app.services.docling_parser import parse_with_docling
-from app.services.gemini import chat as gemini_chat, general_chat
+from app.services.gemini import chat as gemini_chat, general_chat, GeminiError
 from app.services.rag import build_chunks
 from app.services.vector_store import VectorStore
 
@@ -217,7 +217,13 @@ async def chat_with_document(
     context_chunks = [r.text for r in relevant_results]
 
     context_text = "\n\n".join(context_chunks)
-    ai_answer = gemini_chat(payload.query, context_text)
+    try:
+        ai_answer = gemini_chat(payload.query, context_text)
+    except GeminiError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"AI service error: {exc.detail}",
+        )
     answer = ai_answer if ai_answer else best.text[:500]
 
     follow_up_questions = _generate_follow_ups(best.text, payload.query)
@@ -276,7 +282,13 @@ async def general_chat_endpoint(
         for m in payload.messages[-10:]
     )
 
-    answer = general_chat(history_text)
+    try:
+        answer = general_chat(history_text)
+    except GeminiError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"AI service error: {exc.detail}",
+        )
     if not answer:
         answer = "I'm having trouble connecting to my knowledge base right now. Please try again in a moment."
 

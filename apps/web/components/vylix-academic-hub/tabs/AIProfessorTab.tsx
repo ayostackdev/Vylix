@@ -196,7 +196,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
             <button
               onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleQuickAction('Summarize this document')}
               disabled={isLoading}
-              className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-indigo-50 to-indigo-100/80 text-indigo-700 font-medium hover:from-indigo-100 hover:to-indigo-200/80 transition-all duration-200 disabled:opacity-50 border border-indigo-200/50 shadow-sm"
+              className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-blue-50 to-blue-100/80 text-blue-700 font-medium hover:from-blue-100 hover:to-blue-200/80 transition-all duration-200 disabled:opacity-50 border border-blue-200/50 shadow-sm"
             >
               Summarize
             </button>
@@ -215,7 +215,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
             <button
               onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleQuickAction('Explain the concept of probability distributions')}
               disabled={isLoading}
-              className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-indigo-50 to-indigo-100/80 text-indigo-700 font-medium hover:from-indigo-100 hover:to-indigo-200/80 transition-all duration-200 disabled:opacity-50 border border-indigo-200/50 shadow-sm"
+              className="flex-1 text-xs py-2.5 px-3 min-h-[44px] rounded-lg bg-gradient-to-r from-blue-50 to-blue-100/80 text-blue-700 font-medium hover:from-blue-100 hover:to-blue-200/80 transition-all duration-200 disabled:opacity-50 border border-blue-200/50 shadow-sm"
             >
               Explain a concept
             </button>
@@ -237,7 +237,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
                 msg.role === 'user'
-                  ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-br-md shadow-md'
+                  ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-md shadow-md'
                   : 'bg-gray-100 text-gray-800 rounded-bl-md border border-gray-200/50'
               }`}
             >
@@ -269,14 +269,14 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !isReadOnly && handleSend()}
             placeholder={isReadOnly ? 'Sign in to chat with AI...' : (selectedDoc ? 'Ask about this document...' : 'Ask anything about your course...')}
-            className="flex-1 min-h-[44px] text-sm rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-indigo-300 focus:ring-1 focus:ring-indigo-300 px-4 py-3 transition-all"
+            className="flex-1 min-h-[44px] text-sm rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-300 focus:ring-1 focus:ring-blue-300 px-4 py-3 transition-all"
             disabled={isLoading || isReadOnly}
             maxLength={2000}
           />
           <button
             onClick={() => isReadOnly ? promptLogin('use AI tutor') : handleSend()}
             disabled={!input.trim() || isLoading || isReadOnly}
-            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-violet-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-sky-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
             aria-label="Send message"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

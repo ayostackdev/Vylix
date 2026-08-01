@@ -111,7 +111,7 @@ export function PrivateVaultView() {
   return (
     <>
       <ProfileBackupBanner />
-      <section className="space-y-5 rounded-[1.75rem] border border-violet-100 bg-indigo-50 p-4 shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:space-y-8 sm:p-8">
+      <section className="space-y-5 rounded-[1.75rem] border border-sky-100 bg-blue-50 p-4 shadow-[0_16px_40px_rgba(59,130,246,0.08)] sm:space-y-8 sm:p-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[1px] shadow-sm">
@@ -134,7 +134,7 @@ export function PrivateVaultView() {
           {stats.map((stat) => (
             <article
               key={stat.label}
-              className="rounded-[1.5rem] border border-violet-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-md"
+              className="rounded-[1.5rem] border border-sky-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md"
             >
               <p className="cp-label">{stat.label}</p>
               <p className="mt-3 text-3xl font-black tracking-tight text-gray-900">
@@ -144,7 +144,7 @@ export function PrivateVaultView() {
           ))}
         </div>
 
-        <div className="rounded-[1.75rem] border border-violet-100 bg-white p-5 shadow-sm">
+        <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <h3 className="cp-card-title text-gray-900">Recent Vault Materials</h3>
           </div>
@@ -160,7 +160,7 @@ export function PrivateVaultView() {
                 return (
                   <div
                     key={item.id}
-                    className="flex flex-col gap-2 rounded-[1.25rem] border border-violet-100 bg-indigo-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-200 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-2 rounded-[1.25rem] border border-sky-100 bg-blue-50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
                       <p className="cp-card-title text-gray-900">{item.fileName}</p>
@@ -169,13 +169,13 @@ export function PrivateVaultView() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <button
                         onClick={() => openFile(item.id, item.fileName)}
-                        className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-700 hover:bg-indigo-50 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
                       >
                         View
                       </button>
                       <button
                         onClick={() => setChatDocument({ id: item.id, title: item.fileName })}
-                        className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-indigo-700 hover:bg-indigo-50 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50 transition-colors"
                       >
                         Chat
                       </button>

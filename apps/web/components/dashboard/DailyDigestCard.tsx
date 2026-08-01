@@ -55,7 +55,7 @@ export function DailyDigestCard() {
               {presence.classmates_active.slice(0, 3).map((c) => (
                 <div
                   key={c.user_id}
-                  className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 border-2 border-white flex items-center justify-center text-[7px] font-bold text-white"
+                  className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-sky-500 border-2 border-white flex items-center justify-center text-[7px] font-bold text-white"
                   title={c.full_name}
                 >
                   {c.full_name.charAt(0)}
@@ -80,7 +80,7 @@ export function DailyDigestCard() {
             {digest.courses_with_activity.slice(0, 3).map((c) => (
               <div key={c.course_id} className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-[8px] font-bold shrink-0">
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center text-white text-[8px] font-bold shrink-0">
                     {c.course_code.slice(0, 2)}
                   </div>
                   <div className="min-w-0">
@@ -89,7 +89,7 @@ export function DailyDigestCard() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {c.new_materials > 0 && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-600">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600">
                       {c.new_materials} material{c.new_materials > 1 ? 's' : ''}
                     </span>
                   )}
@@ -99,7 +99,7 @@ export function DailyDigestCard() {
                     </span>
                   )}
                   {c.active_classmates > 0 && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-600">
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-600">
                       {c.active_classmates} active
                     </span>
                   )}

@@ -96,7 +96,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-xl font-semibold text-gray-900 mb-3">10. Contact Us</h2>
             <p>
               If you have questions about this Privacy Policy, please contact us at{' '}
-              <a href="mailto:ayostackdev@gmail.com" className="text-indigo-600 hover:underline">
+              <a href="mailto:ayostackdev@gmail.com" className="text-blue-600 hover:underline">
                 ayostackdev@gmail.com
               </a>
             </p>

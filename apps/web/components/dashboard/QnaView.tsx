@@ -156,10 +156,10 @@ export function QnaView() {
       </div>
 
       {isSearching ? (
-        <div className="rounded-[1.75rem] border border-violet-100 bg-white p-5 shadow-sm">
+        <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
           {searchLoading ? (
             <div className="flex justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-200 border-t-blue-600" />
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-200 border-t-blue-600" />
             </div>
           ) : searchResults.length === 0 ? (
             <div className="py-8 text-center">
@@ -178,13 +178,13 @@ export function QnaView() {
       ) : view === 'browse' ? (
         <div className="space-y-6">
           {trending.length > 0 && (
-            <div className="rounded-[1.75rem] border border-violet-100 bg-white p-5 shadow-sm">
+            <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
               <h3 className="text-base font-black text-gray-900 mb-3 flex items-center gap-2">
                 <span>🔥</span> Trending Questions
               </h3>
               {trendingLoading ? (
                 <div className="flex justify-center py-4">
-                  <div className="h-6 w-6 animate-spin rounded-full border-4 border-violet-200 border-t-blue-600" />
+                  <div className="h-6 w-6 animate-spin rounded-full border-4 border-sky-200 border-t-blue-600" />
                 </div>
               ) : (
                 <div className="grid gap-2">
@@ -196,7 +196,7 @@ export function QnaView() {
             </div>
           )}
 
-          <div className="rounded-[1.75rem] border border-violet-100 bg-white p-5 shadow-sm">
+          <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
             <h3 className="text-base font-black text-gray-900 mb-3">My Courses</h3>
             {coursesLoading ? (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -217,12 +217,12 @@ export function QnaView() {
                   <button
                     key={course.id}
                     onClick={() => handleCourseClick(course)}
-                    className="rounded-xl border border-indigo-100 bg-white p-4 shadow-sm text-left transition-all hover:shadow-md hover:-translate-y-0.5"
+                    className="rounded-xl border border-blue-100 bg-white p-4 shadow-sm text-left transition-all hover:shadow-md hover:-translate-y-0.5"
                   >
                     <p className="truncate text-sm font-black text-gray-900">{course.code}</p>
                     <p className="mt-0.5 truncate text-xs text-gray-600">{course.title}</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-700">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-700">
                         L{course.level}
                       </span>
                     </div>
@@ -233,7 +233,7 @@ export function QnaView() {
           </div>
         </div>
       ) : view === 'questions' ? (
-        <div className="rounded-[1.75rem] border border-violet-100 bg-white p-5 shadow-sm">
+        <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <button
               onClick={handleBack}
@@ -252,7 +252,7 @@ export function QnaView() {
 
           {topicsLoading ? (
             <div className="flex justify-center py-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-200 border-t-blue-600" />
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-200 border-t-blue-600" />
             </div>
           ) : topics.length === 0 ? (
             <div className="py-8 text-center">
@@ -268,8 +268,8 @@ export function QnaView() {
                   onClick={() => handleTopicClick(topic)}
                   className={`rounded-xl border p-4 shadow-sm text-left transition-all hover:shadow-md ${
                     selectedTopic?.id === topic.id
-                      ? 'border-indigo-300 bg-indigo-50 ring-2 ring-indigo-200'
-                      : 'border-indigo-100 bg-white'
+                      ? 'border-blue-300 bg-blue-50 ring-2 ring-blue-200'
+                      : 'border-blue-100 bg-white'
                   }`}
                 >
                   <p className="text-sm font-black text-gray-900">{topic.title}</p>
@@ -289,7 +289,7 @@ export function QnaView() {
                 </h3>
                 <button
                   onClick={() => setShowAskModal(true)}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
                 >
                   <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -311,7 +311,7 @@ export function QnaView() {
 
               {questionsLoading ? (
                 <div className="flex justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-200 border-t-blue-600" />
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-200 border-t-blue-600" />
                 </div>
               ) : questions.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-gray-200 py-8 text-center">
@@ -334,7 +334,7 @@ export function QnaView() {
           )}
         </div>
       ) : (
-        <div className="rounded-[1.75rem] border border-violet-100 bg-white p-5 shadow-sm">
+        <div className="rounded-[1.75rem] border border-sky-100 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <button
               onClick={handleBack}
@@ -347,7 +347,7 @@ export function QnaView() {
 
           {selectedQuestion && (
             <div className="space-y-6">
-              <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+              <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -399,13 +399,13 @@ export function QnaView() {
                     value={answerContent}
                     onChange={(e) => setAnswerContent(e.target.value)}
                     rows={3}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
                   />
                   <div className="mt-2 flex justify-end">
                     <button
                       onClick={handleAnswerSubmit}
                       disabled={!answerContent.trim() || createAnswer.isPending}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50"
                     >
                       {createAnswer.isPending ? 'Posting...' : 'Post Answer'}
                     </button>
@@ -419,7 +419,7 @@ export function QnaView() {
 
       {showAskModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-[1.75rem] border border-indigo-100 bg-white p-6 shadow-xl">
+          <div className="w-full max-w-lg rounded-[1.75rem] border border-blue-100 bg-white p-6 shadow-xl">
             <h3 className="text-lg font-black text-gray-900 mb-4">Ask a Question</h3>
             <div className="space-y-3">
               <div>
@@ -429,7 +429,7 @@ export function QnaView() {
                   placeholder="What's your question?"
                   value={askTitle}
                   onChange={(e) => setAskTitle(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
               </div>
               <div>
@@ -439,7 +439,7 @@ export function QnaView() {
                   value={askContent}
                   onChange={(e) => setAskContent(e.target.value)}
                   rows={4}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm resize-none focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 />
               </div>
             </div>
@@ -453,7 +453,7 @@ export function QnaView() {
               <button
                 onClick={handleAskSubmit}
                 disabled={!askTitle.trim() || !askContent.trim() || createQuestion.isPending}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50"
               >
                 {createQuestion.isPending ? 'Posting...' : 'Post Question'}
               </button>
@@ -469,7 +469,7 @@ function TrendingCard({ question, onClick }: { question: QnaQuestion; onClick: (
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-xl border border-indigo-100 bg-white p-3 text-left transition-all hover:bg-indigo-50 hover:shadow-sm"
+      className="w-full rounded-xl border border-blue-100 bg-white p-3 text-left transition-all hover:bg-blue-50 hover:shadow-sm"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -492,7 +492,7 @@ function SearchResultCard({ question, onClick }: { question: QnaQuestion; onClic
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-xl border border-indigo-100 bg-white p-4 text-left transition-all hover:bg-indigo-50 hover:shadow-sm"
+      className="w-full rounded-xl border border-blue-100 bg-white p-4 text-left transition-all hover:bg-blue-50 hover:shadow-sm"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -518,7 +518,7 @@ function QuestionCard({ question, onClick }: { question: QnaQuestion; onClick: (
   return (
     <button
       onClick={onClick}
-      className="w-full rounded-xl border border-indigo-100 bg-white p-4 text-left transition-all hover:bg-indigo-50 hover:shadow-sm"
+      className="w-full rounded-xl border border-blue-100 bg-white p-4 text-left transition-all hover:bg-blue-50 hover:shadow-sm"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">

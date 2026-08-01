@@ -24,8 +24,8 @@ const config: Config = {
           strong: '#0b0e24',
         },
         primary: {
-          DEFAULT: '#7c3aed',
-          dark: '#5b21b6',
+          DEFAULT: '#2563eb',
+          dark: '#1d4ed8',
         },
         gold: {
           DEFAULT: '#c9a227',

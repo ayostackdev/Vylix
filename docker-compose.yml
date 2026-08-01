@@ -35,6 +35,7 @@ services:
       - 4000:4000
     env_file:
       - .env
+      - apps/api/.env
     environment:
       DATABASE_URL: postgresql://vylix:vylix@postgres:5432/vylix
       DIRECT_URL: postgresql://vylix:vylix@postgres:5432/vylix
@@ -54,6 +55,7 @@ services:
       target: worker
     env_file:
       - .env
+      - apps/api/.env
     environment:
       DATABASE_URL: postgresql://vylix:vylix@postgres:5432/vylix
       DIRECT_URL: postgresql://vylix:vylix@postgres:5432/vylix

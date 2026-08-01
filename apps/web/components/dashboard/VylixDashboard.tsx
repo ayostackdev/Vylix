@@ -51,12 +51,12 @@ export function VylixDashboard() {
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-x-hidden overflow-y-auto px-4 py-3 text-gray-800 sm:px-6 sm:py-4 md:px-8 md:py-8 lg:px-12 lg:py-10">
-      <div className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-indigo-200/35 blur-2xl cp-float" />
+      <div className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-blue-200/35 blur-2xl cp-float" />
       <div className="pointer-events-none absolute right-[-5rem] top-24 h-[28rem] w-[28rem] rounded-full bg-green-200/28 blur-2xl cp-shimmer" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-300/50 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/50 to-transparent" />
 
       <div className="relative mx-auto flex w-full max-w-7xl flex-1 min-h-0 flex-col gap-3 overflow-visible md:gap-6">
-        <header className="sticky top-0 z-50 w-full border-b border-indigo-100 bg-white/80 p-3 backdrop-blur sm:p-4">
+        <header className="sticky top-0 z-50 w-full border-b border-blue-100 bg-white/80 p-3 backdrop-blur sm:p-4">
           <div className="cp-fade-up flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0 space-y-3 sm:space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[1px] shadow-sm">
@@ -93,7 +93,7 @@ export function VylixDashboard() {
                     Offline Mode Active
                   </Badge>
                 ) : isAlumni ? (
-                  <span className="cp-pill inline-flex items-center rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 ring-1 ring-purple-100/70 sm:px-3 sm:py-1 sm:text-xs">🎓 Alumni — Read Only</span>
+                  <span className="cp-pill inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-700 ring-1 ring-sky-100/70 sm:px-3 sm:py-1 sm:text-xs">🎓 Alumni — Read Only</span>
                 ) : isAuthenticated ? (
                   <Badge variant="live" className="px-2 py-0.5 text-[10px] sm:px-3 sm:py-1 sm:text-xs">
                     <span className="relative flex h-1.5 w-1.5">
@@ -108,7 +108,7 @@ export function VylixDashboard() {
               </div>
 
               <div
-                className="flex items-center gap-3 rounded-[1.25rem] border border-indigo-100 bg-indigo-50 px-3 py-2 shadow-sm cursor-pointer transition-all hover:bg-indigo-100/70 active:scale-[0.98] sm:gap-4 sm:rounded-[1.5rem] sm:px-4 sm:py-3"
+                className="flex items-center gap-3 rounded-[1.25rem] border border-blue-100 bg-blue-50 px-3 py-2 shadow-sm cursor-pointer transition-all hover:bg-blue-100/70 active:scale-[0.98] sm:gap-4 sm:rounded-[1.5rem] sm:px-4 sm:py-3"
                 onClick={() => {
                   if (!isAuthenticated) {
                     promptLogin('view your profile');
@@ -129,7 +129,7 @@ export function VylixDashboard() {
                   }
                 }}
               >
-                <Avatar className="h-10 w-10 shadow-sm ring-4 ring-indigo-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[2px] [&>div]:rounded-full">
+                <Avatar className="h-10 w-10 shadow-sm ring-4 ring-blue-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[2px] [&>div]:rounded-full">
                   <AvatarImage src={user?.avatarUrl ?? undefined} alt="Student profile photo" />
                   <AvatarFallback className="bg-green-50 font-black text-gray-900">{userInitials}</AvatarFallback>
                 </Avatar>
@@ -143,13 +143,13 @@ export function VylixDashboard() {
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-[2rem] border border-indigo-100 bg-indigo-50/95 p-4 shadow-[0_24px_80px_rgba(148,163,184,0.14)] sm:gap-5 sm:p-5 md:p-6 lg:p-7">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 rounded-[2rem] border border-blue-100 bg-blue-50/95 p-4 shadow-[0_24px_80px_rgba(148,163,184,0.14)] sm:gap-5 sm:p-5 md:p-6 lg:p-7">
           <aside className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 lg:gap-4">
             {spotlightStats.map((stat, index) => (
               <article
                 key={stat.label}
-                className={`cp-fade-up rounded-[1.5rem] border-l-4 border-t border-indigo-100 bg-white p-4 shadow-[0_12px_30px_rgba(59,130,246,0.08)] delay-${index + 1}`}
-                style={{ borderLeftColor: ['#4f46e5', '#7c3aed', '#d946ef'][index] }}
+                className={`cp-fade-up rounded-[1.5rem] border-l-4 border-t border-blue-100 bg-white p-4 shadow-[0_12px_30px_rgba(59,130,246,0.08)] delay-${index + 1}`}
+                style={{ borderLeftColor: ['#2563eb', '#0ea5e9', '#22d3ee'][index] }}
               >
                 <p className="cp-label">{stat.label}</p>
                 <p className="mt-2 text-2xl font-black tracking-tight bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">{stat.value}</p>
@@ -166,12 +166,12 @@ export function VylixDashboard() {
           {isAuthenticated && !isAlumni && <LevelUpdateBanner />}
 
           {isAlumni && (
-            <div className="cp-fade-up rounded-[1.75rem] border border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/60 p-4 shadow-sm">
+            <div className="cp-fade-up rounded-[1.75rem] border border-sky-200 bg-gradient-to-br from-sky-50 to-sky-100/60 p-4 shadow-sm">
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🎓</span>
                 <div>
-                  <p className="font-bold text-purple-900">Alumni Account — Read Only</p>
-                  <p className="mt-1 text-sm text-purple-800">
+                  <p className="font-bold text-sky-900">Alumni Account — Read Only</p>
+                  <p className="mt-1 text-sm text-sky-800">
                     Welcome back! As an alumnus, you can browse materials, view your vault, and explore the Public Pulse. 
                     Uploading new content and posting are not available.
                   </p>
@@ -202,31 +202,31 @@ export function VylixDashboard() {
             className="cp-fade-up flex min-h-0 flex-1 flex-col gap-3 sm:gap-4"
           >
             <div className="flex w-full justify-center cp-fade-in">
-              <TabsList className="grid w-full max-w-none grid-cols-5 rounded-xl border border-violet-100 bg-indigo-50 p-1 shadow-lg shadow-violet-200/25 sm:max-w-3xl sm:rounded-2xl sm:p-1.5">
+              <TabsList className="grid w-full max-w-none grid-cols-5 rounded-xl border border-sky-100 bg-blue-50 p-1 shadow-lg shadow-sky-200/25 sm:max-w-3xl sm:rounded-2xl sm:p-1.5">
                 <TabsTrigger
                   value="vault"
-                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:via-violet-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">🔐</span>
                   <span className="hidden sm:inline">🔐 Vault</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="questions"
-                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:via-violet-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">📝</span>
                   <span className="hidden sm:inline">📝 Questions</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="chat"
-                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:via-violet-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">💬</span>
                   <span className="hidden sm:inline">💬 Chat</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="qna"
-                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:via-violet-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">💡</span>
                   <span className="hidden sm:inline">💡 Q&A</span>
@@ -234,7 +234,7 @@ export function VylixDashboard() {
                 <TabsTrigger
                   value="pulse"
                   disabled={!isOnline}
-                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:via-violet-500 data-[state=active]:to-fuchsia-500 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
+                  className="rounded-lg px-1.5 py-3 text-[11px] font-black uppercase leading-none tracking-wide transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-sky-500 data-[state=active]:to-cyan-400 data-[state=active]:text-white data-[state=active]:shadow-md disabled:opacity-40 sm:px-3 sm:py-2.5 sm:text-sm sm:tracking-widest text-gray-600"
                 >
                   <span className="sm:hidden">✨</span>
                   <span className="hidden sm:inline">✨ Pulse</span>
@@ -242,33 +242,33 @@ export function VylixDashboard() {
               </TabsList>
             </div>
 
-            <section className="flex flex-col min-h-0 flex-1 overflow-y-auto rounded-[2rem] border border-indigo-100 bg-white shadow-[0_18px_60px_rgba(59,130,246,0.08)]">
+            <section className="flex flex-col min-h-0 flex-1 overflow-y-auto rounded-[2rem] border border-blue-100 bg-white shadow-[0_18px_60px_rgba(59,130,246,0.08)]">
               <TabsContent value="vault" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
                     {!isAuthenticated ? (
                       <div className="mx-auto w-full max-w-2xl space-y-6 py-6 sm:py-10">
-                        <div className="rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
+                        <div className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-sky-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
                           <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">📁</p>
                           <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent sm:text-2xl">Your Private Document Vault</h3>
                           <p className="mb-6 text-sm text-gray-600 sm:text-base">
                             Store past questions, lecture notes, and PDFs. Access them offline. Organised by course — always with you.
                           </p>
                           <div className="mb-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">📄</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Save PDFs</p>
                             </div>
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">📚</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">By Course</p>
                             </div>
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">📴</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Offline Access</p>
                             </div>
                           </div>
                           <button
                             onClick={() => promptLogin('access your Private Vault')}
-                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
                           >
                             Sign In to Unlock Vault
                           </button>
@@ -279,7 +279,7 @@ export function VylixDashboard() {
                         <div className="flex justify-end">
                           <button
                             onClick={() => setShowUploadModal(true)}
-                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
+                            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -297,7 +297,7 @@ export function VylixDashboard() {
                       <div className="flex justify-end">
                         <button
                           onClick={() => setShowUploadModal(true)}
-                          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
+                          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
                         >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -311,29 +311,29 @@ export function VylixDashboard() {
                   <TabsContent value="chat" className="cp-fade-up m-0 flex flex-col min-h-0 flex-1 p-0">
                     {!isAuthenticated ? (
                       <div className="flex flex-1 items-center justify-center p-3 sm:p-6 lg:p-8">
-                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
+                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-sky-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
                           <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">💬</p>
                           <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent sm:text-2xl">Study Together</h3>
                           <p className="mb-6 text-sm text-gray-600 sm:text-base">
                             Message classmates, share past questions, form study groups. Real-time chat organised around your courses.
                           </p>
                           <div className="mb-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">💬</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Real‑time Chat</p>
                             </div>
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">👥</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Study Groups</p>
                             </div>
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">📎</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Share Materials</p>
                             </div>
                           </div>
                           <button
                             onClick={() => promptLogin('access Chat')}
-                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
                           >
                             Sign In to Start Chatting
                           </button>
@@ -346,29 +346,29 @@ export function VylixDashboard() {
                   <TabsContent value="qna" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
                     {!isAuthenticated ? (
                       <div className="flex flex-1 items-center justify-center py-12">
-                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-indigo-100 bg-gradient-to-br from-indigo-50 to-violet-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
+                        <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-sky-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
                           <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">💡</p>
                           <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent sm:text-2xl">Community Q&A</h3>
                           <p className="mb-6 text-sm text-gray-600 sm:text-base">
                             Ask questions, get answers from classmates, and help each other learn. Organized by course and topic.
                           </p>
                           <div className="mb-6 grid grid-cols-1 gap-3 text-left sm:grid-cols-3">
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">❓</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Ask Questions</p>
                             </div>
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">💬</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Get Answers</p>
                             </div>
-                            <div className="rounded-xl border border-indigo-100 bg-white p-3 text-center">
+                            <div className="rounded-xl border border-blue-100 bg-white p-3 text-center">
                               <span className="text-xl">🏆</span>
                               <p className="mt-1 text-xs font-semibold text-gray-800">Earn Points</p>
                             </div>
                           </div>
                           <button
                             onClick={() => promptLogin('access Q&A')}
-                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"
                           >
                             Sign In to Join
                           </button>
@@ -392,7 +392,7 @@ export function VylixDashboard() {
             )}
           </div>
 
-          <footer className="mt-auto border-t border-indigo-100 bg-gradient-to-r from-indigo-50/80 to-violet-50/35 px-3 py-3 backdrop-blur-sm sm:px-6 sm:py-4">
+          <footer className="mt-auto border-t border-blue-100 bg-gradient-to-r from-blue-50/80 to-sky-50/35 px-3 py-3 backdrop-blur-sm sm:px-6 sm:py-4">
             <div className="flex items-center justify-between gap-3 text-left">
               <div>
                 <p className="font-bold text-[10px] uppercase tracking-wider bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
@@ -403,7 +403,7 @@ export function VylixDashboard() {
                 </p>
               </div>
 
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1.5 shadow-sm transition-all hover:shadow-md">
+              <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 shadow-sm transition-all hover:shadow-md">
                 <span className="relative flex h-2 w-2">
                   <span
                     className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${

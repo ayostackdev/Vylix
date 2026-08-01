@@ -66,7 +66,7 @@ export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmat
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-indigo-100 px-4 py-3">
+      <div className="border-b border-blue-100 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h3 className="cp-card-title text-gray-900">Messages</h3>
@@ -77,7 +77,7 @@ export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmat
           <div className="flex items-center gap-1.5">
             <button
               onClick={onClassmates}
-              className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-white px-2 py-1.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-50 transition-all"
+              className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-white px-2 py-1.5 text-[10px] font-bold text-blue-700 hover:bg-blue-50 transition-all"
               title="Find classmates"
             >
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -87,7 +87,7 @@ export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmat
             </button>
             <button
               onClick={onCreateNew}
-              className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 px-2 py-1.5 text-[10px] font-bold text-white shadow-md hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-2 py-1.5 text-[10px] font-bold text-white shadow-md hover:shadow-lg transition-all"
             >
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -108,8 +108,8 @@ export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmat
               onClick={() => setFilter(f.key)}
               className={`text-[10px] px-2.5 py-1 rounded-lg border font-semibold transition-all ${
                 filter === f.key
-                  ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                  : 'bg-gray-50/80 text-gray-500 border-gray-200/80 hover:border-indigo-300 hover:text-indigo-600'
+                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                  : 'bg-gray-50/80 text-gray-500 border-gray-200/80 hover:border-blue-300 hover:text-blue-600'
               }`}
             >
               {f.label}
@@ -128,7 +128,7 @@ export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmat
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center px-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-50 flex items-center justify-center mb-3 ring-1 ring-indigo-100/50">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center mb-3 ring-1 ring-blue-100/50">
               <span className="text-2xl">
                 {filter === 'groups' ? '👥' : filter === 'directs' ? '💬' : '💬'}
               </span>
@@ -155,21 +155,21 @@ export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmat
                 <button
                   key={conv.id}
                   onClick={() => onSelect(conv.id)}
-                  className={`w-full rounded-xl p-3 text-left transition-all hover:bg-indigo-50 active:scale-[0.99] ${
+                  className={`w-full rounded-xl p-3 text-left transition-all hover:bg-blue-50 active:scale-[0.99] ${
                     isSelected
-                      ? 'bg-gradient-to-r from-indigo-50 to-violet-50/35 ring-1 ring-indigo-200'
+                      ? 'bg-gradient-to-r from-blue-50 to-sky-50/35 ring-1 ring-blue-200'
                       : ''
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     {conv.type === 'GROUP' ? (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ring-2 ring-indigo-100">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-sm ring-2 ring-blue-100">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                       </div>
                     ) : (
-                      <Avatar className="h-10 w-10 shrink-0 shadow-sm ring-2 ring-indigo-100">
+                      <Avatar className="h-10 w-10 shrink-0 shadow-sm ring-2 ring-blue-100">
                         <AvatarImage src={avatar.src} />
                         <AvatarFallback className="bg-green-50 font-bold text-gray-900 text-sm">
                           {avatar.fallback}
@@ -180,7 +180,7 @@ export function ConversationList({ selectedId, onSelect, onCreateNew, onClassmat
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
                           {conv.type === 'GROUP' && (
-                            <svg className="w-3 h-3 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                           )}
