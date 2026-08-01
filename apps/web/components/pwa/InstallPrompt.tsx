@@ -58,7 +58,7 @@ export function InstallPrompt() {
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 text-2xl">📱</div>
           <div className="flex-1">
-            <h3 className="font-black mb-1 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">Install Vylix Academic Hub</h3>
+            <h3 className="font-black mb-1 bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent">Install Vylix Academic Hub</h3>
             <p className="text-sm text-gray-700 mb-4">
               Get faster access and offline support. Add Vylix Academic Hub to your home screen for the best experience.
             </p>
@@ -71,7 +71,7 @@ export function InstallPrompt() {
               </button>
               <button
                 onClick={handleDismiss}
-                className="px-4 py-2 bg-white text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text rounded-lg font-bold hover:bg-blue-50 border border-blue-200 transition-colors"
+                className="px-4 py-2 bg-white text-transparent bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text rounded-lg font-bold hover:bg-blue-50 border border-blue-200 transition-colors"
               >
                 Maybe later
               </button>

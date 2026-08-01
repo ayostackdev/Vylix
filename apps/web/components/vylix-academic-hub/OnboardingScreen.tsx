@@ -78,7 +78,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   return (
     <div className="flex min-h-dvh items-center justify-center p-4 sm:p-6 md:p-8 overflow-y-auto relative">
       {/* Premium animated mesh background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0B0E1A] via-[#171234] to-[#2E0A3D]">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0B0E1A] via-[#101F3C] to-[#0E3A52]">
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: 'radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.2) 0%, transparent 50%), radial-gradient(ellipse at 40% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%)',
           backgroundSize: '200% 200%',
@@ -95,7 +95,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         {/* Premium Logo */}
         <div className="text-center mb-8 sm:mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 mb-4 shadow-2xl shadow-blue-600/10 premium-fade-in">
-            <span className="text-3xl sm:text-4xl font-black text-gradient" style={{ WebkitTextFillColor: 'transparent', background: 'linear-gradient(135deg, #818cf8, #e879f9)', WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>V</span>
+            <span className="text-3xl sm:text-4xl font-black text-gradient" style={{ WebkitTextFillColor: 'transparent', background: 'linear-gradient(135deg, #60a5fa, #22d3ee)', WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>V</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight premium-slide-up">Vylix Academic Hub</h1>
           <p className="text-xs sm:text-sm text-white/40 mt-1.5 font-medium premium-slide-up" style={{ animationDelay: '100ms' }}>Clear the clutter, master your course.</p>

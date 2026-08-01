@@ -59,7 +59,7 @@ export function VylixDashboard() {
         <header className="sticky top-0 z-50 w-full border-b border-blue-100 bg-white/80 p-3 backdrop-blur sm:p-4">
           <div className="cp-fade-up flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0 space-y-3 sm:space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[1px] shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 p-[1px] shadow-sm">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white px-2 py-0.5 font-bold text-[10px] uppercase tracking-wider text-gray-900 sm:px-3 sm:py-1 sm:text-[11px]">
                   Academic Hub
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -68,7 +68,7 @@ export function VylixDashboard() {
               </div>
 
               <div className="space-y-1 sm:space-y-2">
-                <h1 className="text-[clamp(1.8rem,6vw,4.2rem)] leading-[1.1] tracking-[-0.04em] font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent pb-2 sm:mb-4">
+                <h1 className="text-[clamp(1.8rem,6vw,4.2rem)] leading-[1.1] tracking-[-0.04em] font-black bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent pb-2 sm:mb-4">
                   Vylix Academic Hub
                 </h1>
                 <p className="cp-body max-w-2xl text-sm sm:text-base">
@@ -79,7 +79,7 @@ export function VylixDashboard() {
 
             <div className="flex flex-col gap-2 sm:gap-3 lg:items-end">
               <div className="flex flex-wrap items-center gap-1.5 text-xs text-gray-800 sm:gap-2 sm:text-sm lg:justify-end">
-                <span className="rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[1px] shadow-sm">
+                <span className="rounded-full bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 p-[1px] shadow-sm">
                   <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gray-900 sm:px-3 sm:py-1 sm:text-xs">
                     {isAuthenticated ? 'Private + Public Learning' : 'Browse Public Content'}
                   </span>
@@ -129,7 +129,7 @@ export function VylixDashboard() {
                   }
                 }}
               >
-                <Avatar className="h-10 w-10 shadow-sm ring-4 ring-blue-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[2px] [&>div]:rounded-full">
+                <Avatar className="h-10 w-10 shadow-sm ring-4 ring-blue-100 sm:h-16 sm:w-16 [border:2px_solid_transparent] bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 p-[2px] [&>div]:rounded-full">
                   <AvatarImage src={user?.avatarUrl ?? undefined} alt="Student profile photo" />
                   <AvatarFallback className="bg-green-50 font-black text-gray-900">{userInitials}</AvatarFallback>
                 </Avatar>
@@ -152,7 +152,7 @@ export function VylixDashboard() {
                 style={{ borderLeftColor: ['#2563eb', '#0ea5e9', '#22d3ee'][index] }}
               >
                 <p className="cp-label">{stat.label}</p>
-                <p className="mt-2 text-2xl font-black tracking-tight bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">{stat.value}</p>
+                <p className="mt-2 text-2xl font-black tracking-tight bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent">{stat.value}</p>
               </article>
             ))}
           </aside>
@@ -248,7 +248,7 @@ export function VylixDashboard() {
                       <div className="mx-auto w-full max-w-2xl space-y-6 py-6 sm:py-10">
                         <div className="rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-sky-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
                           <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">📁</p>
-                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent sm:text-2xl">Your Private Document Vault</h3>
+                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent sm:text-2xl">Your Private Document Vault</h3>
                           <p className="mb-6 text-sm text-gray-600 sm:text-base">
                             Store past questions, lecture notes, and PDFs. Access them offline. Organised by course — always with you.
                           </p>
@@ -313,7 +313,7 @@ export function VylixDashboard() {
                       <div className="flex flex-1 items-center justify-center p-3 sm:p-6 lg:p-8">
                         <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-sky-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
                           <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">💬</p>
-                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent sm:text-2xl">Study Together</h3>
+                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent sm:text-2xl">Study Together</h3>
                           <p className="mb-6 text-sm text-gray-600 sm:text-base">
                             Message classmates, share past questions, form study groups. Real-time chat organised around your courses.
                           </p>
@@ -348,7 +348,7 @@ export function VylixDashboard() {
                       <div className="flex flex-1 items-center justify-center py-12">
                         <div className="mx-auto w-full max-w-2xl rounded-[1.75rem] border border-blue-100 bg-gradient-to-br from-blue-50 to-sky-50/35 px-6 py-8 text-center shadow-sm sm:px-8 sm:py-10">
                           <p className="mb-3 text-4xl sm:mb-4 sm:text-5xl">💡</p>
-                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent sm:text-2xl">Community Q&A</h3>
+                          <h3 className="mb-2 text-xl font-black bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent sm:text-2xl">Community Q&A</h3>
                           <p className="mb-6 text-sm text-gray-600 sm:text-base">
                             Ask questions, get answers from classmates, and help each other learn. Organized by course and topic.
                           </p>
@@ -395,7 +395,7 @@ export function VylixDashboard() {
           <footer className="mt-auto border-t border-blue-100 bg-gradient-to-r from-blue-50/80 to-sky-50/35 px-3 py-3 backdrop-blur-sm sm:px-6 sm:py-4">
             <div className="flex items-center justify-between gap-3 text-left">
               <div>
-                <p className="font-bold text-[10px] uppercase tracking-wider bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
+                <p className="font-bold text-[10px] uppercase tracking-wider bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent">
                   Vylix Academic Hub
                 </p>
                 <p className="mt-0.5 cp-body text-[11px] sm:text-xs">

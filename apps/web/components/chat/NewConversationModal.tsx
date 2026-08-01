@@ -234,7 +234,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
                   {selectedUsers.map((u) => (
                     <span
                       key={u.id}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-[1px] shadow-sm"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 p-[1px] shadow-sm"
                     >
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-900">
                         {u.fullName}

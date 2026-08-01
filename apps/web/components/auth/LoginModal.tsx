@@ -51,7 +51,7 @@ export function LoginModal() {
         <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-sky-50/35 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent mb-3">
+              <h2 className="text-[clamp(1.5rem,3vw,2.2rem)] leading-[1.2] tracking-[-0.03em] font-black bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent mb-3">
                 {isSignUp ? 'Join Vylix Academic Hub' : 'Welcome Back'}
               </h2>
               <p className="cp-body mt-1 text-sm">
@@ -179,7 +179,7 @@ export function LoginModal() {
                   setError('');
                   setSuccess('');
                 }}
-                className="font-semibold text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text hover:opacity-80 transition-opacity"
+                className="font-semibold text-transparent bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text hover:opacity-80 transition-opacity"
               >
                 {isSignUp ? 'Sign In' : 'Sign Up'}
               </button>

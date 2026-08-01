@@ -63,7 +63,7 @@ export function GraduationCelebrationModal({
           recycle={false}
           numberOfPieces={500}
           gravity={0.15}
-          colors={['#6366f1', '#7c3aed', '#d946ef', '#f59e0b', '#10b981', '#ef4444']}
+          colors={['#3b82f6', '#0284c7', '#22d3ee', '#f59e0b', '#10b981', '#ef4444']}
         />
       )}
 

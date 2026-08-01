@@ -119,7 +119,7 @@ export function DriveFilePickerModal({ isOpen, onClose, onSuccess }: DriveFilePi
         <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-sky-50/35 px-6 py-4 shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
+              <h2 className="text-xl font-black bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent">
                 Import from Google Drive
               </h2>
               <p className="text-sm text-gray-500 mt-1">Browse and select files to import into your course.</p>

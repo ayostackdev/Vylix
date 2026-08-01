@@ -17,8 +17,8 @@ interface Course {
 }
 
 const DEPT_COLORS: Record<string, string> = {
-  STA: '#8b5cf6', PHY: '#f59e0b', CHM: '#10b981', MTH: '#6366f1',
-  CSC: '#ef4444', ENG: '#f97316', ECO: '#06b6d4', BUS: '#8b5cf6',
+  STA: '#3b82f6', PHY: '#f59e0b', CHM: '#10b981', MTH: '#2563eb',
+  CSC: '#ef4444', ENG: '#f97316', ECO: '#06b6d4', BUS: '#3b82f6',
 }
 
 interface MainSidebarProps {

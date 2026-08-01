@@ -190,7 +190,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
         <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-sky-50/35 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
+              <h2 className="text-xl font-black bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text text-transparent">
                 Upload Material
               </h2>
               <p className="cp-body text-sm mt-1">Share study resources with your department.</p>
