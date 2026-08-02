@@ -65,6 +65,75 @@ async def list_departments(college_id: str, db: AsyncSession = Depends(get_db)):
 
 # ── Seed data (University → College → Departments) ────────────────
 
+#: Standard college set applied to universities that don't define their own.
+DEFAULT_COLLEGES: list[dict] = [
+    {
+        "code": "SCI",
+        "name": "Faculty of Science",
+        "duration_years": 4,
+        "departments": [
+            ("CSC", "Computer Science"),
+            ("BCH", "Biochemistry"),
+            ("CHM", "Chemistry"),
+            ("PHY", "Physics"),
+            ("MTH", "Mathematics"),
+            ("BIO", "Biology"),
+        ],
+    },
+    {
+        "code": "ENG",
+        "name": "Faculty of Engineering",
+        "duration_years": 5,
+        "departments": [
+            ("EEE", "Electrical & Electronics Engineering"),
+            ("MEE", "Mechanical Engineering"),
+            ("CVE", "Civil Engineering"),
+        ],
+    },
+    {
+        "code": "ART",
+        "name": "Faculty of Arts",
+        "duration_years": 4,
+        "departments": [
+            ("ENG", "English & Literary Studies"),
+            ("HIS", "History & International Studies"),
+        ],
+    },
+    {
+        "code": "SMS",
+        "name": "Faculty of Social & Management Sciences",
+        "duration_years": 4,
+        "departments": [
+            ("ACC", "Accounting"),
+            ("BUS", "Business Administration"),
+            ("ECO", "Economics"),
+            ("MKT", "Mass Communication"),
+        ],
+    },
+    {
+        "code": "LAW",
+        "name": "Faculty of Law",
+        "duration_years": 5,
+        "departments": [("LAW", "Law")],
+    },
+    {
+        "code": "MED",
+        "name": "Faculty of Medicine",
+        "duration_years": 6,
+        "departments": [
+            ("MBB", "Medicine & Surgery"),
+            ("NSC", "Nursing Science"),
+        ],
+    },
+]
+
+
+def _normalize_name(name: str) -> str:
+    import re
+
+    return re.sub(r"\s+", " ", name.strip().lower())
+
+
 SEED_DATA: list[dict] = [
     {
         "code": "UNILAG",
@@ -905,19 +974,66 @@ SEED_DATA: list[dict] = [
             },
         ],
     },
+    # ── NUC-Approved Federal Universities (2026) ────────────────────────────
+    # Universities already seeded above are intentionally omitted; the merge
+    # logic below skips any university whose normalized name already exists.
+    {"code": "ATBU", "name": "Abubakar Tafawa Balewa University"},
+    {"code": "ADEYEMI", "name": "Adeyemi Federal University of Education"},
+    {"code": "AFIT", "name": "Air Force Institute of Technology"},
+    {"code": "AE-FUNAI", "name": "Alex Ekwueme Federal University Ndufu-Alike"},
+    {"code": "ALVAN", "name": "Alvan Ikoku Federal University of Education"},
+    {"code": "FUBK", "name": "Federal University Birnin Kebbi"},
+    {"code": "FUD", "name": "Federal University Dutse"},
+    {"code": "FUDMA", "name": "Federal University Dutsin-Ma"},
+    {"code": "FUGASHUA", "name": "Federal University Gashua"},
+    {"code": "FUGUS", "name": "Federal University Gusau"},
+    {"code": "FUKASHERE", "name": "Federal University Kashere"},
+    {"code": "FULAFIA", "name": "Federal University Lafia"},
+    {"code": "FULOKOJA", "name": "Federal University Lokoja"},
+    {"code": "FUAZ", "name": "Federal University of Agriculture, Zuru"},
+    {"code": "FUSK", "name": "Federal University of Applied Sciences, Kachia"},
+    {"code": "FUEP", "name": "Federal University of Education, Pankshin"},
+    {"code": "FUEZ", "name": "Federal University of Education, Zaria"},
+    {"code": "FUHSA", "name": "Federal University of Health Sciences, Azare"},
+    {"code": "FUPRE", "name": "Federal University of Petroleum Resources, Effurun"},
+    {"code": "FUTMINNA", "name": "Federal University of Technology, Minna"},
+    {"code": "FUTD", "name": "Federal University of Transportation, Daura"},
+    {"code": "FUOTUOKE", "name": "Federal University Otuoke"},
+    {"code": "FUOYE", "name": "Federal University Oye-Ekiti"},
+    {"code": "FUWUKARI", "name": "Federal University Wukari"},
+    {"code": "JOSTUM", "name": "Joseph Sarwuan Tarka University"},
+    {"code": "MOUAU", "name": "Michael Okpara University of Agriculture"},
+    {"code": "MAUTECH", "name": "Modibbo Adama University of Technology"},
+    {"code": "NAUB", "name": "Nigerian Army University, Biu"},
+    {"code": "NDA", "name": "Nigerian Defense Academy"},
+    {"code": "NMU", "name": "Nigerian Maritime University"},
+    {"code": "UNIZIK", "name": "Nnamdi Azikiwe University"},
+    {"code": "TASUED", "name": "Tai Solarin Federal University of Education"},
+    {"code": "UNIABUJA", "name": "University of Abuja"},
+    {"code": "UNICAL", "name": "University of Calabar"},
+    {"code": "UNIJOS", "name": "University of Jos"},
+    {"code": "UNIPORT", "name": "University of Port Harcourt"},
 ]
 
 
 @router.post("/seed")
 async def seed_colleges(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(University))
-    existing = result.scalars().all()
-    if existing:
-        return {"message": f"Already seeded ({len(existing)} universities exist)"}
+    existing_university_names = {
+        _normalize_name(n)
+        for n in (await db.execute(select(University.name))).scalars().all()
+    }
+    existing_catalog_codes = set(
+        (await db.execute(select(DepartmentCatalog.code))).scalars().all()
+    )
 
-    catalog_entries: set[str] = set()
+    added = 0
+    skipped = 0
 
     for uni_data in SEED_DATA:
+        if _normalize_name(uni_data["name"]) in existing_university_names:
+            skipped += 1
+            continue
+
         uni_id = str(uuid.uuid4())
         university = University(
             id=uni_id,
@@ -926,7 +1042,7 @@ async def seed_colleges(db: AsyncSession = Depends(get_db)):
         )
         db.add(university)
 
-        for college_data in uni_data.get("colleges", []):
+        for college_data in uni_data.get("colleges", DEFAULT_COLLEGES):
             college_id = str(uuid.uuid4())
             college = College(
                 id=college_id,
@@ -946,9 +1062,13 @@ async def seed_colleges(db: AsyncSession = Depends(get_db)):
                 )
                 db.add(department)
 
-                if dept_code not in catalog_entries:
-                    catalog_entries.add(dept_code)
+                if dept_code not in existing_catalog_codes:
+                    existing_catalog_codes.add(dept_code)
                     db.add(DepartmentCatalog(code=dept_code, name=dept_name))
 
+        added += 1
+
     await db.commit()
-    return {"message": f"Seeded {len(SEED_DATA)} universities with colleges and departments"}
+    return {
+        "message": f"Seeded {added} new universities (skipped {skipped} already present)"
+    }
