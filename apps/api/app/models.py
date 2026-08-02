@@ -340,9 +340,9 @@ class MaterialUnlock(Base):
     __tablename__ = "material_unlocks"
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    material_id: Mapped[str] = mapped_column(String(36), ForeignKey("materials.id", ondelete="CASCADE"))
-    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"))
-    referrer_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id", ondelete="SET NULL"))
+    material_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("materials.id", ondelete="CASCADE"))
+    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
+    referrer_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     material: Mapped["Material"] = relationship(back_populates="unlocks")
@@ -713,7 +713,7 @@ class FlashcardDeck(Base):
     __tablename__ = "flashcard_decks"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"))
+    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id"))
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     document_id: Mapped[str | None] = mapped_column(String)
@@ -758,7 +758,7 @@ class Subscription(Base):
     __tablename__ = "subscriptions"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"))
+    user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
     reference: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     plan: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
