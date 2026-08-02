@@ -9,7 +9,7 @@ from app.database import get_db
 from app.deps import check_ai_token_quota, CurrentUser, get_current_user
 from app.models import FlashcardDeck, Flashcard
 from app.services.vector_store import VectorStore
-from app.services.gemini import chat as gemini_chat, GeminiError
+from app.services.gemini import chat as gemini_chat, GeminiError, error_response
 
 router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 
@@ -353,7 +353,8 @@ async def generate_flashcards(
     try:
         response = gemini_chat(prompt, "You are an expert academic flashcard generator. Create precise, study-effective flashcards.")
     except GeminiError as exc:
-        raise HTTPException(status_code=502, detail=f"AI generation failed: {exc.detail}")
+        status_code, detail = error_response(exc)
+        raise HTTPException(status_code=status_code, detail=detail)
     if not response:
         raise HTTPException(status_code=500, detail="AI generation failed. Please try again.")
 

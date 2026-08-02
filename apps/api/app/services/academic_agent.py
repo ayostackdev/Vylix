@@ -4,10 +4,11 @@ import logging
 
 import psycopg
 from google import genai
-from google.genai import types
+from google.genai import errors, types
 
 from app.core.config import get_settings
 from app.core.postgres import get_connection
+from app.services.gemini import GeminiError, SERVICE_BUSY_MESSAGE
 from app.services.vector_store import VectorStore
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,19 @@ def _get_client() -> genai.Client:
     if _client is None:
         if not settings.gemini_api_key:
             raise RuntimeError("GEMINI_API_KEY is not configured")
-        _client = genai.Client(api_key=settings.gemini_api_key)
+        _client = genai.Client(
+            api_key=settings.gemini_api_key,
+            http_options=types.HttpOptions(
+                retry_options=types.HttpRetryOptions(
+                    attempts=3,
+                    initial_delay=1.0,
+                    max_delay=8.0,
+                    exp_base=2.0,
+                    jitter=True,
+                    http_status_codes=[408, 429, 500, 502, 503, 504],
+                ),
+            ),
+        )
     return _client
 
 
@@ -134,9 +147,12 @@ def run_vylix_academic_agent(
                 max_output_tokens=4096,
             ),
         )
+    except (errors.ClientError, errors.ServerError) as e:
+        logger.error("Gemini SDK call failed for user %s course %s: %s", user_id, course_code, e)
+        raise GeminiError(SERVICE_BUSY_MESSAGE, status_code=e.code)
     except Exception:
         logger.exception("Gemini call failed for user %s course %s", user_id, course_code)
-        raise
+        raise GeminiError(SERVICE_BUSY_MESSAGE)
 
     result = response.text
     logger.info("Agent complete output_length=%d", len(result))
