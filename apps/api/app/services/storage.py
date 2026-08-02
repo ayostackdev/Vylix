@@ -83,7 +83,7 @@ class AppwriteStorage(StorageProvider):
     async def upload(self, bucket: str, path: str, data: bytes, content_type: str) -> str:
         import httpx
         files = {"file": (Path(path).name, data, content_type)}
-        data_fields = {"fileId": "unique()"}
+        data_fields = {"fileId": "unique()", "permissions[0]": 'read("any")'}
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{self.endpoint}/storage/buckets/{self.bucket_id}/files",
@@ -93,7 +93,7 @@ class AppwriteStorage(StorageProvider):
             )
             resp.raise_for_status()
             file_id = resp.json()["$id"]
-        return f"{self.endpoint}/storage/buckets/{self.bucket_id}/files/{file_id}/view"
+        return f"{self.endpoint}/storage/buckets/{self.bucket_id}/files/{file_id}/view?project={self.project_id}"
 
     async def delete(self, bucket: str, path: str) -> None:
         import httpx
