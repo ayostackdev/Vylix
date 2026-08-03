@@ -56,10 +56,10 @@
   --sidebar-bg: rgba(17, 22, 52, 0.92);
   --card-bg: rgba(19, 24, 58, 0.92);
   --card-border: rgba(42, 48, 86, 1);
-  --navy-900: #eef1ff;
-  --navy-800: #c7cdf0;
+  --navy-900: #e5e8f2;
+  --navy-800: #c6cbe0;
   --navy-700: #9aa3cf;
-  --navy-strong: #f4f6ff;
+  --navy-strong: #e5e8f2;
   --apple-green: #34d399;
   --primary: #3b82f6;
   --primary-dark: #93c5fd;
@@ -74,7 +74,7 @@
   --success: #34d399;
   --warning: #fbbf24;
   --error: #f87171;
-  --text-primary: #eef1ff;
+  --text-primary: #d9dcea;
   --text-secondary: #a7aed4;
   --text-tertiary: #7b84b0;
   --border: #2a3056;
@@ -1455,7 +1455,7 @@ select:focus {
 .dark .active\:bg-gray-200\/60:active { background-color: rgba(49, 56, 95, 0.6); }
 
 .dark .text-gray-900 { color: var(--text-primary); }
-.dark .text-gray-800 { color: #d9def7; }
+.dark .text-gray-800 { color: #cdd1e2; }
 .dark .text-gray-700 { color: var(--text-primary); }
 .dark .text-gray-600 { color: var(--text-secondary); }
 .dark .text-gray-500 { color: var(--text-secondary); }
