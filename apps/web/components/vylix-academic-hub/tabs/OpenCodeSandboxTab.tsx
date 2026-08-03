@@ -82,7 +82,7 @@ export function OpenCodeSandboxTab() {
         className="hidden"
         title="code-sandbox"
       />
-      <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%)' }}>
+      <div className="p-3 border-b border-gray-100 tool-header-bg-blue">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-gray-900 tracking-tight">OpenCode Sandbox</h3>

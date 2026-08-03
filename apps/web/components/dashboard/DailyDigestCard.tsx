@@ -22,7 +22,7 @@ export function DailyDigestCard() {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
       {/* Greeting + Streak */}
-      <div className="p-5 pb-3" style={{ background: 'linear-gradient(135deg, #f5f3fe 0%, #f0eefb 100%)' }}>
+      <div className="p-5 pb-3 digest-card-bg">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-base font-bold text-gray-900 tracking-tight">{digest.greeting}</h2>

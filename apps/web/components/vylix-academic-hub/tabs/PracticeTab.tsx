@@ -78,7 +78,7 @@ export function PracticeTab({ selectedDoc, isReadOnly = false }: PracticeTabProp
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
+      <div className="p-3 border-b border-gray-100 tool-header-bg">
         <div className="flex items-center gap-2">
           {view !== 'select' && (
             <button

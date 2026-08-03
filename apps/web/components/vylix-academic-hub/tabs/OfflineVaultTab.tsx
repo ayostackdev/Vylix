@@ -63,7 +63,7 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
 
   return (
     <div className="flex flex-col h-full bg-white">
-      <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
+      <div className="p-3 border-b border-gray-100 tool-header-bg">
         <h3 className="text-sm font-semibold text-gray-900 tracking-tight">Offline Vault</h3>
         <div className="flex items-center gap-2 mt-1">
           <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${

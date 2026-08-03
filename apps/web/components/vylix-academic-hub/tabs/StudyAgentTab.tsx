@@ -122,7 +122,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
   if (!selectedDoc) {
     return (
       <div className="flex flex-col h-full bg-white">
-        <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
+        <div className="p-3 border-b border-gray-100 tool-header-bg">
           <h3 className="text-sm font-semibold text-gray-900 tracking-tight">Study Agent</h3>
           <p className="text-xs text-gray-400">Personalized study assistant</p>
         </div>
@@ -144,7 +144,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
   return (
     <>
     <div className="flex flex-col h-full bg-white">
-      <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
+      <div className="p-3 border-b border-gray-100 tool-header-bg">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-gray-900 tracking-tight">Study Agent</h3>

@@ -183,7 +183,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
   return (
     <>
     <div className="flex flex-col h-full bg-white">
-      <div className="p-3 border-b border-gray-100" style={{ background: 'linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%)' }}>
+      <div className="p-3 border-b border-gray-100 tool-header-bg">
         <h3 className="text-sm font-semibold text-gray-900 tracking-tight">AI Professor</h3>
         <p className="text-xs text-gray-400">
           {selectedDoc ? `Reading: ${selectedDoc.name}` : 'No document selected'}
