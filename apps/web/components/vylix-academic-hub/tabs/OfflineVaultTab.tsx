@@ -57,6 +57,7 @@ export function OfflineVaultTab({ selectedDoc, isReadOnly = false }: OfflineVaul
   }, [])
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this saved material?')) return
     const updated = await deleteVaultMaterial(id)
     setVaultMaterials(updated)
   }

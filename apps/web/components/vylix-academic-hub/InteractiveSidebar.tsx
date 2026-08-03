@@ -6,11 +6,12 @@ import { AIProfessorTab } from './tabs/AIProfessorTab'
 import { StudyAgentTab } from './tabs/StudyAgentTab'
 import { PracticeTab } from './tabs/PracticeTab'
 import { OfflineVaultTab } from './tabs/OfflineVaultTab'
+import { FlashcardTab } from './tabs/FlashcardTab'
 import { TokenCounter } from '@/components/profile/TokenCounter'
 import { useAuth } from '@/context/auth-context'
 import type { DocumentInfo } from './ThreePanelLayout'
 
-type TabId = 'professor' | 'practice' | 'vault' | 'agent'
+type TabId = 'professor' | 'practice' | 'vault' | 'agent' | 'cards'
 
 interface InteractiveSidebarProps {
   selectedDoc: DocumentInfo | null
@@ -29,7 +30,7 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
   const tabConfig: { id: TabId; label: string; icon: JSX.Element }[] = [
     {
       id: 'professor',
-      label: 'AI Tutor',
+      label: 'Tutor',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -42,6 +43,15 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      ),
+    },
+    {
+      id: 'cards',
+      label: 'Cards',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       ),
     },
@@ -163,6 +173,7 @@ export function InteractiveSidebar({ selectedDoc, isOpen: controlledOpen, onOpen
           <div className="flex-1 min-h-0 overflow-hidden relative">
             <Tabs.Content value="professor" className="h-full"><AIProfessorTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
             <Tabs.Content value="practice" className="h-full"><PracticeTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
+            <Tabs.Content value="cards" className="h-full"><FlashcardTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
             <Tabs.Content value="vault" className="h-full"><OfflineVaultTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
             <Tabs.Content value="agent" className="h-full"><StudyAgentTab selectedDoc={selectedDoc} isReadOnly={isReadOnly} /></Tabs.Content>
 

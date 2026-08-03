@@ -124,6 +124,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
   }
 
   const deleteDeck = async (deckId: string) => {
+    if (!window.confirm('Are you sure you want to delete this flashcard deck?')) return
     const headers = await authHeaders()
     await fetch(`/api/flashcards/decks/${deckId}`, { method: 'DELETE', headers })
     setDecks((prev) => prev.filter((d) => d.id !== deckId))

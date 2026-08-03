@@ -185,6 +185,7 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
   };
 
   const handleDelete = async (messageId: string) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) return
     await deleteMessage.mutateAsync({ messageId });
   };
 

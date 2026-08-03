@@ -40,7 +40,6 @@ export function PrivateVaultView() {
   const [chatDocument, setChatDocument] = useState<{ id: string; title: string } | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerTitle, setViewerTitle] = useState('');
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const {
     showModal,
     checkAfterSave,
@@ -60,6 +59,8 @@ export function PrivateVaultView() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      if (!window.confirm('Are you sure you want to delete this material?')) return null;
+
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
@@ -71,8 +72,8 @@ export function PrivateVaultView() {
       if (!res.ok) throw new Error('Failed to delete');
       return id;
     },
-    onSuccess: () => {
-      setConfirmDeleteId(null);
+    onSuccess: (id) => {
+      if (id === null) return;
       queryClient.invalidateQueries({ queryKey: ['vault-materials'] });
       queryClient.invalidateQueries({ queryKey: ['past-questions'] });
     },
@@ -179,31 +180,13 @@ export function PrivateVaultView() {
                       >
                         Chat
                       </button>
-                      {confirmDeleteId === item.id ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => deleteMutation.mutate(item.id)}
-                            disabled={isDeleting}
-                            className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
-                          >
-                            {isDeleting ? '...' : 'Confirm'}
-                          </button>
-                          <button
-                            onClick={() => setConfirmDeleteId(null)}
-                            disabled={isDeleting}
-                            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2 py-1 text-[11px] font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setConfirmDeleteId(item.id)}
-                          className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          Delete
-                        </button>
-                      )}
+                      <button
+                        onClick={() => deleteMutation.mutate(item.id)}
+                        disabled={isDeleting}
+                        className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      >
+                        {isDeleting ? '...' : 'Delete'}
+                      </button>
                     </div>
                   </div>
                 );

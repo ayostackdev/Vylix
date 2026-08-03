@@ -66,7 +66,6 @@ export function PastQuestionsView() {
   const [searchCourse, setSearchCourse] = useState('');
   const [searchYear, setSearchYear] = useState('');
   const [searchSemester, setSearchSemester] = useState('');
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerTitle, setViewerTitle] = useState('');
 
@@ -81,6 +80,8 @@ export function PastQuestionsView() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      if (!window.confirm('Are you sure you want to delete this past question?')) return null;
+
       const supabase = getSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No session');
@@ -95,8 +96,8 @@ export function PastQuestionsView() {
       }
       return id;
     },
-    onSuccess: () => {
-      setConfirmDeleteId(null);
+    onSuccess: (id) => {
+      if (id === null) return;
       queryClient.invalidateQueries({ queryKey: ['past-questions'] });
       queryClient.invalidateQueries({ queryKey: ['vault-materials'] });
     },
@@ -235,31 +236,13 @@ export function PastQuestionsView() {
                       📖 View
                     </button>
                     {user?.id === item.uploader_id && (
-                      confirmDeleteId === item.id ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => deleteMutation.mutate(item.id)}
-                            disabled={isDeleting}
-                            className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
-                          >
-                            {isDeleting ? '...' : 'Confirm'}
-                          </button>
-                          <button
-                            onClick={() => setConfirmDeleteId(null)}
-                            disabled={isDeleting}
-                            className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setConfirmDeleteId(item.id)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          🗑 Delete
-                        </button>
-                      )
+                      <button
+                        onClick={() => deleteMutation.mutate(item.id)}
+                        disabled={isDeleting}
+                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                      >
+                        {isDeleting ? '...' : '🗑 Delete'}
+                      </button>
                     )}
                   </div>
                 </div>
