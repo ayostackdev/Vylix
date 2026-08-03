@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useStreakAndPoints, useUserBadges } from '@/queries/use-gamification';
+import { useTheme } from '@/providers/theme-provider';
 
 interface University {
   id: string;
@@ -40,6 +41,7 @@ const RARITY_COLORS: Record<string, string> = {
 
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { user, refreshProfile, logout, updateAvatar } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const supabase = getSupabaseBrowserClient();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { data: stats } = useStreakAndPoints();
@@ -517,6 +519,40 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 transition-colors"
                 >
                   Sign Out
+                </button>
+              </div>
+
+              <div className="divider" />
+
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Appearance</p>
+                <button
+                  onClick={toggleTheme}
+                  className="w-full flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-colors hover:bg-gray-100"
+                >
+                  <span className="flex items-center gap-2.5">
+                    {theme === 'dark' ? (
+                      <svg className="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.36 6.36l-1.42-1.42M7.06 7.06L5.64 5.64m13.72 0l-1.42 1.42M7.06 16.94l-1.42 1.42M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                      </svg>
+                    )}
+                    <span className="text-sm font-semibold text-gray-900">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
+                  </span>
+                  <span
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      theme === 'dark' ? 'bg-gradient-to-r from-blue-600 to-sky-500' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                        theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </span>
                 </button>
               </div>
             </>
