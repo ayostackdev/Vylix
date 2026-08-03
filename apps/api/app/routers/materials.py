@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import logging
 import uuid
+from contextlib import suppress
 from datetime import datetime, timezone
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
+import anyio
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel
 from sqlalchemy import select, func
@@ -18,11 +22,43 @@ from app.models import (
     MaterialUnlock, PointsTransaction,
 )
 from app.services.storage import get_storage
+from app.services.vector_store import VectorStore
 from app.tasks import process_material_task
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 router = APIRouter(prefix="/materials", tags=["materials"])
+_vector_store = VectorStore()
+
+
+def _compress_pdf_bytes(data: bytes, filename: str) -> bytes:
+    """Compress a PDF in-memory using Ghostscript, falling back to the original."""
+    from app.services.pdf_compressor import compress_pdf_ghostscript
+
+    if not filename.lower().endswith(".pdf") or len(data) == 0:
+        return data
+
+    source_path: Path | None = None
+    target_path: Path | None = None
+    try:
+        with NamedTemporaryFile(delete=False, suffix=".pdf") as source_file:
+            source_file.write(data)
+            source_path = Path(source_file.name)
+
+        target_path = source_path.with_name(f"{source_path.stem}_compressed.pdf")
+        compressed = compress_pdf_ghostscript(source_path, target_path)
+        if compressed is not None and compressed.stat().st_size < len(data):
+            return compressed.read_bytes()
+        return data
+    except OSError:
+        logger.warning("PDF compression failed for %s; storing original.", filename)
+        return data
+    finally:
+        with suppress(OSError):
+            if source_path is not None:
+                source_path.unlink(missing_ok=True)
+            if target_path is not None:
+                target_path.unlink(missing_ok=True)
 
 
 class TopicRef(BaseModel):
@@ -176,6 +212,11 @@ async def upload_material(
     if len(data) > max_bytes:
         raise HTTPException(status_code=400, detail=f"File exceeds {settings.max_upload_mb}MB limit")
 
+    if file.content_type == "application/pdf":
+        data = await anyio.to_thread.run_sync(
+            lambda: _compress_pdf_bytes(data, file.filename or "document.pdf")
+        )
+
     topic_id = await _resolve_topic(db, course_code, department_code, user.id)
 
     material_id = str(uuid.uuid4())
@@ -242,6 +283,8 @@ async def delete_material(
     storage = get_storage()
     if material.file_path:
         await storage.delete(settings.supabase_storage_bucket, material.file_path)
+
+    await anyio.to_thread.run_sync(_vector_store.delete_document, material_id)
 
     await db.delete(material)
     await db.flush()

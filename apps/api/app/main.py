@@ -10,7 +10,7 @@ from app.core.middleware import ActivityTrackingMiddleware
 from app.routers import (
     health, colleges, courses, topics, user, materials,
     qna, gamification, settings as settings_router, collaboration, maintenance,
-    documents, analytics, insights, uploads, ws, google_drive, study_agent,
+    documents, analytics, insights, ws, google_drive, study_agent,
     digest, flashcards, payments,
 )
 
@@ -70,7 +70,6 @@ app.include_router(study_agent.router, prefix=settings.api_prefix)
 app.include_router(documents.router, prefix=settings.api_prefix)
 app.include_router(analytics.router, prefix=settings.api_prefix)
 app.include_router(insights.router, prefix=settings.api_prefix)
-app.include_router(uploads.router, prefix=settings.api_prefix)
 
 # WebSocket
 app.include_router(ws.router)

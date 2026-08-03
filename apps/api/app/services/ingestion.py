@@ -27,12 +27,16 @@ class IngestionResult:
     tips: list[str]
 
 
-def ingest_document(source_path: str | Path, department_code: str = "COLPHY") -> IngestionResult:
+def ingest_document(
+    source_path: str | Path,
+    department_code: str = "COLPHY",
+    document_id: str | None = None,
+) -> IngestionResult:
     path = Path(source_path)
     compressed_path = compress_pdf(path) if path.suffix.lower() == ".pdf" else path
     parsed_document: ParsedDocument = parse_with_docling(
         compressed_path,
-        document_id=path.stem,
+        document_id=document_id or path.stem,
         source_name=path.name,
     )
     chunks = build_chunks(parsed_document.markdown)

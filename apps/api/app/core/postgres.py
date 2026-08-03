@@ -13,7 +13,8 @@ settings = get_settings()
 
 @contextmanager
 def get_connection():
-    connection = psycopg.connect(settings.database_url, row_factory=dict_row)
+    url = settings.direct_url or settings.database_url.replace("?pgbouncer=true", "")
+    connection = psycopg.connect(url, row_factory=dict_row)
     try:
         yield connection
     finally:

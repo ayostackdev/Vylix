@@ -54,6 +54,15 @@ class Settings(BaseSettings):
     # AI
     gemini_api_key: str | None = Field(default=None)
 
+    # Vector search
+    # "auto" uses pgvector when GEMINI_API_KEY is set, otherwise ChromaDB.
+    # Explicit "pgvector" or "chromadb" forces the backend.
+    vector_store_backend: str = Field(default="auto")
+    embedding_model: str = Field(default="gemini-embedding-001")
+    embedding_dimensions: int = Field(default=768)
+    embedding_batch_size: int = Field(default=64)
+    embedding_cache_ttl_seconds: int = Field(default=604800)
+
     # Maintenance
     maintenance_api_key: str = Field(default="")
 

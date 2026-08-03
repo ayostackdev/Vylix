@@ -177,7 +177,11 @@ def process_material_task(
             resp.raise_for_status()
             local_path.write_bytes(resp.content)
 
-        result = ingest_document(local_path, department_code=department_code)
+        result = ingest_document(
+            local_path,
+            department_code=department_code,
+            document_id=material_id,
+        )
 
         _update_material(
             material_id,

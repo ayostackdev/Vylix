@@ -2,6 +2,7 @@ FROM python:3.11-slim AS base
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
+    ghostscript \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
