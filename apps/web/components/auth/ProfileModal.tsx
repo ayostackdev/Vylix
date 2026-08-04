@@ -572,7 +572,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 </div>
                 {referralEarned > 0 && (
                   <p className="mt-2 text-[11px] font-semibold text-emerald-700">
-                    You've earned {referralEarned.toLocaleString()} points from referrals 🎉
+                    You&apos;ve earned {referralEarned.toLocaleString()} points from referrals 🎉
                   </p>
                 )}
               </div>

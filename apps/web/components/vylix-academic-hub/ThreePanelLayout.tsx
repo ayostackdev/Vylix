@@ -35,7 +35,7 @@ export function ThreePanelLayout() {
   return (
     <div className="flex h-dvh w-full overflow-hidden premium-bg">
       {/* Mobile premium header */}
-      <header className={`fixed left-0 right-0 z-30 header-premium pt-[env(safe-area-inset-top)] md:hidden ${!isAuthenticated ? 'top-[52px]' : 'top-0'}`}>
+      <header className={`fixed left-0 right-0 z-30 header-premium pt-[env(safe-area-inset-top)] md:hidden ${!isAuthenticated ? 'top-[72px]' : 'top-0'}`}>
         <div className="flex items-center justify-between px-3 py-2">
           <div className="flex items-center gap-2.5 min-w-0">
             {selectedCourseId && activeView === 'courses' ? (
@@ -221,7 +221,7 @@ export function ThreePanelLayout() {
       </div>
 
       {/* Main content */}
-      <div className={`flex-1 flex flex-col min-w-0 pt-[max(3.25rem,env(safe-area-inset-top)+2.5rem)] pb-[max(4rem,env(safe-area-inset-bottom)+3.5rem)] md:pt-0 md:pb-0 ${!isAuthenticated ? 'md:mt-[68px]' : ''}`}>
+      <div className={`flex-1 flex flex-col min-w-0 pb-[max(4rem,env(safe-area-inset-bottom)+3.5rem)] md:pb-0 ${!isAuthenticated ? 'pt-[max(8rem,env(safe-area-inset-top)+7.5rem)] md:pt-0 md:mt-[68px]' : 'pt-[max(3.25rem,env(safe-area-inset-top)+2.5rem)] md:pt-0'}`}>
         {activeView === 'chat' ? (
           <div className="flex-1 overflow-hidden">
             <CollaborationView />

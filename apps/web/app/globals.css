@@ -1668,6 +1668,159 @@ select:focus {
   background-attachment: fixed;
 }
 
+/* ============================================
+   EXTENDED DARK MODE OVERRIDES
+   Completes coverage for remaining utility
+   classes used across components so text and
+   UI stay visible in dark mode.
+   ============================================ */
+
+/* Correct lightest gray text tones so they stay
+   readable on dark surfaces (terminal, code editor,
+   tertiary hints) instead of becoming darker than
+   the background they sit on. */
+.dark .text-gray-100 { color: #e5e8f2; }
+.dark .text-gray-200 { color: #c6cbe0; }
+.dark .text-gray-300 { color: #9aa3cf; }
+
+/* Dark terminal / code editor surfaces keep a dark
+   backdrop so light text (fixed above) reads well. */
+.dark .bg-gray-900 { background-color: #0b0e24; }
+.dark .bg-slate-900 { background-color: #0b0e24; }
+
+.dark .text-yellow-400 { color: #facc15; }
+
+/* Hover text variants */
+.dark .hover\:text-blue-600:hover { color: #93c5fd; }
+.dark .hover\:text-blue-800:hover { color: #c4dcff; }
+.dark .hover\:text-red-400:hover { color: #f87171; }
+.dark .hover\:text-red-600:hover { color: #fda4a4; }
+.dark .hover\:text-red-700:hover { color: #fecaca; }
+.dark .hover\:text-red-800:hover { color: #fed7d7; }
+.dark .hover\:text-amber-600:hover { color: #fcd34d; }
+.dark .hover\:text-sky-600:hover { color: #7dd3fc; }
+
+/* Group hover text variants */
+.dark .group:hover .group-hover\:text-gray-900 { color: var(--text-primary); }
+.dark .group:hover .group-hover\:text-blue-500 { color: #60a5fa; }
+.dark .group:hover .group-hover\:text-blue-700 { color: #a9c9ff; }
+.dark .group:hover .group-hover\:text-sky-400 { color: #38bdf8; }
+
+/* Focus / disabled variants */
+.dark .focus\:border-blue-300:focus { border-color: #4169ad; }
+.dark .focus\:border-blue-500:focus { border-color: #60a5fa; }
+.dark .focus\:border-sky-400:focus { border-color: #38bdf8; }
+.dark .focus\:border-sky-500:focus { border-color: #7dd3fc; }
+.dark .focus\:border-green-500:focus { border-color: #34d399; }
+.dark .focus\:border-amber-500:focus { border-color: #fbbf24; }
+.dark .disabled\:bg-gray-300:disabled { background-color: #31385f; }
+
+/* Focus ring tones */
+.dark .focus\:ring-blue-200:focus { --tw-ring-color: #33508a; }
+.dark .focus\:ring-blue-300:focus { --tw-ring-color: #4169ad; }
+.dark .focus\:ring-blue-500:focus { --tw-ring-color: #60a5fa; }
+.dark .focus\:ring-sky-200:focus { --tw-ring-color: #26507a; }
+.dark .focus\:ring-sky-400:focus { --tw-ring-color: #38bdf8; }
+.dark .focus\:ring-amber-200:focus { --tw-ring-color: #5c4918; }
+
+/* Remaining tinted backgrounds */
+.dark .bg-gray-200\/60 { background-color: rgba(42, 48, 86, 0.6); }
+.dark .bg-blue-50\/60 { background-color: rgba(21, 42, 85, 0.6); }
+.dark .bg-blue-500\/10 { background-color: rgba(59, 130, 246, 0.12); }
+.dark .bg-blue-100 { background-color: #1c3a70; }
+.dark .bg-red-100 { background-color: #571a26; }
+.dark .bg-red-500\/10 { background-color: rgba(248, 113, 113, 0.12); }
+.dark .bg-amber-100 { background-color: #4f3d12; }
+.dark .bg-sky-100 { background-color: #163f5e; }
+.dark .bg-sky-400\/50 { background-color: rgba(56, 189, 248, 0.18); }
+.dark .bg-orange-50 { background-color: #331f08; }
+.dark .bg-emerald-50\/60 { background-color: rgba(14, 51, 43, 0.6); }
+.dark .bg-green-200\/28 { background-color: rgba(34, 197, 94, 0.14); }
+
+/* Remaining hover backgrounds */
+.dark .hover\:bg-gray-50\/50:hover { background-color: rgba(22, 27, 61, 0.5); }
+.dark .hover\:bg-gray-300:hover { background-color: #31385f; }
+.dark .hover\:bg-blue-50\/50:hover { background-color: rgba(21, 42, 85, 0.5); }
+.dark .hover\:bg-blue-100\/70:hover { background-color: rgba(28, 58, 112, 0.7); }
+.dark .hover\:bg-red-100:hover { background-color: #6b2130; }
+.dark .hover\:bg-amber-100:hover { background-color: #5c4918; }
+
+/* Group hover backgrounds */
+.dark .group:hover .group-hover\:bg-blue-50 { background-color: #1c3a70; }
+
+/* Remaining border tones */
+.dark .border-gray-200\/80 { border-color: rgba(42, 48, 86, 0.8); }
+.dark .border-gray-200\/60 { border-color: rgba(42, 48, 86, 0.6); }
+.dark .border-gray-200\/50 { border-color: rgba(42, 48, 86, 0.5); }
+.dark .border-gray-100\/80 { border-color: rgba(36, 42, 82, 0.8); }
+.dark .border-blue-100\/60 { border-color: rgba(42, 63, 115, 0.6); }
+.dark .border-blue-100\/50 { border-color: rgba(42, 63, 115, 0.5); }
+.dark .border-blue-200\/50 { border-color: rgba(51, 80, 138, 0.5); }
+.dark .border-red-200\/60 { border-color: rgba(94, 35, 51, 0.6); }
+.dark .border-red-500\/20 { border-color: rgba(239, 68, 68, 0.2); }
+.dark .border-amber-200 { border-color: #4f3d12; }
+.dark .border-amber-200\/60 { border-color: rgba(79, 61, 18, 0.6); }
+.dark .border-emerald-100\/60 { border-color: rgba(20, 58, 51, 0.6); }
+.dark .border-emerald-200\/40 { border-color: rgba(29, 77, 66, 0.4); }
+.dark .border-emerald-200\/50 { border-color: rgba(29, 77, 66, 0.5); }
+.dark .border-emerald-200\/60 { border-color: rgba(29, 77, 66, 0.6); }
+.dark .border-emerald-200\/70 { border-color: rgba(29, 77, 66, 0.7); }
+.dark .border-emerald-300 { border-color: #276958; }
+.dark .border-emerald-400 { border-color: #34d399; }
+.dark .border-green-200 { border-color: #1d4d42; }
+.dark .border-orange-100 { border-color: #472a0b; }
+.dark .border-orange-200\/60 { border-color: rgba(89, 54, 16, 0.6); }
+
+/* Remaining hover border tones */
+.dark .hover\:border-gray-300:hover { border-color: var(--border); }
+.dark .hover\:border-sky-200:hover { border-color: #26507a; }
+.dark .hover\:\!border-blue-300:hover { border-color: #4169ad !important; }
+
+/* Remaining ring tones */
+.dark .ring-blue-100 { --tw-ring-color: #2a3f73; }
+.dark .ring-blue-100\/50 { --tw-ring-color: rgba(42, 63, 115, 0.5); }
+.dark .ring-blue-100\/70 { --tw-ring-color: rgba(42, 63, 115, 0.7); }
+.dark .ring-blue-200 { --tw-ring-color: #33508a; }
+.dark .ring-blue-200\/30 { --tw-ring-color: rgba(51, 80, 138, 0.3); }
+.dark .ring-blue-300 { --tw-ring-color: #4169ad; }
+.dark .ring-blue-500 { --tw-ring-color: #3b82f6; }
+.dark .ring-sky-100\/70 { --tw-ring-color: rgba(29, 58, 85, 0.7); }
+.dark .ring-sky-200 { --tw-ring-color: #26507a; }
+.dark .ring-sky-400 { --tw-ring-color: #38bdf8; }
+.dark .ring-emerald-200 { --tw-ring-color: #1d4d42; }
+.dark .ring-emerald-200\/60 { --tw-ring-color: rgba(29, 77, 66, 0.6); }
+.dark .ring-emerald-200\/70 { --tw-ring-color: rgba(29, 77, 66, 0.7); }
+.dark .ring-amber-100\/70 { --tw-ring-color: rgba(61, 47, 13, 0.7); }
+.dark .ring-amber-200 { --tw-ring-color: #4f3d12; }
+.dark .ring-amber-200\/60 { --tw-ring-color: rgba(79, 61, 18, 0.6); }
+.dark .ring-orange-100\/70 { --tw-ring-color: rgba(71, 42, 11, 0.7); }
+.dark .ring-green-100\/70 { --tw-ring-color: rgba(20, 58, 51, 0.7); }
+
+/* Divide tones */
+.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]) { border-color: var(--border-light); }
+
+/* Remaining gradient stops */
+.dark .from-gray-400 { --tw-gradient-from: #4b5485 var(--tw-gradient-from-position); }
+.dark .from-blue-500\/20 { --tw-gradient-from: rgb(59 130 246 / 0.2) var(--tw-gradient-from-position); }
+.dark .via-teal-50 { --tw-gradient-via: #123b34 var(--tw-gradient-via-position); }
+.dark .to-gray-500 { --tw-gradient-to: #4b5485 var(--tw-gradient-to-position); }
+.dark .to-teal-50\/80 { --tw-gradient-to: rgb(18 59 52 / 0.8) var(--tw-gradient-to-position); }
+
+/* Remaining hover gradient stops */
+.dark .hover\:from-blue-100:hover { --tw-gradient-from: #1c3a70 var(--tw-gradient-from-position); }
+.dark .hover\:from-emerald-100:hover { --tw-gradient-from: #143a33 var(--tw-gradient-from-position); }
+.dark .hover\:to-blue-200\/80:hover { --tw-gradient-to: rgb(51 80 138 / 0.8) var(--tw-gradient-to-position); }
+.dark .hover\:to-emerald-200\/80:hover { --tw-gradient-to: rgb(29 77 66 / 0.8) var(--tw-gradient-to-position); }
+
+/* Placeholders stay visible on dark inputs */
+.dark .placeholder-gray-400::placeholder { color: #7b84b0; }
+.dark .placeholder-gray-500::placeholder { color: #7b84b0; }
+
+/* Read-only overlay fade inside AI tools panel adapts to dark */
+.dark .from-white { --tw-gradient-from: #0b0e24 var(--tw-gradient-from-position); }
+.dark .via-white\/95 { --tw-gradient-via: rgb(11 14 36 / 0.95) var(--tw-gradient-via-position); }
+.dark .to-transparent { --tw-gradient-to: transparent var(--tw-gradient-to-position); }
+
 .dark ::selection {
   background: rgba(59, 130, 246, 0.35);
   color: var(--navy-strong);

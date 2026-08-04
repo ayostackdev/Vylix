@@ -209,7 +209,7 @@ export function InviteModal({ isOpen, onClose }: InviteModalProps) {
             </>
           ) : (
             <div className="text-center py-8">
-              <p className="text-sm text-gray-500">Couldn't load your invite link. Try again.</p>
+              <p className="text-sm text-gray-500">Couldn&apos;t load your invite link. Try again.</p>
             </div>
           )}
         </div>
