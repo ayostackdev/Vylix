@@ -5,8 +5,12 @@ export interface FormDataApiResponse {
 	body: string;
 }
 
-export async function fetchApi(path: string, init?: RequestInit): Promise<Response> {
-	const urls = API_BASE_FALLBACKS(path);
+export interface ApiRequestInit extends RequestInit {
+	direct?: boolean;
+}
+
+export async function fetchApi(path: string, init: ApiRequestInit = {}): Promise<Response> {
+	const urls = API_BASE_FALLBACKS(path, init.direct);
 	let lastError: unknown = null;
 
 	for (let i = 0; i < urls.length; i++) {
@@ -27,9 +31,9 @@ export async function fetchApi(path: string, init?: RequestInit): Promise<Respon
 	throw lastError instanceof Error ? lastError : new Error('Request failed');
 }
 
-function API_BASE_FALLBACKS(path: string): string[] {
+function API_BASE_FALLBACKS(path: string, direct = false): string[] {
 	const versionedPath = toVersionedApiPath(path);
-	const primary = resolveApiUrl(path);
+	const primary = resolveApiUrl(path, { direct });
 	return primary === versionedPath ? [primary] : Array.from(new Set([primary, versionedPath]));
 }
 
@@ -41,7 +45,7 @@ export function postFormDataApi(
 		onProgress?: (loaded: number, total: number) => void;
 	},
 ): Promise<FormDataApiResponse> {
-	const urls = API_BASE_FALLBACKS(path);
+	const urls = API_BASE_FALLBACKS(path, true);
 
 	return attempt(0);
 

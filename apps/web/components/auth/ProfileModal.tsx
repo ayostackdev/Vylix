@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { fetchApi } from '@/lib/api-request';
 import { useStreakAndPoints, useUserBadges } from '@/queries/use-gamification';
 import { useTheme } from '@/providers/theme-provider';
 import { InviteModal } from '@/components/vylix-academic-hub/InviteModal';
@@ -184,10 +185,11 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const res = await fetch('/api/user/avatar', {
+      const res = await fetchApi('/api/user/avatar', {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: formData,
+        direct: true,
       });
 
       if (!res.ok) {

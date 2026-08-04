@@ -234,6 +234,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: formData,
+        direct: true,
       })
       if (!res.ok) {
         const err = await res.json().catch(() => null)

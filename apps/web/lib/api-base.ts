@@ -12,11 +12,13 @@ export function toVersionedApiPath(path: string): string {
 			: `/api/v1${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-export function resolveApiUrl(path: string): string {
+export function resolveApiUrl(path: string, opts?: { direct?: boolean }): string {
 	const versionedPath = toVersionedApiPath(path);
 
 	// In the browser, keep API calls same-origin so Next.js rewrites proxy to backend.
-	if (typeof window !== 'undefined') {
+	// Multipart uploads go direct to the backend: the rewrite path caps at Vercel's
+	// serverless body limit (~4.5MB) which causes large uploads to hang and fail.
+	if (typeof window !== 'undefined' && !opts?.direct) {
 		return versionedPath;
 	}
 
