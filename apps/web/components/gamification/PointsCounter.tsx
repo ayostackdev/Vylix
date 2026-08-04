@@ -14,7 +14,7 @@ export function PointsCounter() {
   const levelColor = points >= 1000 ? 'from-sky-500 to-sky-600' : points >= 500 ? 'from-yellow-500 to-amber-500' : points >= 200 ? 'from-gray-400 to-gray-500' : 'from-orange-400 to-orange-500';
 
   return (
-    <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
       <div className="flex items-center gap-3">
         <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${levelColor} flex items-center justify-center shadow-sm`}>
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,8 +22,8 @@ export function PointsCounter() {
           </svg>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Points</p>
-          <p className="text-xl font-black tracking-tight text-gray-900">{points.toLocaleString()}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Total Points</p>
+          <p className="text-xl font-black tracking-tight text-emerald-700">{points.toLocaleString()}</p>
         </div>
         <div className="ml-auto">
           <span className={`inline-flex items-center rounded-full bg-gradient-to-r ${levelColor} p-[1px] shadow-sm`}>

@@ -10,6 +10,7 @@ import { LoginModal } from '@/components/auth/LoginModal';
 import { EmailVerificationModal } from '@/components/auth/EmailVerificationModal';
 import { GraduationCelebrationModal } from '@/components/auth/GraduationCelebrationModal';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
+import { PointsRefreshListener } from '@/components/gamification/PointsRefreshListener';
 
 function ProgressiveGatingModals() {
   const { showEmailModal, closeEmailModal, onEmailVerified, showGraduationModal, closeGraduationModal } = useProgressiveGating();
@@ -39,6 +40,7 @@ export function QueryProvider({ children }: Readonly<{ children: React.ReactNode
             <LoginModal />
             <ProgressiveGatingModals />
             <InstallPrompt />
+            <PointsRefreshListener />
           </DriveProvider>
         </ProgressiveGatingProvider>
       </PersistQueryClientProvider>

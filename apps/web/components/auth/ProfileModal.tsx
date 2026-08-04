@@ -328,10 +328,10 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                   <p className="text-lg font-black text-gray-900 mt-1">{streak}</p>
                   <p className="text-[9px] font-bold uppercase tracking-wider text-orange-600">Day Streak</p>
                 </div>
-                <div className="rounded-xl bg-gradient-to-br from-blue-50 to-sky-50/80 border border-blue-200/60 p-3 text-center">
+                <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-200/60 p-3 text-center">
                   <span className="text-lg">💰</span>
                   <p className="text-lg font-black text-gray-900 mt-1">{points.toLocaleString()}</p>
-                  <p className="text-[9px] font-bold uppercase tracking-wider text-blue-600">Points</p>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Points</p>
                 </div>
                 <div className="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-50/80 border border-emerald-200/60 p-3 text-center">
                   <span className="text-lg">🏅</span>
