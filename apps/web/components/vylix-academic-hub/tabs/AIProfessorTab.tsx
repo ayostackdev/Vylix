@@ -119,7 +119,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
             setShowLimitModal(true)
             return 'You\'ve reached your daily AI query limit. Upgrade to premium for more.'
           }
-          return 'You\'re sending messages too quickly. Please wait a moment before trying again.'
+          return err.detail || 'You\'re sending messages too quickly. Please wait a moment before trying again.'
         }
       }
 
@@ -135,7 +135,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
           setShowLimitModal(true)
           return 'You\'ve reached your daily AI query limit. Upgrade to premium for more.'
         }
-        return 'You\'re sending messages too quickly. Please wait a moment before trying again.'
+        return err.detail || 'You\'re sending messages too quickly. Please wait a moment before trying again.'
       }
 
       if (!res.ok) {

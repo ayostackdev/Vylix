@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import logging
+import socket
 import uuid
 from contextlib import suppress
 from datetime import datetime, timezone
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from urllib.parse import urlparse
 
 import anyio
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, UploadFile, File
@@ -29,6 +31,23 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 router = APIRouter(prefix="/materials", tags=["materials"])
 _vector_store = VectorStore()
+
+
+def _celery_broker_reachable(timeout: float = 1.5) -> bool:
+    """Fast reachability check for the Celery broker.
+
+    apply_async blocks for minutes retrying the Redis result backend when the
+    broker is down, so uploads would hang even though the comment below intends
+    them to stay fast. Skip enqueueing (leaving the material QUEUED) instead.
+    """
+    try:
+        parsed = urlparse(settings.celery_broker_url)
+        host = parsed.hostname or "localhost"
+        port = parsed.port or 6379
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
 
 
 def _compress_pdf_bytes(data: bytes, filename: str) -> bytes:
@@ -253,15 +272,21 @@ async def upload_material(
 
     try:
         # Do not wait on Celery's result backend here; uploads must stay fast even if Redis is down.
-        task = process_material_task.apply_async(
-            kwargs={
-                "material_id": material.id,
-                "file_url": url,
-                "file_name": material.file_name,
-            },
-            ignore_result=True,
-        )
-        material.processing_job_id = task.id
+        if not _celery_broker_reachable():
+            logger.warning(
+                "Celery broker not reachable; skipping enqueue for material %s; it will stay QUEUED",
+                material.id,
+            )
+        else:
+            task = process_material_task.apply_async(
+                kwargs={
+                    "material_id": material.id,
+                    "file_url": url,
+                    "file_name": material.file_name,
+                },
+                ignore_result=True,
+            )
+            material.processing_job_id = task.id
     except Exception:
         logger.exception(
             "Could not enqueue processing for material %s; it will stay QUEUED", material.id

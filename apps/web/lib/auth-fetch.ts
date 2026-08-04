@@ -19,7 +19,16 @@ export async function authFetch(path: string, options?: RequestInit): Promise<un
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(body || `Request failed: ${res.status}`);
+    let detail = body;
+    try {
+      const parsed = JSON.parse(body);
+      if (typeof parsed.detail === 'string') detail = parsed.detail;
+      else if (typeof parsed.message === 'string') detail = parsed.message;
+      else if (typeof parsed.error === 'string') detail = parsed.error;
+    } catch {
+      // Body was not JSON — use it as-is.
+    }
+    throw new Error(detail || `Request failed: ${res.status}`);
   }
 
   return res.json();

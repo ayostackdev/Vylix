@@ -26,6 +26,11 @@ SERVICE_BUSY_MESSAGE = (
     "The AI service is busy right now. Please wait a moment and try again."
 )
 
+#: Friendly message shown when the Gemini API key has exhausted its quota.
+QUOTA_EXCEEDED_MESSAGE = (
+    "Your AI quota is exhausted. Check your Gemini API plan and billing, or try again later."
+)
+
 
 class GeminiError(Exception):
     """Raised when the Gemini API cannot be reached or returns an error."""
@@ -58,8 +63,10 @@ def _retry_delay(attempt: int, headers: Any) -> float:
 
 def error_response(exc: GeminiError) -> tuple[int, str]:
     """Map a GeminiError to an (HTTP status, detail) pair for callers."""
+    if exc.status_code == 429:
+        return 429, QUOTA_EXCEEDED_MESSAGE
     if exc.status_code is None or exc.status_code in RETRYABLE_STATUS:
-        return 503, SERVICE_BUSY_MESSAGE
+        return 503, exc.detail or SERVICE_BUSY_MESSAGE
     return 502, exc.detail
 
 
@@ -101,7 +108,8 @@ def _call(prompt: str, system_instruction: str | None = None) -> str | None:
             if attempt < MAX_ATTEMPTS - 1:
                 time.sleep(_retry_delay(attempt, e.headers))
             else:
-                raise GeminiError(SERVICE_BUSY_MESSAGE, status_code=e.code)
+                detail = QUOTA_EXCEEDED_MESSAGE if e.code == 429 else SERVICE_BUSY_MESSAGE
+                raise GeminiError(detail, status_code=e.code)
         except (URLError, TimeoutError) as e:
             logger.error("Gemini API call failed: %s", e)
             if attempt < MAX_ATTEMPTS - 1:

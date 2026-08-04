@@ -50,7 +50,13 @@ export function DriveProvider({ children }: { children: React.ReactNode }) {
       window.location.href = auth_url;
     } catch (err) {
       console.error('Drive connection failed:', err);
-      setDriveError('Could not connect to server. Make sure the backend is running.');
+      const msg = err instanceof Error ? err.message : '';
+      const isNetworkFailure = /Request failed|Network error|Failed to fetch/i.test(msg);
+      setDriveError(
+        msg && !isNetworkFailure
+          ? msg
+          : 'Could not connect to server. Make sure the backend is running.'
+      );
     }
   }, []);
 

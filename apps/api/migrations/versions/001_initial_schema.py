@@ -18,12 +18,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Enums
-    userstatus = postgresql.ENUM("STUDENT", "ALUMNI", name="userstatus", create_type=False)
-    badgerarity = postgresql.ENUM("COMMON", "RARE", "EPIC", "LEGENDARY", name="badgerarity", create_type=False)
-    materialprocessingstatus = postgresql.ENUM("QUEUED", "PROCESSING", "COMPLETED", "FAILED", name="materialprocessingstatus", create_type=False)
-    conversationtype = postgresql.ENUM("DIRECT", "GROUP", name="conversationtype", create_type=False)
-    conversationrole = postgresql.ENUM("OWNER", "ADMIN", "MEMBER", name="conversationrole", create_type=False)
-    rsvpstatus = postgresql.ENUM("GOING", "MAYBE", "DECLINED", name="rsvpstatus", create_type=False)
+    userstatus = postgresql.ENUM("STUDENT", "ALUMNI", name="UserStatus", create_type=False)
+    badgerarity = postgresql.ENUM("COMMON", "RARE", "EPIC", "LEGENDARY", name="BadgeRarity", create_type=False)
+    materialprocessingstatus = postgresql.ENUM("QUEUED", "PROCESSING", "COMPLETED", "FAILED", name="MaterialProcessingStatus", create_type=False)
+    conversationtype = postgresql.ENUM("DIRECT", "GROUP", name="ConversationType", create_type=False)
+    conversationrole = postgresql.ENUM("OWNER", "ADMIN", "MEMBER", name="ConversationRole", create_type=False)
+    rsvpstatus = postgresql.ENUM("GOING", "MAYBE", "DECLINED", name="RSVPStatus", create_type=False)
 
     for e in [userstatus, badgerarity, materialprocessingstatus, conversationtype, conversationrole, rsvpstatus]:
         e.create(op.get_bind(), checkfirst=True)
@@ -493,5 +493,5 @@ def downgrade() -> None:
     for t in tables:
         op.drop_table(t)
 
-    for e in ["rsvpstatus", "conversationrole", "conversationtype", "materialprocessingstatus", "badgerarity", "userstatus"]:
+    for e in ["RSVPStatus", "ConversationRole", "ConversationType", "MaterialProcessingStatus", "BadgeRarity", "UserStatus"]:
         op.execute(f"DROP TYPE IF EXISTS {e}")
