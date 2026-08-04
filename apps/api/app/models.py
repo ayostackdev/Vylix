@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSON, UUID
@@ -8,6 +8,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 class Base(DeclarativeBase):
     pass
+
+
+def _utcnow():
+    return datetime.now(timezone.utc)
 
 
 # ── Enums ──────────────────────────────────────────────────────────
@@ -129,7 +133,10 @@ class User(Base):
     current_level: Mapped[str | None] = mapped_column(String)
     level_updated_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     school_email: Mapped[str | None] = mapped_column(String)
-    status: Mapped[UserStatus] = mapped_column(Enum(UserStatus), default=UserStatus.STUDENT)
+    status: Mapped[UserStatus] = mapped_column(
+        Enum(UserStatus, name="UserStatus", native_enum=False, validate_strings=True),
+        default=UserStatus.STUDENT,
+    )
     graduated_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     university_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("universities.id", ondelete="RESTRICT"))
     department_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("departments.id", ondelete="RESTRICT"))
@@ -141,8 +148,8 @@ class User(Base):
     daily_tokens_used: Mapped[int] = mapped_column(Integer, default=0)
     daily_tokens_limit: Mapped[int] = mapped_column(Integer, default=50)
     daily_tokens_reset_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
     last_active_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     user_streak_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("user_streaks.id"))
 
@@ -188,8 +195,8 @@ class UserPrivacy(Base):
     show_contributions: Mapped[bool] = mapped_column(Boolean, default=True)
     show_email: Mapped[bool] = mapped_column(Boolean, default=False)
     show_department: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(back_populates="privacy")
 
@@ -208,8 +215,8 @@ class UserProfile(Base):
     banner_image_url: Mapped[str | None] = mapped_column(String)
     last_profile_view: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     view_count: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(back_populates="profile")
 
@@ -224,7 +231,7 @@ class UserEmail(Base):
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
     is_primary: Mapped[bool] = mapped_column(Boolean, default=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="emails")
 
@@ -244,9 +251,12 @@ class Badge(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     icon: Mapped[str] = mapped_column(String, nullable=False)
-    rarity: Mapped[BadgeRarity] = mapped_column(Enum(BadgeRarity), default=BadgeRarity.COMMON)
+    rarity: Mapped[BadgeRarity] = mapped_column(
+        Enum(BadgeRarity, name="BadgeRarity", native_enum=False, validate_strings=True),
+        default=BadgeRarity.COMMON,
+    )
     criteria: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     users: Mapped[list["UserBadge"]] = relationship(back_populates="badge", cascade="all, delete-orphan")
 
@@ -259,7 +269,7 @@ class UserBadge(Base):
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
     badge_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("badges.id", ondelete="CASCADE"))
-    earned_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    earned_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
     awarded_by: Mapped[str | None] = mapped_column(String)
 
     user: Mapped["User"] = relationship(back_populates="badges")
@@ -281,7 +291,7 @@ class Topic(Base):
     course_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("courses.id", ondelete="CASCADE"))
     author_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="RESTRICT"))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    last_activity: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    last_activity: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     course: Mapped["Course"] = relationship(back_populates="topics")
     author: Mapped["User"] = relationship("User", back_populates="topics_created", foreign_keys=[author_id])
@@ -307,7 +317,8 @@ class Material(Base):
     topic_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("topics.id", ondelete="CASCADE"))
     uploader_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="RESTRICT"))
     processing_status: Mapped[MaterialProcessingStatus] = mapped_column(
-        Enum(MaterialProcessingStatus), default=MaterialProcessingStatus.QUEUED
+        Enum(MaterialProcessingStatus, name="MaterialProcessingStatus", native_enum=False, validate_strings=True),
+        default=MaterialProcessingStatus.QUEUED,
     )
     processing_job_id: Mapped[str | None] = mapped_column(String)
     summary: Mapped[str | None] = mapped_column(Text)
@@ -315,7 +326,7 @@ class Material(Base):
     tips: Mapped[dict | None] = mapped_column(JSON)
     processing_error: Mapped[str | None] = mapped_column(Text)
     processed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    uploaded_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    uploaded_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
     is_seed: Mapped[bool] = mapped_column(Boolean, default=False)
     is_shared: Mapped[bool] = mapped_column(Boolean, default=True)
     is_past_question: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -343,7 +354,7 @@ class MaterialUnlock(Base):
     material_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("materials.id", ondelete="CASCADE"))
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
     referrer_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="SET NULL"))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     material: Mapped["Material"] = relationship(back_populates="unlocks")
     user: Mapped["User"] = relationship(back_populates="material_unlocks", foreign_keys=[user_id])
@@ -363,13 +374,16 @@ class Conversation(Base):
     __tablename__ = "conversations"
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
-    type: Mapped[ConversationType] = mapped_column(Enum(ConversationType), default=ConversationType.GROUP)
+    type: Mapped[ConversationType] = mapped_column(
+        Enum(ConversationType, name="ConversationType", native_enum=False, validate_strings=True),
+        default=ConversationType.GROUP,
+    )
     title: Mapped[str | None] = mapped_column(String)
     department_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("departments.id", ondelete="SET NULL"))
     topic_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("topics.id", ondelete="SET NULL"))
     created_by_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="RESTRICT"))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     department: Mapped["Department | None"] = relationship(back_populates="conversations")
     topic: Mapped["Topic | None"] = relationship(back_populates="conversations")
@@ -391,9 +405,12 @@ class ConversationMember(Base):
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
     conversation_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("conversations.id", ondelete="CASCADE"))
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
-    role: Mapped[ConversationRole] = mapped_column(Enum(ConversationRole), default=ConversationRole.MEMBER)
+    role: Mapped[ConversationRole] = mapped_column(
+        Enum(ConversationRole, name="ConversationRole", native_enum=False, validate_strings=True),
+        default=ConversationRole.MEMBER,
+    )
     last_read_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    joined_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    joined_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     conversation: Mapped["Conversation"] = relationship(back_populates="members")
     user: Mapped["User"] = relationship(back_populates="conversation_memberships")
@@ -415,8 +432,8 @@ class Message(Base):
     meta: Mapped[dict | None] = mapped_column("metadata", JSON)
     edited_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     conversation: Mapped["Conversation"] = relationship(back_populates="messages")
     sender: Mapped["User"] = relationship("User", back_populates="messages_sent", foreign_keys=[sender_id])
@@ -437,7 +454,7 @@ class MessageReadReceipt(Base):
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
     message_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("messages.id", ondelete="CASCADE"))
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
-    read_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    read_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     message: Mapped["Message"] = relationship(back_populates="receipts")
     user: Mapped["User"] = relationship(back_populates="messages_read")
@@ -459,9 +476,9 @@ class Notification(Base):
     message: Mapped[str | None] = mapped_column(Text)
     payload: Mapped[dict | None] = mapped_column(JSON)
     source_message_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("messages.id", ondelete="SET NULL"))
-    delivered_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    delivered_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
     read_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="notifications")
     source_message: Mapped["Message | None"] = relationship(back_populates="notifications")
@@ -484,10 +501,10 @@ class UserStreak(Base):
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), unique=True)
     current_streak: Mapped[int] = mapped_column(Integer, default=0)
     longest_streak: Mapped[int] = mapped_column(Integer, default=0)
-    last_activity_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    streak_started_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    last_activity_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    streak_started_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     users: Mapped[list["User"]] = relationship(back_populates="streak")
 
@@ -506,7 +523,7 @@ class PointsTransaction(Base):
     reason: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     related_id: Mapped[str | None] = mapped_column(String)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="points_transactions")
 
@@ -527,7 +544,7 @@ class RewardItem(Base):
     points_cost: Mapped[int] = mapped_column(Integer, nullable=False)
     category: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     __table_args__ = (
         Index("ix_reward_items_is_active", "is_active"),
@@ -544,7 +561,7 @@ class UserRewardPurchase(Base):
     code: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     redeemed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     expires_at: Mapped[str] = mapped_column(DateTime(timezone=True), nullable=False)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="reward_purchases")
 
@@ -568,8 +585,8 @@ class TopicQuestion(Base):
     help_count: Mapped[int] = mapped_column(Integer, default=0)
     view_count: Mapped[int] = mapped_column(Integer, default=0)
     is_resolved: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     topic: Mapped["Topic"] = relationship(back_populates="questions")
     author: Mapped["User"] = relationship("User", back_populates="questions_asked", foreign_keys=[author_id])
@@ -592,8 +609,8 @@ class QuestionAnswer(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     help_count: Mapped[int] = mapped_column(Integer, default=0)
     is_accepted: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     question: Mapped["TopicQuestion"] = relationship(back_populates="answers")
     author: Mapped["User"] = relationship("User", back_populates="answers_provided", foreign_keys=[author_id])
@@ -614,7 +631,7 @@ class VaultItem(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
     local_blob_id: Mapped[str] = mapped_column(String, nullable=False)
-    saved_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    saved_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     user: Mapped["User"] = relationship(backref="vault_items")
 
@@ -631,7 +648,7 @@ class Lesson(Base):
     location: Mapped[str] = mapped_column(String, nullable=False)
     host_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="RESTRICT"))
     course_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("courses.id", ondelete="CASCADE"))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     host: Mapped["User"] = relationship("User", back_populates="lessons_hosted", foreign_keys=[host_id])
     course: Mapped["Course"] = relationship(back_populates="lessons")
@@ -646,8 +663,11 @@ class RSVP(Base):
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
     user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="CASCADE"))
     lesson_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("lessons.id", ondelete="CASCADE"))
-    status: Mapped[RSVPStatus] = mapped_column(Enum(RSVPStatus), default=RSVPStatus.GOING)
-    responded_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    status: Mapped[RSVPStatus] = mapped_column(
+        Enum(RSVPStatus, name="RSVPStatus", native_enum=False, validate_strings=True),
+        default=RSVPStatus.GOING,
+    )
+    responded_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(back_populates="rsvps")
     lesson: Mapped["Lesson"] = relationship(back_populates="rsvps")
@@ -669,8 +689,8 @@ class ConnectedAccount(Base):
     token_expires_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     scope: Mapped[str | None] = mapped_column(String)
     email: Mapped[str | None] = mapped_column(String)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(backref="connected_accounts")
 
@@ -696,7 +716,7 @@ class ImportedFile(Base):
     status: Mapped[str] = mapped_column(String, default="pending")  # pending, importing, imported, failed
     error: Mapped[str | None] = mapped_column(Text)
     imported_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     user: Mapped["User"] = relationship(backref="imported_files")
 
@@ -719,8 +739,8 @@ class FlashcardDeck(Base):
     document_id: Mapped[str | None] = mapped_column(String)
     course_code: Mapped[str | None] = mapped_column(String)
     card_count: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(backref="flashcard_decks")
     cards: Mapped[list["Flashcard"]] = relationship(back_populates="deck", cascade="all, delete-orphan")
@@ -742,7 +762,7 @@ class Flashcard(Base):
     next_review: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     review_count: Mapped[int] = mapped_column(Integer, default=0)
     last_reviewed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
 
     deck: Mapped["FlashcardDeck"] = relationship(back_populates="cards")
 
@@ -763,8 +783,8 @@ class Subscription(Base):
     plan: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
     expires_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
     user: Mapped["User"] = relationship(backref="subscriptions")
 
