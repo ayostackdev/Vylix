@@ -12,4 +12,4 @@ Notes
 
 - Celery is used for background tasks (requires Redis broker).
 - See `docs/fastapi-microservice.md` for architecture details and production recommendations.
-- For Heroku, use the app in `apps/python-service` with `Procfile` and `runtime.txt`.
+- Deploy the API to Render via `render.yaml` (web + Celery worker + Celery beat).

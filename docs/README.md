@@ -6,7 +6,5 @@ Key docs
 
 - Architecture: `architecture/overview.md`
 - Features: `features/` (see individual files)
-- Deployment (Heroku): `deployment/heroku.md`
+- Deployment: `deployment/heroku.md` (web on Vercel, API on Render)
 - Services: `services/fastapi-microservice.md`
-
-Note: Heroku is now the active deployment path for backend services.
