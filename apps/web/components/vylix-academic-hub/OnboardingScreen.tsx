@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useSearchParams } from 'next/navigation'
 import { DriveFilePickerModal } from './DriveFilePickerModal'
 
@@ -52,18 +53,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     setIsLoading(true)
     setAuthError('')
     try {
-      const supabase = getSupabaseBrowserClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        setAuthError('Please sign in first')
-        setIsLoading(false)
-        return
-      }
-      const res = await fetch(`/api/v1/google-drive/connect`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      if (!res.ok) throw new Error('Failed to start Drive connection')
-      const { auth_url } = await res.json()
+      const { auth_url } = await authFetch('/api/google-drive/connect') as { auth_url: string }
       window.location.href = auth_url
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : 'Failed to connect Drive')

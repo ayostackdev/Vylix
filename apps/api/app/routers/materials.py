@@ -252,10 +252,14 @@ async def upload_material(
     await db.flush()
 
     try:
-        task = process_material_task.delay(
-            material_id=material.id,
-            file_url=url,
-            file_name=material.file_name,
+        # Do not wait on Celery's result backend here; uploads must stay fast even if Redis is down.
+        task = process_material_task.apply_async(
+            kwargs={
+                "material_id": material.id,
+                "file_url": url,
+                "file_name": material.file_name,
+            },
+            ignore_result=True,
         )
         material.processing_job_id = task.id
     except Exception:

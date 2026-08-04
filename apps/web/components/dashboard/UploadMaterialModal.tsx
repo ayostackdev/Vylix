@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { resolveApiUrl } from '@/lib/api-base';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { queryClient } from '@/lib/query-client';
 import { useAuth } from '@/context/auth-context';
@@ -138,7 +139,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
       xhr.onerror = () => reject(new Error(`Network error uploading "${file.name}"`));
       xhr.onabort = () => reject(new Error(`Upload of "${file.name}" cancelled`));
 
-      xhr.open('POST', '/api/materials/upload');
+      xhr.open('POST', resolveApiUrl('/api/materials/upload'));
       xhr.setRequestHeader('Authorization', `Bearer ${sessionToken}`);
       xhr.send(formData);
     });
