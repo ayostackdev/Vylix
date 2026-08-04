@@ -8,7 +8,7 @@ from google.genai import errors, types
 
 from app.core.config import get_settings
 from app.core.postgres import get_connection
-from app.services.gemini import GeminiError, SERVICE_BUSY_MESSAGE
+from app.services.gemini import GeminiError, SERVICE_BUSY_MESSAGE, estimate_cost
 from app.services.vector_store import VectorStore
 
 logger = logging.getLogger(__name__)
@@ -155,5 +155,24 @@ def run_vylix_academic_agent(
         raise GeminiError(SERVICE_BUSY_MESSAGE)
 
     result = response.text
+
+    try:
+        meta = getattr(response, "usage_metadata", None)
+        prompt_tokens = getattr(meta, "prompt_token_count", 0) or 0
+        completion_tokens = getattr(meta, "candidates_token_count", 0) or 0
+        cost = estimate_cost(model_id, prompt_tokens, completion_tokens)
+        logger.info(
+            "gemini_usage model=%s user=%s course=%s prompt_tokens=%d completion_tokens=%d total_tokens=%d cost_usd=%.6f",
+            model_id,
+            user_id,
+            course_code,
+            prompt_tokens,
+            completion_tokens,
+            prompt_tokens + completion_tokens,
+            cost,
+        )
+    except Exception:
+        logger.warning("Failed to parse Gemini SDK usage metadata", exc_info=True)
+
     logger.info("Agent complete output_length=%d", len(result))
     return result

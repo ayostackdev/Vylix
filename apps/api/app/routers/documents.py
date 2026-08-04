@@ -218,7 +218,7 @@ async def chat_with_document(
 
     context_text = "\n\n".join(context_chunks)
     try:
-        ai_answer = gemini_chat(payload.query, context_text)
+        ai_answer = gemini_chat(payload.query, context_text, user_id=_user.id if _user else None)
     except GeminiError as exc:
         status_code, detail = error_response(exc)
         raise HTTPException(status_code=status_code, detail=detail)
@@ -281,7 +281,7 @@ async def general_chat_endpoint(
     )
 
     try:
-        answer = general_chat(history_text)
+        answer = general_chat(history_text, user_id=_user.id if _user else None)
     except GeminiError as exc:
         status_code, detail = error_response(exc)
         raise HTTPException(status_code=status_code, detail=detail)

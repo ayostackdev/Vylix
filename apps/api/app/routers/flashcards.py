@@ -351,7 +351,7 @@ async def generate_flashcards(
     )
 
     try:
-        response = gemini_chat(prompt, "You are an expert academic flashcard generator. Create precise, study-effective flashcards.")
+        response = gemini_chat(prompt, "You are an expert academic flashcard generator. Create precise, study-effective flashcards.", user_id=user.id)
     except GeminiError as exc:
         status_code, detail = error_response(exc)
         raise HTTPException(status_code=status_code, detail=detail)

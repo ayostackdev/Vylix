@@ -14,6 +14,25 @@ logger = logging.getLogger(__name__)
 
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash"
 
+#: Model used by the urllib-backed call path below.
+MODEL_NAME = "gemini-2.0-flash"
+
+#: Approximate USD cost per 1M tokens by model (input, output). These are
+#: estimates used ONLY for usage/cost logging — verify them against the
+#: provider billing dashboard and update as pricing changes.
+MODEL_PRICES: dict[str, dict[str, float]] = {
+    "gemini-2.0-flash": {"input": 0.075, "output": 0.30},
+    "gemini-2.5-flash": {"input": 0.30, "output": 2.50},
+    "gemini-2.5-pro-preview": {"input": 1.25, "output": 10.00},
+}
+DEFAULT_PRICE: dict[str, float] = {"input": 0.10, "output": 0.40}
+
+
+def estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> float:
+    """Estimated USD cost for a single call, for logging only."""
+    prices = MODEL_PRICES.get(model, DEFAULT_PRICE)
+    return (prompt_tokens * prices["input"] + completion_tokens * prices["output"]) / 1_000_000
+
 MAX_ATTEMPTS = 3
 BASE_RETRY_DELAY = 1.0
 MAX_RETRY_DELAY = 8.0
@@ -70,7 +89,11 @@ def error_response(exc: GeminiError) -> tuple[int, str]:
     return 502, exc.detail
 
 
-def _call(prompt: str, system_instruction: str | None = None) -> str | None:
+def _call(
+    prompt: str,
+    system_instruction: str | None = None,
+    user_id: str | None = None,
+) -> str | None:
     settings = get_settings()
     if not settings.gemini_api_key:
         raise GeminiError("GEMINI_API_KEY is not configured")
@@ -121,13 +144,35 @@ def _call(prompt: str, system_instruction: str | None = None) -> str | None:
             raise GeminiError("Gemini API returned an invalid response")
 
     try:
+        usage = result.get("usageMetadata") or {}
+        prompt_tokens = usage.get("promptTokenCount") or 0
+        completion_tokens = usage.get("candidatesTokenCount") or 0
+        total_tokens = usage.get("totalTokenCount") or (prompt_tokens + completion_tokens)
+        cost = estimate_cost(MODEL_NAME, prompt_tokens, completion_tokens)
+        logger.info(
+            "gemini_usage model=%s user=%s prompt_tokens=%d completion_tokens=%d total_tokens=%d cost_usd=%.6f",
+            MODEL_NAME,
+            user_id or "-",
+            prompt_tokens,
+            completion_tokens,
+            total_tokens,
+            cost,
+        )
+    except Exception:
+        logger.warning("Failed to parse Gemini usage metadata", exc_info=True)
+
+    try:
         return result["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):
         logger.warning("Gemini response contained no text: %s", json.dumps(result)[:500])
         raise GeminiError("Gemini API returned an empty response")
 
 
-def generate_insights(text: str, department_code: str) -> dict[str, Any] | None:
+def generate_insights(
+    text: str,
+    department_code: str,
+    user_id: str | None = None,
+) -> dict[str, Any] | None:
     system = (
         "You are a study assistant for university students. "
         "Analyze the given academic material and return JSON with exactly three keys:\n"
@@ -143,7 +188,7 @@ def generate_insights(text: str, department_code: str) -> dict[str, Any] | None:
     )
 
     try:
-        result = _call(prompt, system_instruction=system)
+        result = _call(prompt, system_instruction=system, user_id=user_id)
     except GeminiError as exc:
         logger.error("Insights generation failed: %s", exc)
         return None
@@ -163,7 +208,7 @@ def generate_insights(text: str, department_code: str) -> dict[str, Any] | None:
         return None
 
 
-def chat(query: str, context: str) -> str | None:
+def chat(query: str, context: str, user_id: str | None = None) -> str | None:
     system = (
         "You are a study assistant helping a university student understand their course material. "
         "Answer the student's question based ONLY on the provided document context. "
@@ -175,10 +220,10 @@ def chat(query: str, context: str) -> str | None:
         f"Student question: {query}\n\n"
         "Answer:"
     )
-    return _call(prompt, system_instruction=system)
+    return _call(prompt, system_instruction=system, user_id=user_id)
 
 
-def general_chat(conversation: str) -> str | None:
+def general_chat(conversation: str, user_id: str | None = None) -> str | None:
     system = (
         "You are a helpful AI study assistant for university students. "
         "Answer the student's questions clearly and educationally. "
@@ -187,4 +232,4 @@ def general_chat(conversation: str) -> str | None:
         "You can help with any academic question — math, science, humanities, study strategies, etc."
     )
     prompt = f"Conversation:\n{conversation}\n\nAssistant:"
-    return _call(prompt, system_instruction=system)
+    return _call(prompt, system_instruction=system, user_id=user_id)
