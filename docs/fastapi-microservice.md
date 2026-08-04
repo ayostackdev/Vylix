@@ -1,6 +1,8 @@
-# FastAPI Support Service Plan
+# FastAPI Backend Notes
 
-This document captures the approved Python stack for the FastAPI support service that works alongside the Nest.js backend for document intelligence, RAG, OCR, and analytics features.
+The Vylix API (`apps/api`) is a FastAPI service covering auth (Supabase JWT),
+materials and past-questions, courses/topics, gamification, and AI-assisted study
+features, including document intelligence, RAG, OCR, and analytics.
 
 ## Service responsibilities
 
@@ -58,6 +60,6 @@ This document captures the approved Python stack for the FastAPI support service
 
 ## Notes
 
-- The Python service scaffold lives in apps/python-service.
-- Nest.js remains the primary backend for the product.
-- This file is the source of truth for the Python support service stack and document workflow.
+- The FastAPI backend lives in apps/api.
+- The AI/document workflows run inside apps/api via Celery workers.
+- This file captures the approved stack and document workflow for the API's document features.
