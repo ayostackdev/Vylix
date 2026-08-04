@@ -14,5 +14,11 @@ export function toVersionedApiPath(path: string): string {
 
 export function resolveApiUrl(path: string): string {
 	const versionedPath = toVersionedApiPath(path);
+
+	// In the browser, keep API calls same-origin so Next.js rewrites proxy to backend.
+	if (typeof window !== 'undefined') {
+		return versionedPath;
+	}
+
 	return API_BASE ? `${API_BASE}${versionedPath}` : versionedPath;
 }

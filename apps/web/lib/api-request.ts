@@ -30,7 +30,7 @@ export async function fetchApi(path: string, init?: RequestInit): Promise<Respon
 function API_BASE_FALLBACKS(path: string): string[] {
 	const versionedPath = toVersionedApiPath(path);
 	const primary = resolveApiUrl(path);
-	return primary === versionedPath ? [primary] : [primary, versionedPath];
+	return primary === versionedPath ? [primary] : Array.from(new Set([primary, versionedPath]));
 }
 
 export function postFormDataApi(
