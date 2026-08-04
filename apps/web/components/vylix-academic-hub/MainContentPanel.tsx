@@ -9,6 +9,7 @@ import type { DocumentInfo } from './ThreePanelLayout'
 import { PdfViewerInline } from './PdfViewerInline'
 import { DriveSyncBanner } from './DriveSyncBanner'
 import { DriveFilePickerModal } from './DriveFilePickerModal'
+import { InviteModal } from './InviteModal'
 import { useDrive } from '@/context/drive-context'
 import { useAuth } from '@/context/auth-context'
 
@@ -77,6 +78,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
   )
   const [userId, setUserId] = useState<string | null>(null)
   const [showDrivePicker, setShowDrivePicker] = useState(false)
+  const [showInvite, setShowInvite] = useState(false)
 
   const course = courses.find((c) => c.id === selectedCourseId) || null
 
@@ -410,6 +412,22 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
             <span className="hidden sm:inline">{driveConnected ? 'Import from Drive' : 'Google Drive'}</span>
             <span className="sm:hidden">{driveConnected ? '↓' : 'Drive'}</span>
           </button>
+          <button
+            onClick={() => {
+              if (isReadOnly) {
+                promptLogin('invite friends')
+              } else {
+                setShowInvite(true)
+              }
+            }}
+            className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs px-2 sm:px-3 py-2 rounded-xl font-semibold min-h-[36px] sm:min-h-[38px] transition-all duration-200 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] btn-glow"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span className="hidden sm:inline">Invite</span>
+            <span className="sm:hidden">Invite</span>
+          </button>
         </div>
       </header>
 
@@ -684,6 +702,12 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
           setShowDrivePicker(false)
           fetchMaterials()
         }}
+      />
+
+      {/* Invite Friends Modal */}
+      <InviteModal
+        isOpen={showInvite}
+        onClose={() => setShowInvite(false)}
       />
     </main>
   )

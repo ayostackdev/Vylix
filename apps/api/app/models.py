@@ -143,6 +143,7 @@ class User(Base):
     bio: Mapped[str | None] = mapped_column(Text)
     avatar_url: Mapped[str | None] = mapped_column(String)
     contribution_score: Mapped[int] = mapped_column(Integer, default=0)
+    referral_code: Mapped[str | None] = mapped_column(String(12), unique=True)
     school_email_prompt_dismissed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     email_prompt_dismissed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
     daily_tokens_used: Mapped[int] = mapped_column(Integer, default=0)
@@ -177,6 +178,8 @@ class User(Base):
     )
     questions_asked: Mapped[list["TopicQuestion"]] = relationship("TopicQuestion", back_populates="author", foreign_keys="TopicQuestion.author_id")
     answers_provided: Mapped[list["QuestionAnswer"]] = relationship("QuestionAnswer", back_populates="author", foreign_keys="QuestionAnswer.author_id")
+    referrals_made: Mapped[list["Referral"]] = relationship("Referral", back_populates="referrer", foreign_keys="Referral.referrer_id")
+    referral_received: Mapped["Referral | None"] = relationship("Referral", back_populates="referee", foreign_keys="Referral.referee_id")
 
     __table_args__ = (
         Index("ix_users_department_id", "department_id"),
@@ -531,6 +534,24 @@ class PointsTransaction(Base):
         Index("ix_points_transactions_user_id", "user_id"),
         Index("ix_points_transactions_created_at", "created_at"),
         Index("ix_points_transactions_user_id_created_at", "user_id", "created_at"),
+    )
+
+
+class Referral(Base):
+    __tablename__ = "referrals"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    referrer_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="RESTRICT"))
+    referee_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("users.id", ondelete="RESTRICT"))
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+
+    referrer: Mapped["User"] = relationship("User", back_populates="referrals_made", foreign_keys=[referrer_id])
+    referee: Mapped["User"] = relationship("User", back_populates="referral_received", foreign_keys=[referee_id])
+
+    __table_args__ = (
+        UniqueConstraint("referee_id", name="uq_referrals_referee"),
+        Index("ix_referrals_referrer_id", "referrer_id"),
+        Index("ix_referrals_referee_id", "referee_id"),
     )
 
 

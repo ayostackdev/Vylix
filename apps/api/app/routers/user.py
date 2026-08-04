@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import secrets
 from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
@@ -13,7 +14,7 @@ from app.database import get_db
 from app.deps import CurrentUser, get_current_user
 from app.models import (
     User, UserEmail, UserProfile, UserPrivacy, UserStreak,
-    PointsTransaction, University, Department, Subscription,
+    PointsTransaction, University, Department, Subscription, Referral,
 )
 from app.schemas import StreakWithPointsOut
 from app.services.storage import get_storage
@@ -23,6 +24,10 @@ router = APIRouter(prefix="/user", tags=["user"])
 
 ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 MAX_AVATAR_MB = 5
+
+REFERRER_REWARD = 100
+REFEREE_REWARD = 50
+REFERRAL_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
 class UserProfileOut(BaseModel):
@@ -353,4 +358,127 @@ async def get_ai_tokens(
         limit=limit,
         remaining=max(0, limit - u.daily_tokens_used),
         is_premium=is_premium,
+    )
+
+
+class ReferralCodeOut(BaseModel):
+    code: str
+    url: str
+    points_per_referral: int
+    total_earned: int
+
+
+class ReferralOut(BaseModel):
+    referee_name: str | None = None
+    referee_avatar: str | None = None
+    created_at: str | None = None
+    points_earned: int = REFERRER_REWARD
+
+
+async def _ensure_referral_code(user: User, db: AsyncSession) -> str:
+    if user.referral_code:
+        return user.referral_code
+    for _ in range(5):
+        code = "V" + "".join(secrets.choice(REFERRAL_CODE_ALPHABET) for _ in range(7))
+        existing = await db.execute(select(User.id).where(User.referral_code == code))
+        if existing.scalar_one_or_none() is None:
+            user.referral_code = code
+            await db.flush()
+            return code
+    raise HTTPException(status_code=500, detail="Could not generate a unique referral code")
+
+
+@router.get("/referral-code", response_model=ReferralCodeOut)
+async def get_referral_code(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    code = await _ensure_referral_code(user.user, db)
+    earned = await db.execute(
+        select(func.coalesce(func.sum(PointsTransaction.amount), 0))
+        .where(
+            PointsTransaction.user_id == user.id,
+            PointsTransaction.reason == "referral_bonus",
+        )
+    )
+    return ReferralCodeOut(
+        code=code,
+        url=f"{settings.frontend_url or 'https://vylix-web.vercel.app'}/?ref={code}",
+        points_per_referral=REFERRER_REWARD,
+        total_earned=earned.scalar() or 0,
+    )
+
+
+@router.get("/referrals", response_model=list[ReferralOut])
+async def list_referrals(
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Referral, User.full_name, User.avatar_url)
+        .join(User, User.id == Referral.referee_id)
+        .where(Referral.referrer_id == user.id)
+        .order_by(Referral.created_at.desc())
+        .limit(50)
+    )
+    return [
+        ReferralOut(
+            referee_name=name,
+            referee_avatar=avatar,
+            created_at=str(r.created_at) if r.created_at else None,
+            points_earned=REFERRER_REWARD,
+        )
+        for r, name, avatar in result.all()
+    ]
+
+
+class ReferralClaimRequest(BaseModel):
+    code: str
+
+
+class ReferralClaimOut(BaseModel):
+    message: str
+    points_earned: int
+
+
+@router.post("/referrals/claim", response_model=ReferralClaimOut)
+async def claim_referral(
+    payload: ReferralClaimRequest,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    code = payload.code.strip().upper()
+    if not code:
+        raise HTTPException(status_code=400, detail="Referral code is required")
+
+    if user.user.referral_code == code:
+        raise HTTPException(status_code=400, detail="You can't use your own referral code")
+
+    referrer = (await db.execute(select(User).where(User.referral_code == code))).scalar_one_or_none()
+    if not referrer:
+        raise HTTPException(status_code=400, detail="Invalid referral code")
+
+    already = await db.execute(
+        select(Referral.id).where(Referral.referee_id == user.id)
+    )
+    if already.scalar_one_or_none() is not None:
+        raise HTTPException(status_code=400, detail="You've already used a referral code")
+
+    db.add(Referral(referrer_id=referrer.id, referee_id=user.id))
+    referrer.contribution_score += REFERRER_REWARD
+    user.user.contribution_score += REFEREE_REWARD
+    db.add(PointsTransaction(
+        user_id=referrer.id, amount=REFERRER_REWARD,
+        reason="referral_bonus",
+        description="A friend joined Vylix with your invite",
+    ))
+    db.add(PointsTransaction(
+        user_id=user.id, amount=REFEREE_REWARD,
+        reason="referral_bonus",
+        description="You joined Vylix through a friend's invite",
+    ))
+    await db.flush()
+    return ReferralClaimOut(
+        message="Referral applied",
+        points_earned=REFEREE_REWARD,
     )

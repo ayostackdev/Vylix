@@ -1,7 +1,8 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { captureReferralCode, claimPendingReferral } from '@/lib/referral';
 
 interface User {
   id: string;
@@ -101,6 +102,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    const claimAttemptedRef = { current: false };
+
+    captureReferralCode();
 
     const syncSession = async () => {
       const { data } = await supabaseClient.auth.getSession();
@@ -114,6 +118,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const baseUser = buildBaseUser(sessionUser);
         setUser(baseUser);
         fetchProfile(baseUser.id);
+        if (!claimAttemptedRef.current) {
+          claimAttemptedRef.current = true;
+          const token = data.session?.access_token;
+          if (token) {
+            claimPendingReferral(token);
+          }
+        }
       } else {
         setUser(null);
       }
@@ -134,6 +145,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const baseUser = buildBaseUser(sessionUser);
         setUser(baseUser);
         fetchProfile(baseUser.id);
+        if (!claimAttemptedRef.current) {
+          claimAttemptedRef.current = true;
+          const token = currentSession?.access_token;
+          if (token) {
+            claimPendingReferral(token);
+          }
+        }
       } else {
         setUser(null);
       }
