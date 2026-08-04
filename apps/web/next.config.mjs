@@ -6,7 +6,7 @@ const nextConfig = {
     typedRoutes: true
   },
   async rewrites() {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+    const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000').trim();
     return [
       {
         source: '/api/auth/:path*',
