@@ -1,10 +1,10 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { resolveApiUrl } from '@/lib/api-base';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { queryClient } from '@/lib/query-client';
 import { useAuth } from '@/context/auth-context';
+import { postFormDataApi } from '@/lib/api-request';
 
 interface UploadMaterialModalProps {
   isOpen: boolean;
@@ -108,41 +108,29 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
       if (semester) formData.append('semester', semester);
     }
 
-    return new Promise<void>((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const fileProgress = Math.round((e.loaded / e.total) * 100);
-          const overall = Math.round((index / total) * 100 + fileProgress / total);
-          setProgress(Math.min(overall, 100));
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve();
-        } else {
-          try {
-            const body = JSON.parse(xhr.responseText);
-            const detail = body.detail;
-            const message = typeof detail === 'string'
-              ? detail
-              : detail?.message || body.message || body.error || `"${file.name}" failed`;
-            reject(new Error(message));
-          } catch {
-            reject(new Error(`"${file.name}" failed (${xhr.status})`));
-          }
-        }
-      };
-
-      xhr.onerror = () => reject(new Error(`Network error uploading "${file.name}"`));
-      xhr.onabort = () => reject(new Error(`Upload of "${file.name}" cancelled`));
-
-      xhr.open('POST', resolveApiUrl('/api/materials/upload'));
-      xhr.setRequestHeader('Authorization', `Bearer ${sessionToken}`);
-      xhr.send(formData);
+    const result = await postFormDataApi('/api/materials/upload', formData, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+      onProgress: (loaded, totalBytes) => {
+        const fileProgress = Math.round((loaded / totalBytes) * 100);
+        const overall = Math.round((index / total) * 100 + fileProgress / total);
+        setProgress(Math.min(overall, 100));
+      },
     });
+
+    if (result.status < 200 || result.status >= 300) {
+      try {
+        const body = JSON.parse(result.body);
+        const detail = body.detail;
+        const message = typeof detail === 'string'
+          ? detail
+          : detail?.message || body.message || body.error || `"${file.name}" failed`;
+        throw new Error(message);
+      } catch {
+        throw new Error(`"${file.name}" failed (${result.status})`);
+      }
+    }
   };
 
   const handleUpload = async () => {

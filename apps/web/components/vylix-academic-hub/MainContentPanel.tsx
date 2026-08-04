@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react'
-import { resolveApiUrl } from '@/lib/api-base'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { offlineStore } from '@/lib/offline-store'
+import { fetchApi } from '@/lib/api-request'
 
 import type { DocumentInfo } from './ThreePanelLayout'
 import { PdfViewerInline } from './PdfViewerInline'
@@ -228,7 +228,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       formData.append('title', file.name)
       formData.append('course_code', course?.code || '')
 
-      const res = await fetch(resolveApiUrl('/api/materials/upload'), {
+      const res = await fetchApi('/api/materials/upload', {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
         body: formData,

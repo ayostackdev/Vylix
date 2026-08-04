@@ -1,14 +1,14 @@
 'use client';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { resolveApiUrl } from '@/lib/api-base';
+import { fetchApi } from '@/lib/api-request';
 
 export async function authFetch(path: string, options?: RequestInit): Promise<unknown> {
   const supabase = getSupabaseBrowserClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) throw new Error('Not authenticated');
 
-  const res = await fetch(resolveApiUrl(path), {
+  const res = await fetchApi(path, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
