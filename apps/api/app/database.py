@@ -4,12 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.core.config import get_settings
 from app.db_rls import apply_rls_context
+from app.db_url import sanitize_db_url
 
 settings = get_settings()
 
 def _async_url(url: str) -> str:
+    url = sanitize_db_url(url)
     url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    url = url.replace("?pgbouncer=true", "")
     return url
 
 

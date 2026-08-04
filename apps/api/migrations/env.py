@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.models import Base
 from app.core.config import get_settings
+from app.db_url import sanitize_db_url
 
 settings = get_settings()
 config = context.config
@@ -17,10 +18,9 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-url = settings.direct_url.replace("%", "%%")
+url = sanitize_db_url(settings.direct_url or settings.database_url).replace("%", "%%")
 url = url.replace("postgresql+asyncpg://", "postgresql+psycopg://", 1)
 url = url.replace("postgresql://", "postgresql+psycopg://", 1)
-url = url.replace("?pgbouncer=true", "")
 config.set_main_option("sqlalchemy.url", url)
 
 
