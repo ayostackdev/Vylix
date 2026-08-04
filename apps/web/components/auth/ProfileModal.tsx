@@ -7,6 +7,8 @@ import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useStreakAndPoints, useUserBadges } from '@/queries/use-gamification';
 import { useTheme } from '@/providers/theme-provider';
+import { InviteModal } from '@/components/vylix-academic-hub/InviteModal';
+import { fetchReferralCode } from '@/lib/referral';
 
 interface University {
   id: string;
@@ -59,6 +61,9 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [showInvite, setShowInvite] = useState(false);
+  const [referralCode, setReferralCode] = useState('');
+  const [referralEarned, setReferralEarned] = useState(0);
 
   const fetchUniversities = useCallback(async () => {
     try {
@@ -125,6 +130,23 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       setSelectedUniId(matched.id);
     }
   }, [isOpen, universities, user?.collegeId, selectedUniId]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        const info = await fetchReferralCode(session.access_token);
+        if (info) {
+          setReferralCode(info.code);
+          setReferralEarned(info.total_earned);
+        }
+      } catch {
+        setReferralCode('');
+      }
+    })();
+  }, [isOpen, supabase]);
 
   const enterEditMode = async () => {
     setFullName(user?.fullName || '');
@@ -524,6 +546,39 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
               <div className="divider" />
 
+              {/* Refer & Earn */}
+              <div className="rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-200/70 p-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm">
+                    <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-900">Refer & Earn</p>
+                    <p className="text-[11px] text-gray-600">Invite a friend, you both get <span className="font-bold text-emerald-700">100 points</span>.</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1 rounded-xl border border-dashed border-emerald-300 bg-white/70 px-3 py-2 text-center">
+                    <span className="text-sm font-black tracking-[0.2em] text-emerald-700">{referralCode || '---'}</span>
+                  </div>
+                  <button
+                    onClick={() => setShowInvite(true)}
+                    className="shrink-0 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-bold text-white hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all"
+                  >
+                    Invite Friends
+                  </button>
+                </div>
+                {referralEarned > 0 && (
+                  <p className="mt-2 text-[11px] font-semibold text-emerald-700">
+                    You've earned {referralEarned.toLocaleString()} points from referrals 🎉
+                  </p>
+                )}
+              </div>
+
+              <div className="divider" />
+
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Appearance</p>
                 <button
@@ -569,6 +624,8 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           </button>
         </div>
       </div>
+
+      <InviteModal isOpen={showInvite} onClose={() => setShowInvite(false)} />
     </div>
   );
 }

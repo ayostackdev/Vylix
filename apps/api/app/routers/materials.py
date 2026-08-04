@@ -251,7 +251,7 @@ async def upload_material(
         logger.warning("Storage upload failed for %s: %s", file.filename, exc)
         raise HTTPException(
             status_code=502,
-            detail="Could not save file to storage. Please try again.",
+            detail=f"Could not save file to storage ({type(exc).__name__}: {exc}). Please try again.",
         ) from exc
 
     material = Material(
