@@ -294,17 +294,6 @@ export function VylixDashboard() {
 
                   <TabsContent value="questions" className="cp-fade-up m-0 max-h-full overflow-y-auto p-3 sm:p-6 lg:p-8">
                     <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <button
-                          onClick={() => setShowUploadModal(true)}
-                          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
-                        >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                          </svg>
-                          Upload Past Question
-                        </button>
-                      </div>
                       <PastQuestionsView />
                     </div>
                   </TabsContent>

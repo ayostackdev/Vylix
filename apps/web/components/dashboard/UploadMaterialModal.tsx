@@ -10,6 +10,7 @@ interface UploadMaterialModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  defaultIsPastQuestion?: boolean;
 }
 
 const ACCEPTED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
@@ -23,12 +24,12 @@ function titleFromFilename(name: string): string {
     .trim();
 }
 
-export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMaterialModalProps) {
+export function UploadMaterialModal({ isOpen, onClose, onSuccess, defaultIsPastQuestion = false }: UploadMaterialModalProps) {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [courseCode, setCourseCode] = useState('');
-  const [isPastQuestion, setIsPastQuestion] = useState(false);
+  const [isPastQuestion, setIsPastQuestion] = useState(defaultIsPastQuestion);
   const [examYear, setExamYear] = useState('');
   const [semester, setSemester] = useState<'FIRST' | 'SECOND' | ''>('');
   const [uploading, setUploading] = useState(false);
@@ -40,7 +41,7 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess }: UploadMateri
   const reset = () => {
     setFiles([]);
     setCourseCode('');
-    setIsPastQuestion(false);
+    setIsPastQuestion(defaultIsPastQuestion);
     setExamYear('');
     setSemester('');
     setCurrentFileIndex(0);

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { useAuth } from '@/context/auth-context';
+import { UploadMaterialModal } from '@/components/dashboard/UploadMaterialModal';
 
 interface PastQuestion {
   id: string;
@@ -68,6 +69,7 @@ export function PastQuestionsView() {
   const [searchSemester, setSearchSemester] = useState('');
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerTitle, setViewerTitle] = useState('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['past-questions', page, searchCourse, searchYear, searchSemester],
@@ -145,6 +147,15 @@ export function PastQuestionsView() {
             Browse past exam questions by course, year, and semester.
           </p>
         </div>
+        <button
+          onClick={() => setShowUploadModal(true)}
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 px-4 py-2 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Upload Past Question
+        </button>
       </div>
 
       {/* Filters */}
@@ -289,6 +300,13 @@ export function PastQuestionsView() {
           <embed src={viewerUrl} type="application/pdf" className="flex-1 w-full" />
         </div>
       )}
+
+      <UploadMaterialModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onSuccess={() => setShowUploadModal(false)}
+        defaultIsPastQuestion
+      />
     </section>
   );
 }
