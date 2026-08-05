@@ -29,6 +29,8 @@ services:
         sync: false
       - key: SUPABASE_STORAGE_BUCKET
         sync: false
+      - key: SUPABASE_AVATARS_BUCKET
+        sync: false
       - key: SUPABASE_JWT_SECRET
         sync: false
       - key: GEMINI_API_KEY

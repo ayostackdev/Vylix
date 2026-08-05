@@ -146,7 +146,7 @@ async def upload_avatar(
     path = f"avatars/{user.id}.{ext}"
 
     storage = get_storage()
-    url = await storage.upload(settings.supabase_storage_bucket, path, data, file.content_type)
+    url = await storage.upload(settings.supabase_avatars_bucket, path, data, file.content_type)
 
     user.user.avatar_url = url
     await db.flush()

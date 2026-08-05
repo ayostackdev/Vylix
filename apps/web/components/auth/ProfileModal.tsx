@@ -183,7 +183,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       if (!session) throw new Error('No session');
 
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('file', file);
 
       const res = await fetchApi('/api/user/avatar', {
         method: 'POST',
@@ -198,7 +198,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       }
 
       const json = await res.json();
-      updateAvatar(json.data.avatarUrl);
+      updateAvatar(json.avatar_url ?? json.avatarUrl);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload avatar');
     } finally {
