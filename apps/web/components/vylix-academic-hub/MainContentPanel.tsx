@@ -238,7 +238,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       })
       if (!res.ok) {
         const err = await res.json().catch(() => null)
-        setActionError(parseApiError(err, 'Upload failed. Please try again.'))
+        setActionError(parseApiError(err, `Upload failed. Please try again. (HTTP ${res.status})`))
         return
       }
       await fetchMaterials()

@@ -11,6 +11,11 @@ export interface ApiRequestInit extends RequestInit {
 	direct?: boolean;
 }
 
+function isJsonResponse(response: Response): boolean {
+	const contentType = response.headers.get('content-type') || '';
+	return contentType.includes('application/json') || contentType.includes('application/problem+json');
+}
+
 export async function fetchApi(path: string, init: ApiRequestInit = {}): Promise<Response> {
 	const urls = API_BASE_FALLBACKS(path, init.direct);
 	let lastError: unknown = null;
@@ -19,9 +24,19 @@ export async function fetchApi(path: string, init: ApiRequestInit = {}): Promise
 		const url = urls[i];
 		try {
 			const response = await fetch(url, init);
-			if (response.ok || response.status !== 404 || i === urls.length - 1) {
+			if (response.ok) return response;
+
+			// 404 and JSON error bodies come from the API itself; return them so the
+			// caller can surface the real detail. HTML/plain error bodies are gateway
+			// pages (proxy timeout, Render cold boot, Cloudflare) — try the next URL.
+			if (response.status === 404) {
+				if (i < urls.length - 1) continue;
 				return response;
 			}
+			if (isJsonResponse(response) || i === urls.length - 1) {
+				return response;
+			}
+			lastError = new Error(`Request failed with HTTP ${response.status}`);
 		} catch (error) {
 			lastError = error;
 			if (i < urls.length - 1) {
@@ -68,7 +83,8 @@ export function postFormDataApi(
 					return;
 				}
 
-				if (xhr.status === 404 && index < urls.length - 1) {
+				const looksLikeJson = /^\s*[\[{]/.test(xhr.responseText);
+				if (index < urls.length - 1 && (xhr.status === 404 || !looksLikeJson)) {
 					attempt(index + 1).then(resolve, reject);
 					return;
 				}

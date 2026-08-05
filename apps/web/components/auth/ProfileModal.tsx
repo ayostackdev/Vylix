@@ -194,7 +194,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => null);
-        throw new Error(parseApiError(err, 'Failed to upload avatar'));
+        throw new Error(parseApiError(err, `Failed to upload avatar (HTTP ${res.status})`));
       }
 
       const json = await res.json();
