@@ -25,7 +25,13 @@ class StorageProvider(abc.ABC):
 class SupabaseStorage(StorageProvider):
     def __init__(self):
         import httpx
-        self.base_url = f"{settings.supabase_url}/storage/v1"
+        if not settings.supabase_url or not settings.supabase_service_role_key:
+            raise RuntimeError(
+                "Supabase storage is not configured. Set SUPABASE_URL and "
+                "SUPABASE_SERVICE_ROLE_KEY in the API environment."
+            )
+        self.base_url = f"{settings.supabase_url.rstrip('/')}/storage/v1"
+        self.public_base = f"{settings.supabase_url.rstrip('/')}/storage/v1/object/public"
         self.key = settings.supabase_service_role_key
         self.headers = {
             "apikey": self.key,
@@ -34,21 +40,29 @@ class SupabaseStorage(StorageProvider):
 
     async def upload(self, bucket: str, path: str, data: bytes, content_type: str) -> str:
         import httpx
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=60) as client:
             resp = await client.post(
                 f"{self.base_url}/object/{bucket}/{path}",
-                headers={**self.headers, "Content-Type": content_type},
+                headers={
+                    **self.headers,
+                    "Authorization": f"Bearer {self.key}",
+                    "Content-Type": content_type,
+                    "x-upsert": "true",
+                },
                 content=data,
             )
-            resp.raise_for_status()
-        return f"{settings.supabase_url}/storage/v1/object/public/{bucket}/{path}"
+            if resp.status_code >= 400:
+                raise RuntimeError(
+                    f"Supabase storage upload failed ({resp.status_code}): {resp.text[:500]}"
+                )
+        return f"{self.public_base}/{bucket}/{path}"
 
     async def delete(self, bucket: str, path: str) -> None:
         import httpx
         async with httpx.AsyncClient() as client:
             resp = await client.delete(
                 f"{self.base_url}/object/{bucket}/{path}",
-                headers=self.headers,
+                headers={**self.headers, "Authorization": f"Bearer {self.key}"},
             )
             resp.raise_for_status()
 
@@ -57,7 +71,7 @@ class SupabaseStorage(StorageProvider):
         async with httpx.AsyncClient() as client:
             resp = await client.post(
                 f"{self.base_url}/object/sign/{bucket}/{path}",
-                headers=self.headers,
+                headers={**self.headers, "Authorization": f"Bearer {self.key}"},
                 json={"expiresIn": expires_in},
             )
             resp.raise_for_status()

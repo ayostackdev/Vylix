@@ -132,13 +132,29 @@ async def update_profile(
     return await get_profile(user=user, db=db)
 
 
+def _guess_image_content_type(filename: str | None, content_type: str | None) -> str | None:
+    if content_type in ALLOWED_AVATAR_TYPES:
+        return content_type
+    if not filename or "." not in filename:
+        return content_type
+    ext = filename.rsplit(".", 1)[-1].lower()
+    return {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "gif": "image/gif",
+        "webp": "image/webp",
+    }.get(ext, content_type)
+
+
 @router.post("/avatar")
 async def upload_avatar(
     file: UploadFile = File(...),
     user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    if file.content_type not in ALLOWED_AVATAR_TYPES:
+    content_type = _guess_image_content_type(file.filename, file.content_type)
+    if content_type not in ALLOWED_AVATAR_TYPES:
         raise HTTPException(status_code=400, detail="Invalid file type")
 
     data = await file.read()
@@ -150,7 +166,7 @@ async def upload_avatar(
 
     storage = get_storage()
     try:
-        url = await storage.upload(settings.supabase_avatars_bucket, path, data, file.content_type)
+        url = await storage.upload(settings.supabase_avatars_bucket, path, data, content_type)
     except Exception as exc:
         logger.warning("Avatar storage upload failed for %s: %s", user.id, exc)
         raise HTTPException(

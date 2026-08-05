@@ -1,4 +1,6 @@
-import { resolveApiUrl, toVersionedApiPath } from '@/lib/api-base';
+import { isBrowserReachableApiBase, parseApiError, resolveApiUrl, toVersionedApiPath } from '@/lib/api-base';
+
+export { parseApiError };
 
 export interface FormDataApiResponse {
 	status: number;
@@ -22,9 +24,10 @@ export async function fetchApi(path: string, init: ApiRequestInit = {}): Promise
 			}
 		} catch (error) {
 			lastError = error;
-			if (i === urls.length - 1) {
-				throw error;
+			if (i < urls.length - 1) {
+				continue;
 			}
+			throw error;
 		}
 	}
 

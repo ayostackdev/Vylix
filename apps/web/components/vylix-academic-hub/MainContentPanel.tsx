@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { offlineStore } from '@/lib/offline-store'
-import { fetchApi } from '@/lib/api-request'
+import { fetchApi, parseApiError } from '@/lib/api-request'
 
 import type { DocumentInfo } from './ThreePanelLayout'
 import { PdfViewerInline } from './PdfViewerInline'
@@ -238,13 +238,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       })
       if (!res.ok) {
         const err = await res.json().catch(() => null)
-        const detail = err?.detail
-        const msg = typeof detail === 'string'
-          ? detail
-          : typeof detail?.message === 'string'
-            ? detail.message
-            : 'Upload failed. Please try again.'
-        setActionError(msg)
+        setActionError(parseApiError(err, 'Upload failed. Please try again.'))
         return
       }
       await fetchMaterials()

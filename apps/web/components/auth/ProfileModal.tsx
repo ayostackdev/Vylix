@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-context';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
-import { fetchApi } from '@/lib/api-request';
+import { fetchApi, parseApiError } from '@/lib/api-request';
 import { useStreakAndPoints, useUserBadges } from '@/queries/use-gamification';
 import { useTheme } from '@/providers/theme-provider';
 import { InviteModal } from '@/components/vylix-academic-hub/InviteModal';
@@ -193,15 +193,8 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const detail = err?.detail;
-        const message =
-          typeof detail === 'string'
-            ? detail
-            : typeof detail?.message === 'string'
-              ? detail.message
-              : err?.message || 'Failed to upload avatar';
-        throw new Error(message);
+        const err = await res.json().catch(() => null);
+        throw new Error(parseApiError(err, 'Failed to upload avatar'));
       }
 
       const json = await res.json();

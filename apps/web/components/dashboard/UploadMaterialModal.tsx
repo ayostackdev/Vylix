@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { queryClient } from '@/lib/query-client';
 import { useAuth } from '@/context/auth-context';
-import { postFormDataApi } from '@/lib/api-request';
+import { postFormDataApi, parseApiError } from '@/lib/api-request';
 
 interface UploadMaterialModalProps {
   isOpen: boolean;
@@ -121,16 +121,13 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess, defaultIsPastQ
     });
 
     if (result.status < 200 || result.status >= 300) {
+      let message = `"${file.name}" failed (${result.status})`;
       try {
-        const body = JSON.parse(result.body);
-        const detail = body.detail;
-        const message = typeof detail === 'string'
-          ? detail
-          : detail?.message || body.message || body.error || `"${file.name}" failed`;
-        throw new Error(message);
+        message = parseApiError(JSON.parse(result.body), message);
       } catch {
-        throw new Error(`"${file.name}" failed (${result.status})`);
+        // Response body was not JSON.
       }
+      throw new Error(message);
     }
   };
 
