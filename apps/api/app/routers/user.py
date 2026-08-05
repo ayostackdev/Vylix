@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import secrets
 from datetime import datetime, timezone, timedelta
 
@@ -22,7 +23,9 @@ from app.services.storage import get_storage
 settings = get_settings()
 router = APIRouter(prefix="/user", tags=["user"])
 
-ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+logger = logging.getLogger(__name__)
+
+ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"}
 MAX_AVATAR_MB = 5
 
 REFERRER_REWARD = 100
@@ -146,7 +149,14 @@ async def upload_avatar(
     path = f"avatars/{user.id}.{ext}"
 
     storage = get_storage()
-    url = await storage.upload(settings.supabase_avatars_bucket, path, data, file.content_type)
+    try:
+        url = await storage.upload(settings.supabase_avatars_bucket, path, data, file.content_type)
+    except Exception as exc:
+        logger.warning("Avatar storage upload failed for %s: %s", user.id, exc)
+        raise HTTPException(
+            status_code=502,
+            detail=f"Could not save avatar to storage ({type(exc).__name__}: {exc}). Please try again.",
+        ) from exc
 
     user.user.avatar_url = url
     await db.flush()

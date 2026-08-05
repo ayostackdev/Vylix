@@ -250,7 +250,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
       await fetchMaterials()
     } catch (error) {
       console.error('[MainContentPanel] Upload failed:', error)
-      setActionError('Upload failed. Please try again.')
+      setActionError(error instanceof Error ? error.message : 'Upload failed. Please try again.')
     } finally {
       setUploading(false)
       e.target.value = ''

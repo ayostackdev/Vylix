@@ -164,7 +164,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       setError('Accepted formats: JPEG, PNG, GIF, WebP');
       return;
@@ -194,7 +194,14 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to upload avatar');
+        const detail = err?.detail;
+        const message =
+          typeof detail === 'string'
+            ? detail
+            : typeof detail?.message === 'string'
+              ? detail.message
+              : err?.message || 'Failed to upload avatar';
+        throw new Error(message);
       }
 
       const json = await res.json();
@@ -303,7 +310,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
               className="hidden"
               onChange={handleAvatarUpload}
             />
