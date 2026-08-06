@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/auth-context'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
-import { DailyLimitModal } from '@/components/profile/DailyLimitModal'
+import { PaywallModal } from '@/components/profile/PaywallModal'
 import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface FlashcardTabProps {
@@ -352,7 +352,7 @@ export function FlashcardTab({ selectedDoc, isReadOnly = false }: FlashcardTabPr
       </div>
     </div>
 
-      <DailyLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
+      <PaywallModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
     </>
   )
 }

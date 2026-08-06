@@ -7,11 +7,14 @@ export function TokenCounter() {
 
   if (isLoading || !data) return null;
 
-  const remaining = data.daily_tokens_limit - data.daily_tokens_used;
+  const remaining = data.remaining;
+  const limit = data.limit;
   const isLow = remaining <= 3;
   const isExhausted = remaining <= 0;
 
-  if (data.is_premium) return null;
+  const title = data.has_paid_pass
+    ? `${remaining} of ${limit} AI queries left on ${data.plan_name}`
+    : `${remaining} of ${limit} AI queries remaining today`;
 
   return (
     <div
@@ -22,12 +25,12 @@ export function TokenCounter() {
           ? 'bg-amber-50 text-amber-600'
           : 'bg-blue-50 text-blue-600'
       }`}
-      title={`${remaining} of ${data.daily_tokens_limit} AI queries remaining today`}
+      title={title}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${
         isExhausted ? 'bg-red-500' : isLow ? 'bg-amber-500' : 'bg-blue-500'
       }`} />
-      {remaining}/{data.daily_tokens_limit}
+      {remaining}/{limit}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useAuth } from '@/context/auth-context'
 import { useStudyAgent } from '@/queries/use-study-agent'
-import { DailyLimitModal } from '@/components/profile/DailyLimitModal'
+import { PaywallModal } from '@/components/profile/PaywallModal'
 import type { DocumentInfo } from '../ThreePanelLayout'
 
 interface Task {
@@ -280,7 +280,7 @@ export function StudyAgentTab({ selectedDoc, isReadOnly = false }: StudyAgentTab
       </div>
     </div>
 
-      <DailyLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
+      <PaywallModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
     </>
   )
 }

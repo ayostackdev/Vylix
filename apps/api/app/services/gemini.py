@@ -93,7 +93,13 @@ def _call(
     prompt: str,
     system_instruction: str | None = None,
     user_id: str | None = None,
+    usage: list | None = None,
 ) -> str | None:
+    """Call Gemini 2.0 Flash and return the generated text.
+
+    When ``usage`` is provided (a list), it receives a
+    ``(prompt_tokens, completion_tokens)`` tuple so callers can track cost.
+    """
     settings = get_settings()
     if not settings.gemini_api_key:
         raise GeminiError("GEMINI_API_KEY is not configured")
@@ -148,6 +154,8 @@ def _call(
         prompt_tokens = usage.get("promptTokenCount") or 0
         completion_tokens = usage.get("candidatesTokenCount") or 0
         total_tokens = usage.get("totalTokenCount") or (prompt_tokens + completion_tokens)
+        if usage is not None:
+            usage.append((prompt_tokens, completion_tokens))
         cost = estimate_cost(MODEL_NAME, prompt_tokens, completion_tokens)
         logger.info(
             "gemini_usage model=%s user=%s prompt_tokens=%d completion_tokens=%d total_tokens=%d cost_usd=%.6f",
@@ -233,3 +241,22 @@ def general_chat(conversation: str, user_id: str | None = None) -> str | None:
     )
     prompt = f"Conversation:\n{conversation}\n\nAssistant:"
     return _call(prompt, system_instruction=system, user_id=user_id)
+
+
+def call(
+    prompt: str,
+    system_instruction: str | None = None,
+    user_id: str | None = None,
+    usage: list | None = None,
+) -> str | None:
+    """Public wrapper around the 2.0 Flash call for feature services.
+
+    ``usage`` is an optional list that receives a ``(prompt_tokens,
+    completion_tokens)`` tuple so callers can track per-call cost.
+    """
+    return _call(
+        prompt,
+        system_instruction=system_instruction,
+        user_id=user_id,
+        usage=usage,
+    )

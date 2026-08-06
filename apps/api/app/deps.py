@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -12,6 +12,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.database import get_db
+from app.entitlements import (
+    free_daily_limit,
+    has_active_paid_pass,
+    spend_paid_query,
+)
 from app.models import User, UserEmail
 from app.security import decode_access_token
 
@@ -38,20 +43,7 @@ class RateLimiter:
 
 
 ai_rate_limiter = RateLimiter(max_requests=15, window_seconds=60)
-
-
-def check_ai_rate_limit(request: Request) -> None:
-    """Dependency that enforces rate limiting on AI endpoints."""
-    client_ip = request.client.host if request.client else "unknown"
-    if ai_rate_limiter.is_rate_limited(f"ai:{client_ip}"):
-        raise HTTPException(
-            status_code=429,
-            detail="Too many requests. Please wait a moment before trying again.",
-        )
-
-
-DAILY_TOKEN_LIMIT = 15
-PREMIUM_TOKEN_LIMIT = 100
+anonymous_ip_limiter = RateLimiter(max_requests=30, window_seconds=60)
 
 
 @dataclass
@@ -60,8 +52,6 @@ class CurrentUser:
     email: str | None
     full_name: str | None
     user: User
-
-
 async def _decode_jwt_payload(token: str) -> dict:
     return await decode_access_token(token)
 
@@ -106,15 +96,35 @@ async def check_ai_token_quota(
     current_user: CurrentUser = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> CurrentUser:
+    """Resolve and spend one AI query from the user's entitlements.
+
+    Order of preference:
+      1. A paid pass with remaining capacity (atomic spend — hard cap).
+      2. The free daily counter (3/day, 10 on the first day).
+
+    A user who holds paid passes but has exhausted all of them gets a hard
+    stop — they need a Top-Up, not a fresh free daily reset.
+    """
     u = current_user.user
     now = datetime.now(timezone.utc)
-    today = now.date()
 
+    if await has_active_paid_pass(db, u.id):
+        if not await spend_paid_query(db, u.id):
+            raise HTTPException(
+                status_code=429,
+                detail="DAILY_LIMIT_REACHED",
+                headers={"X-Tokens-Reset": "midnight"},
+            )
+        await db.flush()
+        return current_user
+
+    today = now.date()
     if u.daily_tokens_reset_at is None or u.daily_tokens_reset_at.date() < today:
         u.daily_tokens_used = 0
         u.daily_tokens_reset_at = now
 
-    if u.daily_tokens_used >= u.daily_tokens_limit:
+    limit = free_daily_limit(u.created_at, now)
+    if u.daily_tokens_used >= limit:
         raise HTTPException(
             status_code=429,
             detail="DAILY_LIMIT_REACHED",
@@ -138,6 +148,30 @@ async def get_optional_user(
         return await get_current_user(credentials, db)
     except HTTPException:
         return None
+
+
+def check_ai_rate_limit(
+    request: Request,
+    user: CurrentUser | None = Depends(get_optional_user),
+) -> None:
+    """Dependency that enforces rate limiting on AI endpoints.
+
+    Keyed by user ID for authenticated students so a whole class sharing one
+    campus NAT/IP never shares a single bucket. Anonymous traffic falls back
+    to a per-IP guard; Gemini's own ~15 RPM model cap still bounds real spend.
+    """
+    if user is not None:
+        key = f"ai:user:{user.id}"
+        limiter = ai_rate_limiter
+    else:
+        key = f"ai:ip:{request.client.host if request.client else 'unknown'}"
+        limiter = anonymous_ip_limiter
+
+    if limiter.is_rate_limited(key):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many requests. Please wait a moment before trying again.",
+        )
 
 
 async def verify_maintenance_key(request: Request) -> str:

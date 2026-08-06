@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 from datetime import datetime, timezone, timedelta
 
 import httpx
@@ -10,6 +12,7 @@ from app.core.config import get_settings
 from app.database import get_db
 from app.deps import CurrentUser, get_current_user
 from app.models import Subscription, User
+from app import plans
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,12 +20,11 @@ settings = get_settings()
 router = APIRouter(prefix="/payments", tags=["payments"])
 
 PAYSTACK_BASE = "https://api.paystack.co"
-PREMIUM_PRICE_KOBO = 250_000  # #2,500 = 250,000 kobo
-PREMIUM_DURATION_DAYS = 365
 
 
 class InitializeRequest(BaseModel):
     email: str
+    plan: str = "semester"
 
 
 class InitializeResponse(BaseModel):
@@ -34,6 +36,61 @@ class VerifyResponse(BaseModel):
     status: str
     plan: str
     expires_at: str | None
+    quota_remaining: int | None
+
+
+def _validate_plan(plan: str) -> plans.Plan:
+    try:
+        p = plans.get_plan(plan)
+    except KeyError:
+        raise HTTPException(status_code=400, detail=f"Unknown plan: {plan}")
+    if p.price_kobo <= 0:
+        raise HTTPException(status_code=400, detail=f"Plan is not purchasable: {plan}")
+    return p
+
+
+def _paystack_headers() -> dict[str, str]:
+    return {
+        "Authorization": f"Bearer {settings.paystack_secret_key}",
+        "Content-Type": "application/json",
+    }
+
+
+async def _activate_subscription(
+    db: AsyncSession,
+    user_id: str,
+    reference: str,
+    plan: str,
+) -> Subscription:
+    """Create (or return existing) an active entitlement row for a payment.
+
+    Idempotent by reference so the webhook and the verify redirect can both
+    race to activate the same payment without creating duplicates.
+    """
+    result = await db.execute(
+        select(Subscription).where(Subscription.reference == reference)
+    )
+    existing = result.scalar_one_or_none()
+    if existing:
+        return existing
+
+    plan_config = plans.get_plan(plan) if plan in plans.PLANS else plans.get_plan("semester")
+    expires_at = datetime.now(timezone.utc) + timedelta(days=plan_config.duration_days or 0)
+
+    sub = Subscription(
+        user_id=user_id,
+        reference=reference,
+        plan=plan,
+        status="active",
+        expires_at=expires_at,
+        quota_total=plan_config.query_quota,
+        quota_used=0,
+        storage_bytes_total=plan_config.storage_bytes,
+        storage_bytes_used=0,
+    )
+    db.add(sub)
+    await db.flush()
+    return sub
 
 
 @router.post("/initialize", response_model=InitializeResponse)
@@ -41,26 +98,24 @@ async def initialize_payment(
     body: InitializeRequest,
     user: CurrentUser = Depends(get_current_user),
 ):
-    ref = f"VYLIX-PREMIUM-{user.user.id}-{int(datetime.now(timezone.utc).timestamp())}"
+    plan_config = _validate_plan(body.plan)
+    ref = f"VYLIX-{plan_config.key.upper()}-{user.user.id}-{int(datetime.now(timezone.utc).timestamp())}"
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{PAYSTACK_BASE}/transaction/initialize",
             json={
                 "email": body.email,
-                "amount": PREMIUM_PRICE_KOBO,
+                "amount": plan_config.price_kobo,
                 "reference": ref,
                 "currency": "NGN",
                 "callback_url": f"{settings.frontend_url}/pricing?trxref={ref}",
                 "metadata": {
                     "user_id": user.user.id,
-                    "plan": "premium",
+                    "plan": plan_config.key,
                 },
             },
-            headers={
-                "Authorization": f"Bearer {settings.paystack_secret_key}",
-                "Content-Type": "application/json",
-            },
+            headers=_paystack_headers(),
         )
 
     data = resp.json()
@@ -82,7 +137,7 @@ async def verify_payment(
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{PAYSTACK_BASE}/transaction/verify/{reference}",
-            headers={"Authorization": f"Bearer {settings.paystack_secret_key}"},
+            headers=_paystack_headers(),
         )
 
     data = resp.json()
@@ -96,42 +151,40 @@ async def verify_payment(
     if txn["metadata"]["user_id"] != user.user.id:
         raise HTTPException(status_code=403, detail="Reference belongs to another user")
 
-    result = await db.execute(
-        select(Subscription).where(Subscription.reference == reference)
-    )
-    existing = result.scalar_one_or_none()
-    if existing:
-        return VerifyResponse(
-            status=existing.status,
-            plan=existing.plan,
-            expires_at=str(existing.expires_at) if existing.expires_at else None,
-        )
-
-    expires_at = datetime.now(timezone.utc) + timedelta(days=PREMIUM_DURATION_DAYS)
-
-    sub = Subscription(
-        user_id=user.user.id,
-        reference=reference,
-        plan="premium",
-        status="active",
-        expires_at=expires_at,
-    )
-    db.add(sub)
-
-    u = await db.get(User, user.user.id)
-    u.daily_tokens_limit = 100
-
+    plan_key = txn["metadata"].get("plan", "semester")
+    sub = await _activate_subscription(db, user.user.id, reference, plan_key)
     await db.commit()
 
+    plan_config = plans.get_plan(sub.plan)
+    remaining = None
+    if sub.quota_total is not None:
+        remaining = max(0, sub.quota_total - sub.quota_used)
+
     return VerifyResponse(
-        status="active",
-        plan="premium",
-        expires_at=str(expires_at),
+        status=sub.status,
+        plan=sub.plan,
+        expires_at=str(sub.expires_at) if sub.expires_at else None,
+        quota_remaining=remaining,
     )
+
+
+def _is_valid_webhook_signature(payload: bytes, signature: str | None) -> bool:
+    """HMAC-SHA512 of the raw body signed with the Paystack secret key."""
+    if not settings.paystack_secret_key or not signature:
+        return True
+    expected = hmac.new(
+        settings.paystack_secret_key.encode(), payload, hashlib.sha512
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature)
 
 
 @router.post("/webhook")
 async def paystack_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    raw_body = await request.body()
+
+    if not _is_valid_webhook_signature(raw_body, request.headers.get("x-paystack-signature")):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
     body = await request.json()
     event = body.get("event")
 
@@ -142,31 +195,14 @@ async def paystack_webhook(request: Request, db: AsyncSession = Depends(get_db))
     reference = data.get("reference")
     metadata = data.get("metadata", {})
     user_id = metadata.get("user_id")
+    plan_key = metadata.get("plan", "semester")
 
     if not reference or not user_id:
         return {"status": "ignored"}
 
-    result = await db.execute(
-        select(Subscription).where(Subscription.reference == reference)
-    )
-    existing = result.scalar_one_or_none()
-    if existing:
+    sub = await _activate_subscription(db, user_id, reference, plan_key)
+    if sub.plan != plan_key:
         return {"status": "duplicate"}
-
-    expires_at = datetime.now(timezone.utc) + timedelta(days=PREMIUM_DURATION_DAYS)
-
-    sub = Subscription(
-        user_id=user_id,
-        reference=reference,
-        plan="premium",
-        status="active",
-        expires_at=expires_at,
-    )
-    db.add(sub)
-
-    u = await db.get(User, user_id)
-    if u:
-        u.daily_tokens_limit = 100
 
     await db.commit()
     return {"status": "ok"}

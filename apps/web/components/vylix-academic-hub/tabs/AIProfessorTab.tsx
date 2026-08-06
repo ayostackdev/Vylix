@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { offlineStore } from '@/lib/offline-store'
 import { useAuth } from '@/context/auth-context'
-import { DailyLimitModal } from '@/components/profile/DailyLimitModal'
+import { PaywallModal } from '@/components/profile/PaywallModal'
 
 import type { DocumentInfo } from '../ThreePanelLayout'
 
@@ -287,7 +287,7 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
       </div>
     </div>
 
-      <DailyLimitModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
+      <PaywallModal isOpen={showLimitModal} onClose={() => setShowLimitModal(false)} />
     </>
   )
 }

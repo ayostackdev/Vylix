@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.database import get_db
 from app.deps import CurrentUser, get_current_user
+from app.entitlements import entitlement_summary
 from app.models import (
     User, UserEmail, UserProfile, UserPrivacy, UserStreak,
     PointsTransaction, University, Department, Subscription, Referral,
@@ -357,6 +358,14 @@ class AiTokensOut(BaseModel):
     limit: int
     remaining: int
     is_premium: bool
+    plan: str
+    plan_name: str
+    quota_remaining: int
+    storage_total_bytes: int
+    storage_used_bytes: int
+    storage_remaining_bytes: int
+    expires_at: str | None
+    has_paid_pass: bool
 
 
 @router.get("/ai-tokens", response_model=AiTokensOut)
@@ -365,25 +374,22 @@ async def get_ai_tokens(
     db: AsyncSession = Depends(get_db),
 ):
     u = user.user
-    now = datetime.now(timezone.utc)
 
-    result = await db.execute(
-        select(Subscription).where(
-            Subscription.user_id == u.id,
-            Subscription.status == "active",
-            Subscription.expires_at > now,
-        ).limit(1)
-    )
-    active_sub = result.scalar_one_or_none()
-
-    is_premium = active_sub is not None
-    limit = 100 if is_premium else 15
+    summary = await entitlement_summary(db, u.id, u.created_at, daily_used=u.daily_tokens_used)
 
     return AiTokensOut(
-        used=u.daily_tokens_used,
-        limit=limit,
-        remaining=max(0, limit - u.daily_tokens_used),
-        is_premium=is_premium,
+        used=summary["quota_used"],
+        limit=summary["quota_total"],
+        remaining=summary["quota_remaining"],
+        is_premium=summary["has_paid_pass"],
+        plan=summary["plan"],
+        plan_name=summary["plan_name"],
+        quota_remaining=summary["quota_remaining"],
+        storage_total_bytes=summary["storage_total_bytes"],
+        storage_used_bytes=summary["storage_used_bytes"],
+        storage_remaining_bytes=summary["storage_remaining_bytes"],
+        expires_at=summary["expires_at"],
+        has_paid_pass=summary["has_paid_pass"],
     )
 
 

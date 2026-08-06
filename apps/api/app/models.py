@@ -114,6 +114,7 @@ class Course(Base):
     department: Mapped["Department | None"] = relationship(back_populates="courses")
     topics: Mapped[list["Topic"]] = relationship(back_populates="course", cascade="all, delete-orphan")
     lessons: Mapped[list["Lesson"]] = relationship(back_populates="course", cascade="all, delete-orphan")
+    solved_questions: Mapped[list["SolvedQuestion"]] = relationship(back_populates="course", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_courses_department_id_is_general", "department_id", "is_general"),
@@ -804,6 +805,10 @@ class Subscription(Base):
     plan: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
     expires_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
+    quota_total: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    quota_used: Mapped[int] = mapped_column(Integer, default=0)
+    storage_bytes_total: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    storage_bytes_used: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
     updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
 
@@ -813,4 +818,89 @@ class Subscription(Base):
         Index("ix_subscriptions_user_id", "user_id"),
         Index("ix_subscriptions_reference", "reference"),
         Index("ix_subscriptions_status", "status"),
+    )
+
+
+# ── Solved Question Bank ────────────────────────────────────────────
+
+class SolvedQuestionStatus(str, enum.Enum):
+    QUEUED = "QUEUED"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class SolvedBankBatch(Base):
+    """A batch generation run of the Solved Question Bank for one course.
+
+    Tracks queued/completed/failed counts and cumulative USD cost so the
+    per-question margin (the core ROI story) is auditable.
+    """
+
+    __tablename__ = "solved_bank_batches"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    course_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("courses.id", ondelete="CASCADE"))
+    trigger: Mapped[str] = mapped_column(String, default="manual")  # manual | schedule
+    target_count: Mapped[int] = mapped_column(Integer, default=300)
+    queued_count: Mapped[int] = mapped_column(Integer, default=0)
+    completed_count: Mapped[int] = mapped_column(Integer, default=0)
+    failed_count: Mapped[int] = mapped_column(Integer, default=0)
+    cost_usd_total: Mapped[float] = mapped_column(default=0.0)
+    status: Mapped[str] = mapped_column(String, default="RUNNING")  # RUNNING | COMPLETED | FAILED
+    error: Mapped[str | None] = mapped_column(Text)
+    started_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    completed_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+
+    course: Mapped["Course"] = relationship()
+    questions: Mapped[list["SolvedQuestion"]] = relationship(back_populates="batch", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("ix_solved_bank_batches_course_id", "course_id"),
+        Index("ix_solved_bank_batches_status", "status"),
+    )
+
+
+class SolvedQuestion(Base):
+    """A single past exam question with a cached AI answer.
+
+    ``question_hash`` is a content fingerprint used for deduplication, so the
+    same question asked in different papers (or schools) is solved exactly once.
+    """
+
+    __tablename__ = "solved_questions"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    batch_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("solved_bank_batches.id", ondelete="SET NULL"))
+    course_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("courses.id", ondelete="CASCADE"))
+    material_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False), ForeignKey("materials.id", ondelete="SET NULL"))
+    question_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    question_text: Mapped[str] = mapped_column(Text, nullable=False)
+    answer_text: Mapped[str | None] = mapped_column(Text)
+    year: Mapped[int | None] = mapped_column(Integer)
+    semester: Mapped[str | None] = mapped_column(String)
+    model: Mapped[str] = mapped_column(String, default="gemini-2.0-flash")
+    cost_usd: Mapped[float] = mapped_column(default=0.0)
+    status: Mapped[SolvedQuestionStatus] = mapped_column(
+        Enum(SolvedQuestionStatus, name="SolvedQuestionStatus", native_enum=False, validate_strings=True),
+        default=SolvedQuestionStatus.QUEUED,
+    )
+    error: Mapped[str | None] = mapped_column(Text)
+    is_sample: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    view_count: Mapped[int] = mapped_column(Integer, default=0)
+    helpful_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now())
+    generated_at: Mapped[str | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[str] = mapped_column(DateTime(timezone=True), default=_utcnow, server_default=func.now(), onupdate=func.now())
+
+    batch: Mapped["SolvedBankBatch | None"] = relationship(back_populates="questions")
+    course: Mapped["Course"] = relationship(back_populates="solved_questions")
+    material: Mapped["Material | None"] = relationship()
+
+    __table_args__ = (
+        UniqueConstraint("question_hash", name="uq_solved_questions_hash"),
+        Index("ix_solved_questions_course_id", "course_id"),
+        Index("ix_solved_questions_course_id_status", "course_id", "status"),
+        Index("ix_solved_questions_course_id_is_sample", "course_id", "is_sample"),
     )

@@ -1,8 +1,9 @@
 import logging
 import sys
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
 from app.core.access_log import AccessLogMiddleware
@@ -11,10 +12,11 @@ from app.routers import (
     health, colleges, courses, topics, user, materials,
     qna, gamification, settings as settings_router, collaboration, maintenance,
     documents, analytics, insights, ws, google_drive, study_agent,
-    digest, flashcards, payments,
+    digest, flashcards, payments, plans, solved_bank,
 )
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 # ── Structured logging ──────────────────────────────────────────────
 
@@ -50,6 +52,16 @@ app.add_middleware(
 app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(AccessLogMiddleware)
 
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """Log unhandled errors and return a JSON 500 with a readable detail."""
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error ({type(exc).__name__}: {exc})"},
+    )
+
 # Core routers
 app.include_router(health.router)
 app.include_router(colleges.router, prefix=settings.api_prefix)
@@ -83,3 +95,9 @@ app.include_router(flashcards.router, prefix=settings.api_prefix)
 
 # Payments
 app.include_router(payments.router, prefix=settings.api_prefix)
+
+# Public pricing plans
+app.include_router(plans.router, prefix=settings.api_prefix)
+
+# Solved Question Bank
+app.include_router(solved_bank.router, prefix=settings.api_prefix)

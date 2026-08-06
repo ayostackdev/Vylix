@@ -19,6 +19,7 @@ from sqlalchemy.orm import selectinload
 from app.core.config import get_settings
 from app.database import get_db
 from app.deps import CurrentUser, get_current_user, get_optional_user
+from app.entitlements import storage_allowance, storage_used
 from app.models import (
     Material, Topic, Course, User, Department, MaterialProcessingStatus,
     MaterialUnlock, PointsTransaction,
@@ -31,6 +32,9 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 router = APIRouter(prefix="/materials", tags=["materials"])
 _vector_store = VectorStore()
+
+MAX_COMPRESS_BYTES = 4 * 1024 * 1024
+COMPRESS_TIMEOUT_SECONDS = 20
 
 
 def _celery_broker_reachable(timeout: float = 1.5) -> bool:
@@ -51,10 +55,18 @@ def _celery_broker_reachable(timeout: float = 1.5) -> bool:
 
 
 def _compress_pdf_bytes(data: bytes, filename: str) -> bytes:
-    """Compress a PDF in-memory using Ghostscript, falling back to the original."""
+    """Best-effort in-memory PDF compression via Ghostscript.
+
+    Compression is strictly optional: it must never block or fail an upload.
+    Large PDFs are skipped so a heavy Ghostscript run cannot stall the request
+    or crash the (free-tier, low-memory) instance.
+    """
     from app.services.pdf_compressor import compress_pdf_ghostscript
 
     if not filename.lower().endswith(".pdf") or len(data) == 0:
+        return data
+    if len(data) > MAX_COMPRESS_BYTES:
+        logger.info("Skipping PDF compression for %s (%d bytes)", filename, len(data))
         return data
 
     source_path: Path | None = None
@@ -65,12 +77,12 @@ def _compress_pdf_bytes(data: bytes, filename: str) -> bytes:
             source_path = Path(source_file.name)
 
         target_path = source_path.with_name(f"{source_path.stem}_compressed.pdf")
-        compressed = compress_pdf_ghostscript(source_path, target_path)
+        compressed = compress_pdf_ghostscript(source_path, target_path, timeout=COMPRESS_TIMEOUT_SECONDS)
         if compressed is not None and compressed.stat().st_size < len(data):
             return compressed.read_bytes()
         return data
-    except OSError:
-        logger.warning("PDF compression failed for %s; storing original.", filename)
+    except Exception:
+        logger.warning("PDF compression failed for %s; storing original.", filename, exc_info=True)
         return data
     finally:
         with suppress(OSError):
@@ -234,6 +246,18 @@ async def upload_material(
     if file.content_type == "application/pdf":
         data = await anyio.to_thread.run_sync(
             lambda: _compress_pdf_bytes(data, file.filename or "document.pdf")
+        )
+
+    allowance = await storage_allowance(db, user.id)
+    used = await storage_used(db, user.id)
+    if used + len(data) > allowance:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "STORAGE_LIMIT_REACHED "
+                f"(used {used // (1024 * 1024)}MB of {allowance // (1024 * 1024)}MB). "
+                "Upgrade your plan to unlock more vault storage."
+            ),
         )
 
     topic_id = await _resolve_topic(db, course_code, department_code, user.id)

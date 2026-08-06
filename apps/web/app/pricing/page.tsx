@@ -3,14 +3,36 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
+import { formatNaira, initializePaystackPayment } from '@/lib/payments';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { usePlans, type Plan } from '@/queries/use-ai-tokens';
+
+function durationLabel(days: number | null): string {
+  if (!days) return 'No expiry';
+  if (days <= 2) return `${days} days`;
+  if (days % 30 === 0) return `${days / 30} months`;
+  return `${days} days`;
+}
+
+function featureList(plan: Plan): string[] {
+  const features = [`${plan.query_quota?.toLocaleString() ?? '5 AI queries/day'}`];
+  if (plan.storage_mb > 0) {
+    features.push(`${plan.storage_mb}MB extra storage`);
+  }
+  if (plan.duration_days) {
+    features.push(durationLabel(plan.duration_days));
+  }
+  return features;
+}
 
 export default function PricingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, promptLogin } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { data: plans, isLoading: plansLoading } = usePlans();
+  const [loadingKey, setLoadingKey] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [purchasedPlan, setPurchasedPlan] = useState<string | null>(null);
 
   useEffect(() => {
     const ref = searchParams.get('trxref');
@@ -26,6 +48,8 @@ export default function PricingPage() {
       });
 
       if (res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setPurchasedPlan(body.plan || null);
         setSuccess(true);
         setTimeout(() => router.push('/'), 3000);
       }
@@ -34,45 +58,27 @@ export default function PricingPage() {
     verify();
   }, [searchParams, user, router]);
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (plan: Plan) => {
     if (!user) {
-      promptLogin('subscribe to Premium');
+      promptLogin('buy a plan');
       return;
     }
-
-    setLoading(true);
 
     const supabase = getSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    const email = session.user.email || '';
+    const email = session?.user.email || '';
     if (!email) {
       alert('No email found on your account. Please update your profile.');
-      setLoading(false);
       return;
     }
 
+    setLoadingKey(plan.key);
     try {
-      const res = await fetch('/api/payments/initialize', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.authorization_url) {
-        window.location.href = data.authorization_url;
-      } else {
-        alert(data.detail || 'Payment initialization failed. Please try again.');
-      }
-    } catch {
-      alert('Network error. Please try again.');
-    } finally {
-      setLoading(false);
+      const { authorization_url } = await initializePaystackPayment(email, plan.key);
+      window.location.assign(authorization_url);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Payment initialization failed. Please try again.');
+      setLoadingKey(null);
     }
   };
 
@@ -83,8 +89,8 @@ export default function PricingPage() {
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-100 flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">🎉</span>
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Welcome to Premium!</h1>
-          <p className="text-sm text-gray-500 mb-4">You now have 100 AI queries/day. Redirecting to dashboard...</p>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Payment successful!</h1>
+          <p className="text-sm text-gray-500 mb-4">Your AI queries are ready. Redirecting to dashboard...</p>
         </div>
       </div>
     );
@@ -93,70 +99,82 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#f6f7fb]">
       <header className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <button onClick={() => router.push('/')} className="text-sm font-bold text-gray-900 hover:text-blue-600 transition-colors">
             Vylix
           </button>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-16">
+      <div className="max-w-5xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Upgrade to Premium</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">Pick your pass</h1>
           <p className="text-gray-500 max-w-md mx-auto">
-            Get unlimited access to AI-powered study tools. One payment. Full year.
+            Buy AI queries by the night, semester or session. No subscriptions, no card on file — pay once and study.
           </p>
         </div>
 
-        <div className="max-w-sm mx-auto">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-center text-white">
-              <p className="text-sm font-medium opacity-80">Annual Premium</p>
-              <p className="text-4xl font-bold mt-1">
-                <span className="text-lg align-top">#</span>2,500
-              </p>
-              <p className="text-sm opacity-80 mt-1">per year</p>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <ul className="space-y-3">
-                {[
-                  '100 AI queries/day (up from 15)',
-                  'AI Professor with document chat',
-                  'AI flashcard generation',
-                  'Study Agent personalized plans',
-                  'Priority support',
-                  'Ad-free experience',
-                ].map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-sm text-gray-700">
-                    <span className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                      <svg className="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={handleSubscribe}
-                disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm hover:shadow-lg hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-50"
+        {plansLoading || !plans ? (
+          <p className="text-center text-gray-400 text-sm">Loading plans...</p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {plans.map((plan) => (
+              <div
+                key={plan.key}
+                className={`relative rounded-2xl bg-white p-6 shadow-sm border ${
+                  plan.featured ? 'border-blue-300 ring-1 ring-blue-200' : 'border-gray-100'
+                }`}
               >
-                {loading ? 'Redirecting to Paystack...' : 'Subscribe Now — #2,500/yr'}
-              </button>
+                {plan.featured && (
+                  <span className="absolute -top-2.5 left-6 px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 text-white text-[10px] font-bold">
+                    MOST POPULAR
+                  </span>
+                )}
 
-              <p className="text-[10px] text-gray-400 text-center">
-                Secured by Paystack. You can cancel anytime.
-              </p>
-            </div>
+                <h2 className="text-sm font-bold text-gray-900">{plan.name}</h2>
+                <p className="text-[11px] text-gray-500 mt-1 leading-snug min-h-[30px]">{plan.tagline}</p>
+
+                <p className="text-2xl font-black text-gray-900 mt-3">
+                  {plan.paid ? formatNaira(plan.price_ngn) : 'Free'}
+                </p>
+                <p className="text-[11px] text-gray-400">
+                  {plan.paid ? `one-time · ${durationLabel(plan.duration_days)}` : 'forever · just sign in'}
+                </p>
+
+                <div className="space-y-1.5 mt-4">
+                  {featureList(plan).map((f) => (
+                    <p key={f} className="flex items-center gap-2 text-xs text-gray-700">
+                      <span className="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                        <svg className="w-2.5 h-2.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                      {f}
+                    </p>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => (plan.paid ? handleSubscribe(plan) : router.push('/'))}
+                  disabled={loadingKey === plan.key}
+                  className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 ${
+                    plan.paid
+                      ? plan.featured
+                        ? 'bg-gradient-to-r from-blue-600 to-sky-500 text-white hover:shadow-lg'
+                        : 'bg-gray-900 text-white hover:bg-gray-700'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {loadingKey === plan.key ? 'Redirecting to Paystack...' : plan.paid ? `Pay ${formatNaira(plan.price_ngn)}` : 'Start Free'}
+                </button>
+              </div>
+            ))}
           </div>
+        )}
 
-          <p className="text-xs text-gray-400 text-center mt-6">
-            Free tier includes 15 AI queries/day with access to all core features.
-          </p>
-        </div>
+        <p className="text-xs text-gray-400 text-center mt-8">
+          Secured by Paystack · Free tier includes 5 AI queries/day
+        </p>
       </div>
     </div>
   );

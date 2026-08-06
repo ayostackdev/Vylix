@@ -8,7 +8,14 @@ import json
 import pytest
 from fastapi import HTTPException
 
-from app.deps import _decode_jwt_payload
+from app.deps import (
+    CurrentUser,
+    RateLimiter,
+    ai_rate_limiter,
+    anonymous_ip_limiter,
+    check_ai_rate_limit,
+    _decode_jwt_payload,
+)
 
 
 SECRET = "test-secret-for-ci"
@@ -49,3 +56,38 @@ async def test_decode_too_many_parts():
     with pytest.raises(HTTPException) as exc_info:
         await _decode_jwt_payload("a.b.c.d")
     assert exc_info.value.status_code == 401
+
+
+def _make_request(client_host: str = "1.2.3.4"):
+    from starlette.requests import Request
+
+    return Request(scope={"type": "http", "client": (client_host, 1234)})
+
+
+def test_rate_limiter_sliding_window():
+    limiter = RateLimiter(max_requests=3, window_seconds=60)
+    assert not limiter.is_rate_limited("k")
+    assert not limiter.is_rate_limited("k")
+    assert not limiter.is_rate_limited("k")
+    assert limiter.is_rate_limited("k")
+
+
+def test_check_ai_rate_limit_anonymous_per_ip():
+    request = _make_request(client_host="10.20.30.99")
+    for _ in range(anonymous_ip_limiter.max_requests):
+        check_ai_rate_limit(request, user=None)
+    with pytest.raises(HTTPException) as exc_info:
+        check_ai_rate_limit(request, user=None)
+    assert exc_info.value.status_code == 429
+
+
+def test_check_ai_rate_limit_keyed_by_user_id():
+    user_a = CurrentUser(id="user-a", email=None, full_name=None, user=None)
+    user_b = CurrentUser(id="user-b", email=None, full_name=None, user=None)
+    request = _make_request(client_host="10.20.30.99")
+    for _ in range(ai_rate_limiter.max_requests):
+        check_ai_rate_limit(request, user=user_a)
+    check_ai_rate_limit(request, user=user_b)
+    with pytest.raises(HTTPException) as exc_info:
+        check_ai_rate_limit(request, user=user_a)
+    assert exc_info.value.status_code == 429
