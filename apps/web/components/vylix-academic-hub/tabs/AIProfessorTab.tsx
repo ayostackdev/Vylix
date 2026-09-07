@@ -5,6 +5,7 @@ import { offlineStore } from '@/lib/offline-store'
 import { useAuth } from '@/context/auth-context'
 import { PaywallModal } from '@/components/profile/PaywallModal'
 import { authFetchRaw } from '@/lib/auth-fetch'
+import { documentChatCacheKey, getQaCached, putQaCached, type DocumentChatResult } from '@/lib/qa-cache'
 
 import type { DocumentInfo } from '../ThreePanelLayout'
 
@@ -88,6 +89,22 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
 
     try {
       if (selectedDoc) {
+        const cacheKey = documentChatCacheKey(selectedDoc.id, userMessage)
+        const cached = await getQaCached<DocumentChatResult>(cacheKey)
+        if (cached) {
+          await offlineStore.saveChatMessage(selectedDoc.courseId, {
+            role: 'user',
+            content: userMessage,
+            documentId: selectedDoc.id,
+          })
+          await offlineStore.saveChatMessage(selectedDoc.courseId, {
+            role: 'assistant',
+            content: cached.answer,
+            documentId: selectedDoc.id,
+          })
+          return cached.answer
+        }
+
         const res = await authFetchRaw(`/api/documents/chat`, {
           method: 'POST',
           body: JSON.stringify({
@@ -98,6 +115,12 @@ export function AIProfessorTab({ selectedDoc, isReadOnly = false }: AIProfessorT
 
         if (res.ok) {
           const data = await res.json()
+
+          await putQaCached(cacheKey, {
+            answer: data.answer,
+            context_chunks: data.context_chunks,
+            follow_up_questions: data.follow_up_questions,
+          })
 
           await offlineStore.saveChatMessage(selectedDoc.courseId, {
             role: 'user',

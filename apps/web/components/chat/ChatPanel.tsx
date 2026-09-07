@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { authFetchRaw } from '@/lib/auth-fetch';
+import { documentChatCacheKey, getQaCached, putQaCached, type DocumentChatResult } from '@/lib/qa-cache';
 
 
 interface Message {
@@ -33,6 +34,14 @@ export function ChatPanel({ documentId, documentTitle, onClose }: ChatPanelProps
     setLoading(true);
 
     try {
+      const cacheKey = documentChatCacheKey(documentId, text.trim());
+      const cached = await getQaCached<DocumentChatResult>(cacheKey);
+      if (cached) {
+        setMessages((prev) => [...prev, { role: 'assistant', content: cached.answer }]);
+        setFollowUps(cached.follow_up_questions ?? []);
+        return;
+      }
+
       const res = await authFetchRaw(`/api/documents/chat`, {
         method: 'POST',
         body: JSON.stringify({ document_id: documentId, query: text.trim() }),
@@ -41,6 +50,11 @@ export function ChatPanel({ documentId, documentTitle, onClose }: ChatPanelProps
       if (!res.ok) throw new Error('Chat request failed');
 
       const data = await res.json();
+      await putQaCached(cacheKey, {
+        answer: data.answer,
+        context_chunks: data.context_chunks,
+        follow_up_questions: data.follow_up_questions,
+      });
       const assistantMessage: Message = { role: 'assistant', content: data.answer };
       setMessages((prev) => [...prev, assistantMessage]);
       setFollowUps(data.follow_up_questions ?? []);

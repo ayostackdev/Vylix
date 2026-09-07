@@ -122,7 +122,6 @@ class Settings(BaseSettings):
     monnify_secret_key: str = Field(default="")
     monnify_contract_code: str = Field(default="")
     monnify_base_url: str = Field(default="https://sandbox.monnify.com")
-    monnify_webhook_secret: str = Field(default="")
 
     # Worker
     materials_worker_concurrency: int = Field(default=5)
