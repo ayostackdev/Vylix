@@ -178,13 +178,16 @@ async def search_document_chunks(query: str, top_k: int = 5) -> SearchResponse:
 
 
 @router.post("/ocr", response_model=OcrResponse)
-async def ocr_document(file: UploadFile = File(...)) -> OcrResponse:
+async def ocr_document(
+    file: UploadFile = File(...),
+    preprocess: bool = Query(default=True, description="Run the handout shadow-destroyer first"),
+) -> OcrResponse:
     suffix = Path(file.filename or "image.png").suffix or ".png"
 
     source_path = await _stream_upload_to_temp(file, suffix)
 
     try:
-        extracted_text = extract_text_with_tesseract(source_path)
+        extracted_text = extract_text_with_tesseract(source_path, preprocess=preprocess)
         return OcrResponse(
             source_name=file.filename or "image.png",
             extracted_text=extracted_text,

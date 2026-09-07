@@ -21,6 +21,10 @@ PyJWT>=2.8.0
 
 # Image processing
 Pillow>=10.4.0
+# Handout "Shadow Destroyer" (uneven-lighting binarization before OCR)
+opencv-python-headless>=4.9.0.80
+# iPhone snaps upload as HEIC — needed to decode them before OCR
+pillow-heif>=0.15.0
 
 # PDF processing
 PyMuPDF>=1.24.0
@@ -30,6 +34,9 @@ numpy>=2.1.0
 pandas>=2.2.0
 scikit-learn>=1.5.0
 google-genai>=1.0.0
+
+# Self-hosted embeddings (dense + sparse); pulls torch (already present via easyocr)
+FlagEmbedding>=1.2.10
 
 # OCR
 pytesseract>=0.3.13

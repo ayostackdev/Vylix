@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,9 +10,10 @@ import numpy as np
 
 from app.core.config import get_settings
 from app.core.postgres import get_connection
+from app.services.bge_m3 import sparse_cosine
 from app.services.embeddings import (
-    GeminiEmbeddingFunction,
     HashingEmbeddingFunction,
+    get_embedding_function,
 )
 
 try:
@@ -52,10 +54,29 @@ WHERE mc.document_id = m.id::text AND mc.document_id = %s
 
 
 class PgVectorBackend:
-    """pgvector-backed chunk store used for real semantic search."""
+    """pgvector-backed chunk store used for real semantic search.
 
-    def __init__(self) -> None:
-        self.embedding_function = GeminiEmbeddingFunction()
+    When the configured embedding provider supports sparse weights (BGE-M3),
+    retrieval is hybrid: a scoped dense candidate pass feeds a Python
+    dense+sparse re-rank so exact keyword matches (``MTH101``) and conceptual
+    matches are fused without requiring ``pgvectorscale`` sparsevec indexing.
+    """
+
+    def __init__(self, embedding_function: Any | None = None) -> None:
+        self.embedding_function = embedding_function or get_embedding_function()
+
+    def _supports_sparse(self) -> bool:
+        return bool(getattr(self.embedding_function, "supports_sparse", False))
+
+    def _run_scope_sync(self, document_id: str, cursor: Any) -> None:
+        cursor.execute(_SCOPE_SYNC, (document_id,))
+        if cursor.rowcount == 0:
+            logger.warning(
+                "Chunks for document %s have no course scope (no matching "
+                "material row); they will be invisible to institution-scoped "
+                "retrieval.",
+                document_id,
+            )
 
     def upsert_document(
         self,
@@ -66,8 +87,22 @@ class PgVectorBackend:
     ) -> int:
         del metadata
         vectors = self.embedding_function.embed_documents(chunks)
+        sparse_weights: list[str] | None = None
+        if self._supports_sparse():
+            lexical = self.embedding_function.embed_sparse(chunks)
+            sparse_weights = [
+                json.dumps({str(token): float(weight) for token, weight in weights.items()})
+                for weights in lexical
+            ]
         rows = [
-            (document_id, source_name, index, chunk, _vector_literal(vector))
+            (
+                document_id,
+                source_name,
+                index,
+                chunk,
+                _vector_literal(vector),
+                sparse_weights[index] if sparse_weights else "{}",
+            )
             for index, (chunk, vector) in enumerate(zip(chunks, vectors))
         ]
         with get_connection() as conn, conn.cursor() as cursor:
@@ -75,22 +110,90 @@ class PgVectorBackend:
             cursor.executemany(
                 """
                 INSERT INTO material_chunks
-                    (document_id, source_name, chunk_index, content, embedding)
-                VALUES (%s, %s, %s, %s, %s::vector)
+                    (document_id, source_name, chunk_index, content, embedding, sparse_weights)
+                VALUES (%s, %s, %s, %s, %s::vector, %s::jsonb)
                 """,
                 rows,
             )
             if document_id:
-                cursor.execute(_SCOPE_SYNC, (document_id,))
-                if cursor.rowcount == 0:
-                    logger.warning(
-                        "Chunks for document %s have no course scope (no matching "
-                        "material row); they will be invisible to institution-scoped "
-                        "retrieval.",
-                        document_id,
-                    )
+                self._run_scope_sync(document_id, cursor)
             conn.commit()
         return len(rows)
+
+    def upsert_hierarchical_document(
+        self,
+        document_id: str,
+        source_name: str,
+        parents: list[str],
+        children_by_parent: list[list[str]],
+        metadata: dict[str, Any] | None = None,
+    ) -> int:
+        """Store parent windows (raw, unembedded) plus embedded child windows.
+
+        Children are embedded and linked to their parent row via ``parent_id``
+        so retrieval can match the small child but answer with the full parent
+        context.
+        """
+        del metadata
+        if len(parents) != len(children_by_parent):
+            raise ValueError("parents and children_by_parent must align")
+        child_texts = [child for group in children_by_parent for child in group]
+
+        vectors = self.embedding_function.embed_documents(child_texts)
+        sparse_weights: list[str] | None = None
+        if self._supports_sparse():
+            lexical = self.embedding_function.embed_sparse(child_texts)
+            sparse_weights = [
+                json.dumps({str(token): float(weight) for token, weight in weights.items()})
+                for weights in lexical
+            ]
+
+        with get_connection() as conn, conn.cursor() as cursor:
+            cursor.execute("DELETE FROM material_chunks WHERE document_id = %s", (document_id,))
+            cursor.execute("DELETE FROM material_parents WHERE document_id = %s", (document_id,))
+
+            parent_ids: list[Any] = []
+            for parent_index, parent_text in enumerate(parents):
+                cursor.execute(
+                    """
+                    INSERT INTO material_parents (document_id, source_name, parent_index, content)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id
+                    """,
+                    (document_id, source_name, parent_index, parent_text),
+                )
+                row = cursor.fetchone()
+                parent_ids.append(row["id"] if row else None)
+
+            rows = []
+            global_index = 0
+            for group_index, group in enumerate(children_by_parent):
+                for chunk in group:
+                    rows.append(
+                        (
+                            document_id,
+                            source_name,
+                            global_index,
+                            chunk,
+                            _vector_literal(vectors[global_index]),
+                            sparse_weights[global_index] if sparse_weights else "{}",
+                            parent_ids[group_index],
+                        )
+                    )
+                    global_index += 1
+            cursor.executemany(
+                """
+                INSERT INTO material_chunks
+                    (document_id, source_name, chunk_index, content, embedding,
+                     sparse_weights, parent_id)
+                VALUES (%s, %s, %s, %s, %s::vector, %s::jsonb, %s)
+                """,
+                rows,
+            )
+            if document_id:
+                self._run_scope_sync(document_id, cursor)
+            conn.commit()
+        return len(child_texts)
 
     def query(
         self,
@@ -100,22 +203,66 @@ class PgVectorBackend:
         document_id: str | None = None,
     ) -> list[SearchResult]:
         vector = self.embedding_function.embed_query(text)
+        sparse: dict[int, float] | None = None
+        if self._supports_sparse():
+            sparse = self.embedding_function.embed_sparse([text])[0]
+
+        candidate_count = max(top_k, settings.embedding_candidate_count)
         with get_connection() as conn, conn.cursor() as cursor:
             cursor.execute(
-                "SELECT * FROM match_material_chunks(%s::vector, %s, %s, %s)",
-                (_vector_literal(vector), document_id, top_k, course_id),
+                """
+                SELECT mc.id, mc.document_id, mc.source_name, mc.chunk_index,
+                       mc.content, mc.sparse_weights, mp.content AS parent_content,
+                       1 - (mc.embedding <=> %s::vector) AS similarity
+                FROM material_chunks mc
+                LEFT JOIN material_parents mp ON mp.id = mc.parent_id
+                WHERE mc.embedding IS NOT NULL
+                  AND (%s::text IS NULL OR mc.document_id = %s)
+                  AND (%s::uuid IS NULL OR mc.course_id = %s)
+                ORDER BY mc.embedding <=> %s::vector
+                LIMIT %s
+                """,
+                (
+                    _vector_literal(vector),
+                    document_id,
+                    document_id,
+                    course_id,
+                    course_id,
+                    _vector_literal(vector),
+                    candidate_count,
+                ),
             )
             rows = cursor.fetchall()
-        results: list[SearchResult] = []
+
+        dense_weight = float(settings.embedding_dense_weight)
+        sparse_weight = 1.0 - dense_weight
+        scored = []
         for row in rows:
+            similarity = float(row["similarity"])
+            if sparse is not None and row.get("sparse_weights"):
+                document_sparse = {
+                    int(token): float(weight)
+                    for token, weight in row["sparse_weights"].items()
+                }
+                score = dense_weight * similarity + sparse_weight * sparse_cosine(
+                    sparse, document_sparse
+                )
+            else:
+                score = similarity
+            scored.append((score, row))
+
+        scored.sort(key=lambda item: item[0], reverse=True)
+        results: list[SearchResult] = []
+        for score, row in scored[:top_k]:
+            context = row.get("parent_content") or row["content"]
             results.append(
                 SearchResult(
                     id=str(row["id"]),
                     document_id=str(row["document_id"]),
                     source_name=str(row["source_name"]),
                     chunk_index=int(row["chunk_index"]),
-                    text=str(row["content"]),
-                    score=float(row["similarity"]),
+                    text=str(context),
+                    score=score,
                 )
             )
         return results
@@ -123,6 +270,7 @@ class PgVectorBackend:
     def delete_document(self, document_id: str) -> None:
         with get_connection() as conn, conn.cursor() as cursor:
             cursor.execute("DELETE FROM material_chunks WHERE document_id = %s", (document_id,))
+            cursor.execute("DELETE FROM material_parents WHERE document_id = %s", (document_id,))
             conn.commit()
 
 
@@ -170,19 +318,35 @@ class VectorStore:
         if selected not in ("auto", "pgvector", "chromadb"):
             logger.warning("Unknown VECTOR_STORE_BACKEND %r; using 'auto'.", selected)
             selected = "auto"
+
+        provider_embedding = get_embedding_function()
+        provider_dims = int(
+            getattr(provider_embedding, "dimensions", None) or settings.embedding_dimensions
+        )
+        use_pgvector = not isinstance(provider_embedding, HashingEmbeddingFunction)
+        if use_pgvector and provider_dims != settings.embedding_dimensions:
+            logger.warning(
+                "Embedding provider %s emits %d-dim vectors but pgvector expects %d "
+                "(EMBEDDING_DIMENSIONS); falling back to ChromaDB.",
+                provider_embedding.name(),
+                provider_dims,
+                settings.embedding_dimensions,
+            )
+            use_pgvector = False
         if selected == "pgvector":
-            if settings.gemini_api_key:
-                self._pg_backend = PgVectorBackend()
+            if use_pgvector:
+                self._pg_backend = PgVectorBackend(embedding_function=provider_embedding)
                 logger.info(
                     "Vector store: pgvector (%s)",
                     self._pg_backend.embedding_function.name(),
                 )
             else:
                 logger.warning(
-                    "pgvector backend requested but GEMINI_API_KEY is unset; using ChromaDB.",
+                    "pgvector backend requested but no real embedding provider is "
+                    "available (no GEMINI_API_KEY and no FlagEmbedding); using ChromaDB.",
                 )
-        elif selected == "auto" and settings.gemini_api_key:
-            self._pg_backend = PgVectorBackend()
+        elif selected == "auto" and use_pgvector:
+            self._pg_backend = PgVectorBackend(embedding_function=provider_embedding)
             logger.info(
                 "Vector store: pgvector (%s)",
                 self._pg_backend.embedding_function.name(),
@@ -219,6 +383,32 @@ class VectorStore:
                     "pgvector upsert failed for %s; falling back to ChromaDB", document_id
                 )
         return self._chroma_upsert(document_id, source_name, chunks, metadata or {})
+
+    def upsert_hierarchical_document(
+        self,
+        document_id: str,
+        source_name: str,
+        parents: list[str],
+        children_by_parent: list[list[str]],
+        metadata: dict[str, Any] | None = None,
+    ) -> int:
+        """Prefer pgvector parent/child storage; flatten to plain chunks for ChromaDB."""
+        if self._pg_backend is not None:
+            try:
+                return self._pg_backend.upsert_hierarchical_document(
+                    document_id,
+                    source_name,
+                    parents,
+                    children_by_parent,
+                    metadata or {},
+                )
+            except Exception:
+                logger.exception(
+                    "pgvector hierarchical upsert failed for %s; falling back to ChromaDB",
+                    document_id,
+                )
+        child_texts = [child for group in children_by_parent for child in group]
+        return self._chroma_upsert(document_id, source_name, child_texts, metadata or {})
 
     def _chroma_upsert(
         self,

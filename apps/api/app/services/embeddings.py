@@ -13,6 +13,7 @@ from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.preprocessing import normalize
 
 from app.core.config import get_settings
+from app.services.bge_m3 import BGEM3EmbeddingFunction, bge_m3_available
 
 logger = logging.getLogger(__name__)
 
@@ -232,17 +233,52 @@ def _retry_delay(attempt: int, headers: Any) -> float:
 
 
 def embed_query(text: str) -> list[float]:
-    """Top-level helper: returns a real embedding or falls back to hashing."""
-    if not settings.gemini_api_key:
-        return HashingEmbeddingFunction()([text])[0]
-    return GeminiEmbeddingFunction().embed_query(text)
+    """Top-level helper: returns an embedding from the configured provider."""
+    embedding_function = get_embedding_function()
+    return embedding_function.embed_query(text)
 
 
 def embed_documents(texts: list[str]) -> list[list[float]]:
-    """Top-level helper: returns real embeddings or falls back to hashing."""
-    if not settings.gemini_api_key:
-        return HashingEmbeddingFunction()(texts)
-    return GeminiEmbeddingFunction().embed_documents(texts)
+    """Top-level helper: returns embeddings from the configured provider."""
+    return get_embedding_function().embed_documents(texts)
+
+
+def get_embedding_function():
+    """Return the embedding function selected by ``settings.embedding_provider``.
+
+    * ``bge-m3`` -- self-hosted dense+sparse (``FlagEmbedding``/torch required).
+    * ``gemini`` -- paid Gemini text-embedding API (legacy).
+    * ``hashing`` -- deterministic local bag-of-words (dev fallback, collides with
+      the ChromaDB fallback store).
+
+    A chosen provider that cannot load degrades to Gemini when a key is present,
+    then to hashing, so nothing raises at import time.
+    """
+    provider = (settings.embedding_provider or "bge-m3").lower()
+
+    def _gemini_or_hashing():
+        if settings.gemini_api_key:
+            return GeminiEmbeddingFunction()
+        logger.warning(
+            "Embedding provider 'gemini' selected but GEMINI_API_KEY is unset; "
+            "using hashing embeddings."
+        )
+        return HashingEmbeddingFunction()
+
+    if provider == "bge-m3":
+        if bge_m3_available():
+            return BGEM3EmbeddingFunction()
+        logger.warning(
+            "Embedding provider 'bge-m3' selected but FlagEmbedding is unavailable; "
+            "falling back."
+        )
+        return _gemini_or_hashing()
+    if provider == "gemini":
+        return _gemini_or_hashing()
+    if provider == "hashing":
+        return HashingEmbeddingFunction()
+    logger.warning("Unknown EMBEDDING_PROVIDER %r; using hashing.", provider)
+    return HashingEmbeddingFunction()
 
 
 def is_gemini_available() -> bool:

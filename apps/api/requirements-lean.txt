@@ -22,6 +22,12 @@ PyJWT>=2.8.0
 
 # Image processing (lightweight)
 Pillow>=10.4.0
+# Handout OCR on the API process (/documents/ocr). The tesseract binary itself
+# is apt-installed in the base image; the opencv shadow-destroyer handles
+# unevenly-lit phone photos before pytesseract runs.
+opencv-python-headless>=4.9.0.80
+pillow-heif>=0.15.0
+pytesseract>=0.3.13
 
 # PDF processing
 PyMuPDF>=1.24.0

@@ -69,13 +69,27 @@ class Settings(BaseSettings):
     alert_webhook_url: str | None = Field(default=None)
 
     # Vector search
-    # "auto" uses pgvector when GEMINI_API_KEY is set, otherwise ChromaDB.
+    # "auto" uses pgvector when an embedding provider is available, otherwise ChromaDB.
     # Explicit "pgvector" or "chromadb" forces the backend.
     vector_store_backend: str = Field(default="auto")
+    # Embedding provider: "bge-m3" (self-hosted dense+sparse, no per-call cost),
+    # "gemini" (paid API, legacy), or "hashing" (dev fallback).
+    embedding_provider: str = Field(default="bge-m3")
     embedding_model: str = Field(default="gemini-embedding-001")
-    embedding_dimensions: int = Field(default=768)
+    # Must match the `material_chunks.embedding` column dimension (migration 035
+    # resized it to 1024 for BGE-M3). The Gemini fallback pins outputDimensionality
+    # to this value so both providers stay insert/query-compatible with pgvector.
+    embedding_dimensions: int = Field(default=1024)
     embedding_batch_size: int = Field(default=64)
     embedding_cache_ttl_seconds: int = Field(default=604800)
+
+    # BGE-M3 (self-hosted)
+    bge_m3_model: str = Field(default="BAAI/bge-m3")
+    bge_m3_device: str = Field(default="cpu")
+    # Candidate pool fetched from the dense pass before the hybrid rerank.
+    embedding_candidate_count: int = Field(default=50)
+    # Hybrid score = dense_weight * dense + (1 - dense_weight) * sparse.
+    embedding_dense_weight: float = Field(default=0.5)
 
     # Exact-match response cache for the academic agent (whole-class dedup).
     prompt_cache_ttl_seconds: int = Field(default=604800)

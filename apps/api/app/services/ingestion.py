@@ -6,7 +6,7 @@ from pathlib import Path
 from app.core.config import get_settings
 from app.services.docling_parser import ParsedDocument, parse_with_docling
 from app.services.pdf import compress_pdf
-from app.services.rag import build_chunks
+from app.services.rag import build_hierarchical_chunks
 from app.services.study_assistant import StudyInsights, generate_study_insights
 from app.services.vector_store import VectorStore
 
@@ -39,22 +39,24 @@ def ingest_document(
         document_id=document_id or path.stem,
         source_name=path.name,
     )
-    chunks = build_chunks(parsed_document.markdown)
+    parents, children_by_parent = build_hierarchical_chunks(parsed_document.markdown)
+    child_count = sum(len(children) for children in children_by_parent)
     insights: StudyInsights = generate_study_insights(
         parsed_document.markdown,
         department_code=department_code,
     )
-    _vector_store.upsert_document(
+    _vector_store.upsert_hierarchical_document(
         document_id=parsed_document.document_id,
         source_name=parsed_document.source_name,
-        chunks=chunks,
+        parents=parents,
+        children_by_parent=children_by_parent,
         metadata=parsed_document.metadata,
     )
     return IngestionResult(
         document_id=parsed_document.document_id,
         source_name=parsed_document.source_name,
         compressed_path=str(compressed_path),
-        chunk_count=len(chunks),
+        chunk_count=child_count,
         parser=str(parsed_document.metadata.get("parser", "unknown")),
         department_code=insights.department_code,
         summary=insights.summary,
