@@ -53,7 +53,7 @@ def _owner(table: str, col: str) -> TableSpec:
 _REFERENCE = ["colleges", "departments", "courses", "badges", "reward_items",
               "universities", "department_catalog"]
 _SERVICE = ["material_chunks", "academic_agent_tasks", "uploaded_files",
-            "solved_bank_batches", "solved_questions"]
+            "solved_bank_batches", "solved_questions", "semantic_cache"]
 
 # ── Owner-scoped tables ───────────────────────────────────────────────
 _OWNER_COLUMNS = {
@@ -153,7 +153,7 @@ TABLE_SPECS: list[TableSpec] = (
 SPEC_BY_TABLE: dict[str, TableSpec] = {s.table: s for s in TABLE_SPECS}
 
 # Tables that exist outside SQLAlchemy metadata (raw SQL migrations).
-EXTRA_BASELINE_TABLES = {"material_chunks", "academic_agent_tasks", "uploaded_files"}
+EXTRA_BASELINE_TABLES = {"material_chunks", "academic_agent_tasks", "uploaded_files", "semantic_cache"}
 
 # Minimal grant surface used by the audit probe role.
 PROBE_TABLES = [

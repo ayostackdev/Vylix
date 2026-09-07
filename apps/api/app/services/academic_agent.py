@@ -12,6 +12,7 @@ from google.genai import errors, types
 from app.core.config import get_settings
 from app.core.postgres import get_connection
 from app.services.gemini import GeminiError, SERVICE_BUSY_MESSAGE, estimate_cost
+from app.services.semantic_cache import get_semantic_cache, put_semantic_cache
 from app.services.vector_store import VectorStore
 
 logger = logging.getLogger(__name__)
@@ -113,6 +114,37 @@ def _get_vector_store() -> VectorStore:
     if _vector_store is None:
         _vector_store = VectorStore(persist_directory=settings.temp_dir / "chromadb")
     return _vector_store
+
+
+def _agent_query_embedding(text: str) -> list[float] | None:
+    """Embed a short agent query, reusing the VectorStore's persistent
+    embedding function so the (possibly BGE-M3) model is not reloaded per
+    request. Falls back to the module-level helper; ``None`` on failure so the
+    semantic cache degrades gracefully."""
+    try:
+        return _get_vector_store().embedding_function.embed_query(text)
+    except Exception:
+        try:
+            from app.services.embeddings import embed_query
+
+            return embed_query(text)
+        except Exception:
+            logger.exception("Query embedding failed; semantic cache skipped")
+            return None
+
+
+def _try_semantic_cache(query: str, course_id: str, tier: str) -> str | None:
+    embedding = _agent_query_embedding(query)
+    if embedding is None:
+        return None
+    return get_semantic_cache(embedding, course_id, tier)
+
+
+def _try_semantic_cache_store(query: str, course_id: str, tier: str, answer: str) -> None:
+    embedding = _agent_query_embedding(query)
+    if embedding is None:
+        return
+    put_semantic_cache(embedding, course_id, tier, query, answer)
 
 
 # ── Stage 1: Investigator ────────────────────────────────────────────────
@@ -234,8 +266,6 @@ def run_vylix_academic_agent(
         task_tier,
     )
 
-    weakness = get_student_weakness_metrics(user_id)
-
     if course_id is None:
         course_id, _university_id = resolve_course_context(course_code)
     if course_id is None:
@@ -244,10 +274,6 @@ def run_vylix_academic_agent(
             course_code,
         )
         material = "No relevant course material found."
-    else:
-        material = search_course_vector_chunks(
-            course_code, user_prompt, course_id=course_id
-        )
 
     tier = "complex" if task_tier == "complex" else "standard"
     if tier == "complex" and not settings.pro_tier_enabled:
@@ -259,6 +285,37 @@ def run_vylix_academic_agent(
         tier = "standard"
 
     model_id = PRO_MODEL if tier == "complex" else FLASH_MODEL
+
+    # Semantic cache: another student already asked this question in this
+    # course/tier. Return the stored answer before retrieval and the LLM call
+    # (zero token cost). Answers are shared per course, so cached hits do not
+    # carry the asker's weakness personalization.
+    if course_id is not None:
+        cached_answer = _try_semantic_cache(user_prompt, course_id, tier)
+        if cached_answer is not None:
+            logger.info(
+                "Agent semantic-cache hit user=%s course=%s tier=%s",
+                user_id,
+                course_code,
+                tier,
+            )
+            from app.services.usage_log import record_ai_usage
+
+            record_ai_usage(
+                model=model_id,
+                feature="study_agent",
+                user_id=user_id,
+                task_tier=tier,
+                dedup_hit=True,
+            )
+            return cached_answer
+
+    weakness = get_student_weakness_metrics(user_id)
+
+    if course_id is not None:
+        material = search_course_vector_chunks(
+            course_code, user_prompt, course_id=course_id
+        )
 
     system = (
         "You are the Vylix Autonomous Academic Coach - a private tutor. "
@@ -323,6 +380,9 @@ def run_vylix_academic_agent(
     result = response.text
 
     _prompt_cache_set(cache_key, result)
+
+    if course_id is not None:
+        _try_semantic_cache_store(user_prompt, course_id, tier, result)
 
     try:
         meta = getattr(response, "usage_metadata", None)

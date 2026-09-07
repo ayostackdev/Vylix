@@ -99,6 +99,15 @@ class Settings(BaseSettings):
     # Exact-match response cache for the academic agent (whole-class dedup).
     prompt_cache_ttl_seconds: int = Field(default=604800)
 
+    # Semantic response cache for the academic agent (question-level dedup):
+    # embeds the raw student prompt and returns a cached answer when the
+    # nearest stored query (same course + tier) has cosine similarity >=
+    # threshold, skipping retrieval and the LLM entirely. Disabled
+    # automatically when the embedding dimension does not match the
+    # semantic_cache.question_embedding column (VECTOR(1024)).
+    semantic_cache_threshold: float = Field(default=0.95)
+    semantic_cache_ttl_seconds: int = Field(default=2419200)
+
     # Maintenance
     maintenance_api_key: str = Field(default="")
 
