@@ -90,6 +90,11 @@ class Settings(BaseSettings):
     embedding_candidate_count: int = Field(default=50)
     # Hybrid score = dense_weight * dense + (1 - dense_weight) * sparse.
     embedding_dense_weight: float = Field(default=0.5)
+    # ColBERT (BGE-M3 multi-vector) late-interaction rerank over the top
+    # candidates. 0 disables it; higher weights trust the token-level MaxSim
+    # score over the hybrid dense+sparse score.
+    embedding_colbert_weight: float = Field(default=0.6)
+    embedding_rerank_candidates: int = Field(default=20)
 
     # Exact-match response cache for the academic agent (whole-class dedup).
     prompt_cache_ttl_seconds: int = Field(default=604800)

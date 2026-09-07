@@ -65,6 +65,7 @@ class BGEM3EmbeddingFunction:
 
     dimensions = DENSE_DIMENSIONS
     supports_sparse = True
+    supports_colbert = True
 
     def __init__(self) -> None:
         self.model_name = settings.bge_m3_model
@@ -106,8 +107,20 @@ class BGEM3EmbeddingFunction:
     def __call__(self, texts: list[str]) -> list[list[float]]:
         return self.embed_documents(texts)
 
-    def encode(self, texts: list[str]) -> dict[str, Any]:
-        """Return normalized dense vectors and lexical weights for ``texts``."""
+    def encode(
+        self,
+        texts: list[str],
+        with_colbert: bool = False,
+    ) -> dict[str, Any]:
+        """Return normalized dense vectors and lexical weights for ``texts``.
+
+        ``with_colbert`` additionally returns the multi-vector token/char-level
+        embeddings used for late-interaction (MaxSim) reranking. ColBERT output
+        is only materialized on demand: ingestion calls go through
+        ``embed_documents``/``embed_sparse`` (colbert off), while the query-time
+        rerank in ``embed_colbert`` pays the extra compute on a handful of
+        candidates instead of storing per-token vectors in the database.
+        """
         model = self._load()
         with self._lock:
             output = model.encode(
@@ -116,11 +129,22 @@ class BGEM3EmbeddingFunction:
                 max_length=8192,
                 return_dense=True,
                 return_sparse=True,
-                return_colbert_vectors=False,
+                return_colbert_vectors=with_colbert,
             )
         dense = _normalize(np.asarray(output["dense_vecs"], dtype=np.float32))
         lexical = output["lexical_weights"]
-        return {"dense_vecs": dense, "lexical_weights": [dict(w) for w in lexical]}
+        result: dict[str, Any] = {
+            "dense_vecs": dense,
+            "lexical_weights": [dict(w) for w in lexical],
+        }
+        if with_colbert:
+            # BGEM3FlagModel returns the multi-vectors shape (T, 1024) per text
+            # (or (1, T, 1024) for a lone text); normalize each token vector.
+            result["colbert_vecs"] = [
+                _normalize(_as_token_matrix(vec, DENSE_DIMENSIONS))
+                for vec in output["colbert_vecs"]
+            ]
+        return result
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         return self.encode(texts)["dense_vecs"].tolist()
@@ -131,6 +155,18 @@ class BGEM3EmbeddingFunction:
     def embed_sparse(self, texts: list[str]) -> list[dict[int, float]]:
         """Return lexical weights keyed by token id for hybrid retrieval."""
         return self.encode(texts)["lexical_weights"]
+
+    def embed_colbert(self, texts: list[str]) -> list[np.ndarray]:
+        """Return per-token L2-normalized multi-vectors for late-interaction scoring."""
+        return self.encode(texts, with_colbert=True)["colbert_vecs"]
+
+
+def _as_token_matrix(vec, columns: int) -> np.ndarray:
+    """Coerce a text's colbert vector to a (num_tokens, columns) matrix.
+
+    Handles flat token vectors as well as batched shapes like ``(1, T, D)``.
+    """
+    return np.asarray(vec, dtype=np.float32).reshape(-1, columns)
 
 
 def _normalize(matrix: np.ndarray) -> np.ndarray:
@@ -150,3 +186,17 @@ def sparse_cosine(query: dict[int, float], document: dict[int, float]) -> float:
     if q_norm == 0 or d_norm == 0:
         return 0.0
     return float(dot / (q_norm * d_norm))
+
+
+def colbert_maxsim(query: np.ndarray, document: np.ndarray) -> float:
+    """Late-interaction MaxSim score between two (T, D) token matrices.
+
+    For every query token, take its maximum similarity over all document
+    tokens, then average across query tokens (ColBERT's scoring rule). Inputs
+    must be row-L2-normalized (``embed_colbert`` already is). Returns ``0.0``
+    when either side has no tokens.
+    """
+    if query.shape[0] == 0 or document.shape[0] == 0:
+        return 0.0
+    similarities = query @ document.T
+    return float(similarities.max(axis=1).mean())

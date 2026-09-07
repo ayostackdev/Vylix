@@ -10,7 +10,7 @@ import numpy as np
 
 from app.core.config import get_settings
 from app.core.postgres import get_connection
-from app.services.bge_m3 import sparse_cosine
+from app.services.bge_m3 import colbert_maxsim, sparse_cosine
 from app.services.embeddings import (
     HashingEmbeddingFunction,
     get_embedding_function,
@@ -67,6 +67,9 @@ class PgVectorBackend:
 
     def _supports_sparse(self) -> bool:
         return bool(getattr(self.embedding_function, "supports_sparse", False))
+
+    def _supports_colbert(self) -> bool:
+        return bool(getattr(self.embedding_function, "supports_colbert", False))
 
     def _run_scope_sync(self, document_id: str, cursor: Any) -> None:
         cursor.execute(_SCOPE_SYNC, (document_id,))
@@ -252,6 +255,15 @@ class PgVectorBackend:
             scored.append((score, row))
 
         scored.sort(key=lambda item: item[0], reverse=True)
+
+        # Optional ColBERT late-interaction rerank: re-encode the top candidates
+        # (child chunks, not parents) plus the query in one batched forward pass
+        # and blend the token-level MaxSim score with the hybrid score. This adds
+        # no storage because only the handful of candidate texts are encoded at
+        # query time.
+        if float(settings.embedding_colbert_weight) > 0.0 and self._supports_colbert():
+            scored = self._colbert_rerank(text, scored, top_k)
+
         results: list[SearchResult] = []
         for score, row in scored[:top_k]:
             context = row.get("parent_content") or row["content"]
@@ -266,6 +278,38 @@ class PgVectorBackend:
                 )
             )
         return results
+
+    def _colbert_rerank(
+        self,
+        text: str,
+        scored: list[tuple[float, dict[str, Any]]],
+        top_k: int,
+    ) -> list[tuple[float, dict[str, Any]]]:
+        """Blend ColBERT MaxSim into the top candidates' hybrid scores.
+
+        ``scored`` is ``[(hybrid_score, row), ...]`` already sorted descending.
+        The ``row`` entries come from the candidate SQL and must carry a
+        ``content`` key (the embedded child text). Vectors are computed on the
+        fly for the query plus the top ``embedding_rerank_candidates`` rows only,
+        so nothing is stored in the database.
+        """
+        colbert_weight = float(settings.embedding_colbert_weight)
+        rerank_count = max(top_k, int(settings.embedding_rerank_candidates))
+        pool = scored[:rerank_count]
+        if not pool:
+            return scored
+
+        query_vecs, *document_vecs = self.embedding_function.embed_colbert(
+            [text] + [item[1]["content"] for item in pool]
+        )
+        reranked = []
+        for (hybrid_score, row), document_vec in zip(pool, document_vecs):
+            maxsim = colbert_maxsim(query_vecs, document_vec)
+            reranked.append(
+                (colbert_weight * maxsim + (1.0 - colbert_weight) * hybrid_score, row)
+            )
+        reranked.sort(key=lambda item: item[0], reverse=True)
+        return reranked
 
     def delete_document(self, document_id: str) -> None:
         with get_connection() as conn, conn.cursor() as cursor:
