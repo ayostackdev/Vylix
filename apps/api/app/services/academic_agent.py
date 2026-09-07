@@ -232,12 +232,17 @@ def search_course_vector_chunks(
     query: str,
     course_id: str | None = None,
     university_id: str | None = None,
+    enable_colbert: bool | None = None,
 ) -> str:
     try:
         store = _get_vector_store()
         enriched = f"[{course_code}] {query}"
         results = store.query(
-            enriched, top_k=5, course_id=course_id, university_id=university_id
+            enriched,
+            top_k=5,
+            course_id=course_id,
+            university_id=university_id,
+            enable_colbert=enable_colbert,
         )
     except Exception:
         logger.exception("Vector search failed for course %s", course_code)
@@ -324,6 +329,7 @@ def run_vylix_academic_agent(
             user_prompt,
             course_id=course_id,
             university_id=university_id,
+            enable_colbert=(tier == "complex"),
         )
 
     system = (

@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16-alpine
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: vylix
           POSTGRES_PASSWORD: vylix
@@ -84,9 +84,14 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
-      - name: Install dependencies
+      - name: Install dependencies (lean API image, no torch)
         working-directory: apps/api
-        run: pip install -r requirements.txt -r requirements-dev.txt
+        run: pip install -r requirements-lean.txt -r requirements-dev.txt
+      - name: Apply migrations
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://vylix:vylix@localhost:5432/vylix_test
+        run: alembic upgrade head
       - name: Run tests
         working-directory: apps/api
         env:
@@ -95,6 +100,73 @@ jobs:
           SUPABASE_JWT_SECRET: test-secret-for-ci
           CORS_ORIGINS: http://localhost:3000
         run: pytest -v
+      - name: Validate pgvector scoping path (synthetic embedder, no torch)
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://vylix:vylix@localhost:5432/vylix_test
+          REDIS_URL: redis://localhost:6379/0
+          SUPABASE_JWT_SECRET: test-secret-for-ci
+        run: python -m scripts.validate_stack --synthetic --course-code TESTCSE
+
+  validate-ml:
+    name: Validate ML Stack (real BGE-M3 + Docling)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: vylix
+          POSTGRES_PASSWORD: vylix
+          POSTGRES_DB: vylix_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      - name: Install worker dependencies (FlagEmbedding + Docling + torch)
+        working-directory: apps/api
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Apply migrations
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://vylix:vylix@localhost:5432/vylix_test
+        run: alembic upgrade head
+      - name: Build a sample handout PDF
+        working-directory: apps/api
+        run: >-
+          python -c "
+          import fitz
+          from scripts.validate_stack import SAMPLE_HANDOUT
+          doc = fitz.open()
+          page = doc.new_page()
+          page.insert_textbox(page.rect, SAMPLE_HANDOUT)
+          doc.save('sample-handout.pdf')
+          "
+      - name: Run end-to-end stack validation (real model)
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://vylix:vylix@localhost:5432/vylix_test
+          REDIS_URL: redis://localhost:6379/0
+          EMBEDDING_DIMENSIONS: "1024"
+        run: python -m scripts.validate_stack --pdf sample-handout.pdf --course-code TESTCSE
 
   build-web:
     name: Build Web

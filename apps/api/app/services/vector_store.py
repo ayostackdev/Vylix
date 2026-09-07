@@ -205,6 +205,7 @@ class PgVectorBackend:
         course_id: str | None = None,
         document_id: str | None = None,
         university_id: str | None = None,
+        enable_colbert: bool | None = None,
     ) -> list[SearchResult]:
         vector = self.embedding_function.embed_query(text)
         sparse: dict[int, float] | None = None
@@ -266,8 +267,11 @@ class PgVectorBackend:
         # (child chunks, not parents) plus the query in one batched forward pass
         # and blend the token-level MaxSim score with the hybrid score. This adds
         # no storage because only the handful of candidate texts are encoded at
-        # query time.
-        if float(settings.embedding_colbert_weight) > 0.0 and self._supports_colbert():
+        # query time. The caller can force it on/off (used to gate the extra
+        # CPU/quality cost to the Pro tier); None defers to config + provider.
+        colbert_enabled = float(settings.embedding_colbert_weight) > 0.0 and self._supports_colbert()
+        colbert_enabled = colbert_enabled if enable_colbert is None else enable_colbert
+        if colbert_enabled:
             scored = self._colbert_rerank(text, scored, top_k)
 
         results: list[SearchResult] = []
@@ -359,8 +363,9 @@ class VectorStore:
         persist_directory: str | Path = "./tmp/chromadb",
         collection_name: str = "vylix_documents",
         backend: str | None = None,
+        embedding_function: Any | None = None,
     ) -> None:
-        self.embedding_function = HashingEmbeddingFunction()
+        self.embedding_function = embedding_function or HashingEmbeddingFunction()
         self.persist_directory = Path(persist_directory)
         self.collection_name = collection_name
         self._fallback_records: list[dict[str, Any]] = []
@@ -373,7 +378,7 @@ class VectorStore:
             logger.warning("Unknown VECTOR_STORE_BACKEND %r; using 'auto'.", selected)
             selected = "auto"
 
-        provider_embedding = get_embedding_function()
+        provider_embedding = embedding_function or get_embedding_function()
         provider_dims = int(
             getattr(provider_embedding, "dimensions", None) or settings.embedding_dimensions
         )
@@ -507,6 +512,7 @@ class VectorStore:
         course_id: str | None = None,
         document_id: str | None = None,
         university_id: str | None = None,
+        enable_colbert: bool | None = None,
     ) -> list[SearchResult]:
         if self._pg_backend is not None:
             try:
@@ -516,6 +522,7 @@ class VectorStore:
                     course_id=course_id,
                     document_id=document_id,
                     university_id=university_id,
+                    enable_colbert=enable_colbert,
                 )
             except Exception:
                 logger.exception("pgvector query failed; falling back to ChromaDB")
