@@ -29,14 +29,3 @@ def extract_text_with_tesseract(image_path: str | Path, preprocess: bool = True)
         if preprocess and source != Path(image_path):
             with suppress(FileNotFoundError):
                 source.unlink()
-
-
-def extract_text_with_easyocr(image_path: str | Path, languages: list[str] | None = None) -> str:
-    try:
-        import easyocr
-    except ImportError as exc:
-        raise RuntimeError("easyocr is required for OCR extraction") from exc
-
-    reader = easyocr.Reader(languages or ["en"], gpu=False)
-    result = reader.readtext(str(image_path), detail=0)
-    return "\n".join(result)

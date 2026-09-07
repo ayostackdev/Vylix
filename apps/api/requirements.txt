@@ -31,22 +31,17 @@ PyMuPDF>=1.24.0
 
 # AI / ML
 numpy>=2.1.0
-pandas>=2.2.0
 scikit-learn>=1.5.0
 google-genai>=1.0.0
 
-# Self-hosted embeddings (dense + sparse); pulls torch (already present via easyocr)
+# Self-hosted embeddings (dense + sparse); pulls torch (already present via docling)
 FlagEmbedding>=1.2.10
 
-# OCR
+# OCR (image uploads): tesseract binary is apt-installed in the base image
 pytesseract>=0.3.13
-easyocr>=1.7.1
 
 # Document parsing
 docling>=2.0.0
-
-# Vector store
-chromadb>=0.5.0
 
 # Rate limiting
 slowapi>=0.1.9

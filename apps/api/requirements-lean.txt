@@ -34,12 +34,8 @@ PyMuPDF>=1.24.0
 
 # AI / ML (lightweight - no torch/transformers/easyocr/docling)
 numpy>=2.1.0
-pandas>=2.2.0
 scikit-learn>=1.5.0
 google-genai>=1.0.0
-
-# JWT
-PyJWT>=2.8.0
 
 # Rate limiting
 slowapi>=0.1.9

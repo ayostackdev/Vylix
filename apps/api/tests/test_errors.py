@@ -21,8 +21,8 @@ async def test_unhandled_errors_return_json_detail():
             resp = await client.get("/_test_crash")
             assert resp.status_code == 500
             assert resp.headers["content-type"].startswith("application/json")
-            assert "ValueError" in resp.json()["detail"]
-            assert "boom" in resp.json()["detail"]
+            # Internal details are deliberately not leaked to the client.
+            assert resp.json() == {"detail": "Internal server error"}
     finally:
         app.router.routes = [r for r in app.router.routes if getattr(r, "path", "") != "/_test_crash"]
 
