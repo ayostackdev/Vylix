@@ -204,6 +204,7 @@ class PgVectorBackend:
         top_k: int = 5,
         course_id: str | None = None,
         document_id: str | None = None,
+        university_id: str | None = None,
     ) -> list[SearchResult]:
         vector = self.embedding_function.embed_query(text)
         sparse: dict[int, float] | None = None
@@ -222,6 +223,9 @@ class PgVectorBackend:
                 WHERE mc.embedding IS NOT NULL
                   AND (%s::text IS NULL OR mc.document_id = %s)
                   AND (%s::uuid IS NULL OR mc.course_id = %s)
+                  AND (%s::uuid IS NULL
+                       OR mc.university_id = %s::uuid
+                       OR mc.university_id IS NULL)
                 ORDER BY mc.embedding <=> %s::vector
                 LIMIT %s
                 """,
@@ -231,6 +235,8 @@ class PgVectorBackend:
                     document_id,
                     course_id,
                     course_id,
+                    university_id,
+                    university_id,
                     _vector_literal(vector),
                     candidate_count,
                 ),
@@ -319,13 +325,17 @@ class PgVectorBackend:
 
 
 def _chroma_where(
-    course_id: str | None, document_id: str | None
+    course_id: str | None,
+    document_id: str | None,
+    university_id: str | None = None,
 ) -> dict[str, Any] | None:
     clauses: list[dict[str, Any]] = []
     if course_id:
         clauses.append({"course_id": course_id})
     if document_id:
         clauses.append({"document_id": document_id})
+    if university_id:
+        clauses.append({"university_id": university_id})
     if not clauses:
         return None
     return clauses[0] if len(clauses) == 1 else {"$and": clauses}
@@ -496,15 +506,26 @@ class VectorStore:
         top_k: int = 5,
         course_id: str | None = None,
         document_id: str | None = None,
+        university_id: str | None = None,
     ) -> list[SearchResult]:
         if self._pg_backend is not None:
             try:
                 return self._pg_backend.query(
-                    text, top_k=top_k, course_id=course_id, document_id=document_id
+                    text,
+                    top_k=top_k,
+                    course_id=course_id,
+                    document_id=document_id,
+                    university_id=university_id,
                 )
             except Exception:
                 logger.exception("pgvector query failed; falling back to ChromaDB")
-        return self._chroma_query(text, top_k, course_id=course_id, document_id=document_id)
+        return self._chroma_query(
+            text,
+            top_k,
+            course_id=course_id,
+            document_id=document_id,
+            university_id=university_id,
+        )
 
     def _chroma_query(
         self,
@@ -512,13 +533,14 @@ class VectorStore:
         top_k: int,
         course_id: str | None = None,
         document_id: str | None = None,
+        university_id: str | None = None,
     ) -> list[SearchResult]:
         if self._collection is not None:
             result = self._collection.query(
                 query_texts=[text],
                 n_results=top_k,
                 include=["documents", "metadatas", "distances"],
-                where=_chroma_where(course_id, document_id),
+                where=_chroma_where(course_id, document_id, university_id),
             )
             documents = result.get("documents", [[]])[0]
             metadatas = result.get("metadatas", [[]])[0]

@@ -87,6 +87,7 @@ async def run_study_agent(
             user_prompt=payload.prompt,
             task_tier=tier,
             course_id=course_id,
+            university_id=_course_university,
         )
     except GeminiError as exc:
         status_code, detail = error_response(exc)

@@ -231,11 +231,14 @@ def search_course_vector_chunks(
     course_code: str,
     query: str,
     course_id: str | None = None,
+    university_id: str | None = None,
 ) -> str:
     try:
         store = _get_vector_store()
         enriched = f"[{course_code}] {query}"
-        results = store.query(enriched, top_k=5, course_id=course_id)
+        results = store.query(
+            enriched, top_k=5, course_id=course_id, university_id=university_id
+        )
     except Exception:
         logger.exception("Vector search failed for course %s", course_code)
         return ""
@@ -258,6 +261,7 @@ def run_vylix_academic_agent(
     user_prompt: str,
     task_tier: str = "standard",
     course_id: str | None = None,
+    university_id: str | None = None,
 ) -> str:
     logger.info(
         "Agent start user=%s course=%s tier=%s",
@@ -267,7 +271,9 @@ def run_vylix_academic_agent(
     )
 
     if course_id is None:
-        course_id, _university_id = resolve_course_context(course_code)
+        course_id, university_id = resolve_course_context(course_code)
+    elif university_id is None:
+        _resolved_course_id, university_id = resolve_course_context(course_code)
     if course_id is None:
         logger.warning(
             "Agent could not resolve course %r; skipping material retrieval",
@@ -314,7 +320,10 @@ def run_vylix_academic_agent(
 
     if course_id is not None:
         material = search_course_vector_chunks(
-            course_code, user_prompt, course_id=course_id
+            course_code,
+            user_prompt,
+            course_id=course_id,
+            university_id=university_id,
         )
 
     system = (
