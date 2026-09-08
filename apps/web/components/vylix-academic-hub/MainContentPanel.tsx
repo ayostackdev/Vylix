@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { offlineStore } from '@/lib/offline-store'
 import { cacheMaterialPdf, openMaterialPdf, removeCachedPdf } from '@/lib/pdf-cache'
-import { fetchApi, parseApiError } from '@/lib/api-request'
+import { fetchApi, postJsonApi, sha256Hex, parseApiError } from '@/lib/api-request'
 import { getAuthHeaders } from '@/lib/auth-fetch'
 
 import type { DocumentInfo } from './ThreePanelLayout'
@@ -240,6 +240,48 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
         return
       }
 
+      const auth = { Authorization: `Bearer ${session.access_token}` }
+      const commonMeta = {
+        file_size: file.size,
+        content_type: file.type,
+        title: file.name,
+        course_code: course?.code || '',
+        content_hash: await sha256Hex(file),
+      }
+
+      // Presigned direct upload to R2 when the provider supports it.
+      const reqRes = await postJsonApi('/api/materials/request-upload', {
+        file_name: file.name,
+        ...commonMeta,
+      }, auth)
+      if (reqRes.ok) {
+        const req = await reqRes.json()
+        const put = await fetch(req.upload_url, { method: 'PUT', body: file })
+        if (!put.ok) {
+          setActionError(`"${file.name}" upload failed (${put.status}). Please try again.`)
+          return
+        }
+        const res = await postJsonApi('/api/materials/complete-upload', {
+          material_id: req.material_id,
+          storage_path: req.storage_path,
+          file_name: file.name,
+          ...commonMeta,
+        }, auth)
+        if (!res.ok) {
+          const err = await res.json().catch(() => null)
+          setActionError(parseApiError(err, `Upload failed. Please try again. (HTTP ${res.status})`))
+          return
+        }
+        await fetchMaterials()
+        return
+      }
+
+      if (reqRes.status !== 501 && reqRes.status !== 404) {
+        const err = await reqRes.json().catch(() => null)
+        setActionError(parseApiError(err, `Upload failed. Please try again. (HTTP ${reqRes.status})`))
+        return
+      }
+
       const formData = new FormData()
       formData.append('file', file)
       formData.append('title', file.name)
@@ -247,7 +289,7 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
 
       const res = await fetchApi('/api/materials/upload', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: auth,
         body: formData,
         direct: true,
       })

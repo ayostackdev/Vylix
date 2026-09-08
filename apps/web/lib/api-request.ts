@@ -112,3 +112,46 @@ export function postFormDataApi(
 		});
 	}
 }
+
+export async function postJsonApi(
+	path: string,
+	body: unknown,
+	headers?: Record<string, string>,
+): Promise<Response> {
+	return fetchApi(path, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json', ...(headers || {}) },
+		body: JSON.stringify(body),
+	});
+}
+
+export function putFileDirect(
+	url: string,
+	file: File,
+	onProgress?: (loaded: number, total: number) => void,
+): Promise<FormDataApiResponse> {
+	return new Promise((resolve, reject) => {
+		const xhr = new XMLHttpRequest();
+
+		xhr.upload.onprogress = (event) => {
+			if (event.lengthComputable && onProgress) {
+				onProgress(event.loaded, event.total);
+			}
+		};
+
+		xhr.onload = () => resolve({ status: xhr.status, body: xhr.responseText });
+		xhr.onerror = () => reject(new Error('Direct upload failed (network error)'));
+		xhr.onabort = () => reject(new Error('Upload cancelled'));
+
+		xhr.open('PUT', url);
+		xhr.send(file);
+	});
+}
+
+export async function sha256Hex(file: File): Promise<string> {
+	const buffer = await file.arrayBuffer();
+	const digest = await crypto.subtle.digest('SHA-256', buffer);
+	return Array.from(new Uint8Array(digest))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
+}

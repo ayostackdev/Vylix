@@ -4,7 +4,13 @@ import { useRef, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { queryClient } from '@/lib/query-client';
 import { useAuth } from '@/context/auth-context';
-import { postFormDataApi, parseApiError } from '@/lib/api-request';
+import {
+	postFormDataApi,
+	postJsonApi,
+	putFileDirect,
+	sha256Hex,
+	parseApiError,
+} from '@/lib/api-request';
 
 interface UploadMaterialModalProps {
   isOpen: boolean;
@@ -97,9 +103,73 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess, defaultIsPastQ
     total: number,
     sessionToken: string,
   ): Promise<void> => {
+    const auth = { Authorization: `Bearer ${sessionToken}` };
+    const autoTitle = titleFromFilename(file.name);
+    const commonMeta = {
+      file_size: file.size,
+      content_type: file.type,
+      title: autoTitle,
+      is_past_question: isPastQuestion,
+      exam_year: examYear ? Number(examYear) : undefined,
+      semester: semester || undefined,
+      content_hash: await sha256Hex(file),
+    };
+    const courseMeta = {
+      course_code: courseCode.trim().toUpperCase() || undefined,
+      department_code: user?.departmentCode || undefined,
+    };
+    const applyProgress = (loaded: number, totalBytes: number) => {
+      const fileProgress = Math.round((loaded / totalBytes) * 100);
+      const overall = Math.round((index / total) * 100 + fileProgress / total);
+      setProgress(Math.min(overall, 100));
+    };
+
+    // Preferred path: presigned direct upload to R2 (keeps the API/VPS off
+    // the upload bytes). Falls back to server-side multipart when the active
+    // storage provider has no presigned-write support.
+    const reqRes = await postJsonApi('/api/materials/request-upload', {
+      file_name: file.name,
+      ...commonMeta,
+      ...courseMeta,
+    }, auth);
+    if (reqRes.ok) {
+      const req = await reqRes.json();
+      const put = await putFileDirect(req.upload_url, file, applyProgress);
+      if (put.status < 200 || put.status >= 300) {
+        throw new Error(`"${file.name}" upload failed (${put.status}). Please try again.`);
+      }
+      const res = await postJsonApi('/api/materials/complete-upload', {
+        material_id: req.material_id,
+        storage_path: req.storage_path,
+        file_name: file.name,
+        ...commonMeta,
+        ...courseMeta,
+      }, auth);
+      if (!res.ok) {
+        let message = `"${file.name}" failed (${res.status})`;
+        try {
+          message = parseApiError(await res.json(), message);
+        } catch {
+          // Non-JSON error body.
+        }
+        throw new Error(message);
+      }
+      return;
+    }
+
+    if (reqRes.status !== 501 && reqRes.status !== 404) {
+      let message = `"${file.name}" failed (${reqRes.status})`;
+      try {
+        message = parseApiError(await reqRes.json(), message);
+      } catch {
+        // Response body was not JSON.
+      }
+      throw new Error(message);
+    }
+
+    // Legacy server-side upload (Supabase/Appwrite providers or older API).
     const formData = new FormData();
     formData.append('file', file);
-    const autoTitle = titleFromFilename(file.name);
     formData.append('title', autoTitle);
     if (courseCode.trim()) formData.append('course_code', courseCode.trim().toUpperCase());
     if (user?.departmentCode) formData.append('department_code', user.departmentCode);
@@ -110,14 +180,8 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess, defaultIsPastQ
     }
 
     const result = await postFormDataApi('/api/materials/upload', formData, {
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-      },
-      onProgress: (loaded, totalBytes) => {
-        const fileProgress = Math.round((loaded / totalBytes) * 100);
-        const overall = Math.round((index / total) * 100 + fileProgress / total);
-        setProgress(Math.min(overall, 100));
-      },
+      headers: auth,
+      onProgress: applyProgress,
     });
 
     if (result.status < 200 || result.status >= 300) {

@@ -123,9 +123,72 @@ class MaterialDetailOut(MaterialOut):
     course_title: str | None = None
 
 
+class RequestUploadRequest(BaseModel):
+    file_name: str
+    file_size: int
+    content_type: str
+    title: str | None = None
+    course_code: str | None = None
+    department_code: str | None = None
+    is_past_question: bool = False
+    exam_year: int | None = None
+    semester: str | None = None
+    content_hash: str | None = None
+
+
+class RequestUploadOut(BaseModel):
+    material_id: str
+    storage_path: str
+    upload_url: str
+    expires_in: int
+
+
+class CompleteUploadRequest(BaseModel):
+    material_id: str
+    storage_path: str
+    file_name: str
+    file_size: int
+    title: str | None = None
+    course_code: str | None = None
+    department_code: str | None = None
+    is_past_question: bool = False
+    exam_year: int | None = None
+    semester: str | None = None
+    content_hash: str | None = None
+
+
 class PastQuestionListOut(BaseModel):
     items: list[PastQuestionOut]
     total: int
+
+
+async def _award_pq_points(db: AsyncSession, user_id: str, material: Material) -> int:
+    """Credit study points for a distinct past-question upload (and milestone)."""
+    points_awarded = await points_service.award(
+        db, user_id, points_service.PQ_UPLOAD_POINTS,
+        points_service.REASON_PQ_UPLOAD,
+        description="Uploaded a new past question",
+        related_id=material.id,
+    )
+    distinct_count = (
+        await db.execute(
+            select(func.count(func.distinct(Material.content_hash))).where(
+                Material.uploader_id == user_id,
+                Material.is_past_question == True,  # noqa: E712
+                Material.content_hash.isnot(None),
+            )
+        )
+    ).scalar_one()
+    if (
+        points_service.PQ_MILESTONE_EVERY
+        and distinct_count % points_service.PQ_MILESTONE_EVERY == 0
+    ):
+        points_awarded += await points_service.award(
+            db, user_id, points_service.PQ_MILESTONE_POINTS,
+            points_service.REASON_PQ_MILESTONE,
+            description=f"{distinct_count} past questions uploaded",
+        )
+    return points_awarded
 
 
 def _material_to_out(m: Material) -> MaterialOut:
@@ -303,7 +366,7 @@ async def upload_material(
             storage_path = f"materials/{material_id}.{ext}"
             try:
                 url = await storage.upload(
-                    settings.supabase_storage_bucket, storage_path, spool, file.content_type
+                    settings.storage_bucket, storage_path, spool, file.content_type
                 )
             except Exception as exc:
                 logger.warning("Storage upload failed for %s: %s", file.filename, exc)
@@ -336,31 +399,7 @@ async def upload_material(
     # the client can show "this PQ already exists".
     points_awarded = 0
     if material.is_past_question and not already_existed:
-        points_awarded = await points_service.award(
-            db, user.id, points_service.PQ_UPLOAD_POINTS,
-            points_service.REASON_PQ_UPLOAD,
-            description="Uploaded a new past question",
-            related_id=material.id,
-        )
-        distinct_count = (
-            await db.execute(
-                select(func.count(func.distinct(Material.content_hash))).where(
-                    Material.uploader_id == user.id,
-                    Material.is_past_question == True,  # noqa: E712
-                    Material.content_hash.isnot(None),
-                )
-            )
-        ).scalar_one()
-        if (
-            points_service.PQ_MILESTONE_EVERY
-            and distinct_count % points_service.PQ_MILESTONE_EVERY == 0
-        ):
-            bonus = await points_service.award(
-                db, user.id, points_service.PQ_MILESTONE_POINTS,
-                points_service.REASON_PQ_MILESTONE,
-                description=f"{distinct_count} past questions uploaded",
-            )
-            points_awarded += bonus
+        points_awarded = await _award_pq_points(db, user.id, material)
 
     try:
         processed_twin = (
@@ -414,6 +453,189 @@ async def upload_material(
     return out
 
 
+_UPLOAD_EXPIRES_SECONDS = 900
+_DIRECT_UPLOAD_TYPES = {"application/pdf", "image/jpeg", "image/jpg", "image/png"}
+
+
+@router.post("/request-upload", response_model=RequestUploadOut)
+async def request_direct_upload(
+    req: RequestUploadRequest,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Reserve an object key and hand the client a presigned PUT URL.
+
+    The client uploads the file directly to R2 (offloading VPS bandwidth),
+    then calls ``complete_upload`` to register the material and start the
+    ingestion pipeline. Falls back to the caller with a 501 when the active
+    storage provider has no presigned-write support (e.g. Supabase).
+    """
+    if user.user.status.value == "ALUMNI":
+        raise HTTPException(status_code=403, detail="Alumni cannot upload materials")
+    if req.content_type not in _DIRECT_UPLOAD_TYPES:
+        raise HTTPException(status_code=400, detail="Only PDF, JPEG, PNG allowed")
+    max_bytes = settings.max_upload_mb * 1024 * 1024
+    if req.file_size <= 0 or req.file_size > max_bytes:
+        raise HTTPException(status_code=400, detail=f"File exceeds {settings.max_upload_mb}MB limit")
+
+    storage = get_storage()
+    material_id = str(uuid.uuid4())
+    storage_path = f"materials/{material_id}.{_ext_from_content_type(req.content_type)}"
+    try:
+        upload_url = await storage.create_presigned_upload_url(
+            settings.storage_bucket,
+            storage_path,
+            req.content_type,
+            expires_in=_UPLOAD_EXPIRES_SECONDS,
+        )
+    except NotImplementedError:
+        raise HTTPException(
+            status_code=501,
+            detail="Direct upload is not supported by the active storage provider",
+        )
+
+    return RequestUploadOut(
+        material_id=material_id,
+        storage_path=storage_path,
+        upload_url=upload_url,
+        expires_in=_UPLOAD_EXPIRES_SECONDS,
+    )
+
+
+def _ext_from_content_type(content_type: str) -> str:
+    ext = content_type.split("/")[-1]
+    return ext if ext != "jpeg" else "jpg"
+
+
+@router.post("/complete-upload", response_model=MaterialOut)
+async def complete_upload(
+    req: CompleteUploadRequest,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Register a material whose bytes were uploaded directly to storage."""
+    if user.user.status.value == "ALUMNI":
+        raise HTTPException(status_code=403, detail="Alumni cannot upload materials")
+
+    if not req.storage_path.startswith(f"materials/{req.material_id}."):
+        raise HTTPException(status_code=400, detail="Upload path does not match the requested material")
+
+    max_bytes = settings.max_upload_mb * 1024 * 1024
+    if req.file_size <= 0 or req.file_size > max_bytes:
+        raise HTTPException(status_code=400, detail=f"File exceeds {settings.max_upload_mb}MB limit")
+
+    allowance = await storage_allowance(db, user.id)
+    used = await storage_used(db, user.id)
+    if used + req.file_size > allowance:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "STORAGE_LIMIT_REACHED "
+                f"(used {used // (1024 * 1024)}MB of {allowance // (1024 * 1024)}MB). "
+                "Upgrade your plan to unlock more vault storage."
+            ),
+        )
+
+    topic_id = await _resolve_topic(
+        db, req.course_code, req.department_code, user.id, user.user.university_id
+    )
+    material_id = req.material_id
+    content_hash = (req.content_hash or "").strip() or None
+
+    # Content-address dedup mirrors the multipart path: an identical blob
+    # already in the vault is reused and the fresh direct upload dropped.
+    existing = (
+        await db.execute(
+            select(Material).where(Material.content_hash == content_hash).limit(1)
+        )
+    ).scalar_one_or_none() if content_hash else None
+    already_existed = existing is not None
+
+    storage = get_storage()
+    # Clean up the object the client just uploaded when a duplicate exists.
+    if already_existed and existing.file_path and existing.file_path != req.storage_path:
+        try:
+            await storage.delete(settings.storage_bucket, req.storage_path)
+        except Exception:
+            logger.warning(
+                "Could not drop duplicate direct-upload blob %s", req.storage_path
+            )
+
+    storage_path = existing.file_path if already_existed and existing.file_path else req.storage_path
+    if settings.r2_public_base_url:
+        url = f"{settings.r2_public_base_url.rstrip('/')}/{storage_path}"
+    else:
+        url = await storage.get_signed_url(settings.storage_bucket, storage_path)
+
+    material = Material(
+        id=material_id,
+        file_name=req.file_name,
+        file_url=url,
+        file_path=storage_path,
+        file_size=req.file_size,
+        topic_id=topic_id,
+        uploader_id=user.id,
+        processing_status=MaterialProcessingStatus.QUEUED,
+        is_past_question=req.is_past_question,
+        exam_year=req.exam_year,
+        semester=req.semester if req.semester in ("FIRST", "SECOND") else None,
+        content_hash=content_hash,
+    )
+    db.add(material)
+    await db.flush()
+
+    points_awarded = 0
+    if material.is_past_question and not already_existed:
+        points_awarded = await _award_pq_points(db, user.id, material)
+
+    try:
+        processed_twin = (
+            await db.execute(
+                select(Material)
+                .where(
+                    Material.content_hash == content_hash,
+                    Material.processing_status == MaterialProcessingStatus.COMPLETED,
+                )
+                .limit(1)
+            )
+        ).scalar_one_or_none() if content_hash else None
+
+        if processed_twin:
+            material.summary = processed_twin.summary
+            material.questions = processed_twin.questions
+            material.tips = processed_twin.tips
+            material.processing_status = MaterialProcessingStatus.COMPLETED
+            material.processed_at = processed_twin.processed_at
+        elif not _celery_broker_reachable():
+            logger.warning(
+                "Celery broker not reachable; skipping enqueue for material %s; it will stay QUEUED",
+                material.id,
+            )
+        else:
+            # Sign a fresh URL: the stored one (or a twin's) may long have expired.
+            worker_url = await storage.get_signed_url(settings.storage_bucket, storage_path)
+            task = process_material_task.apply_async(
+                kwargs={
+                    "material_id": material.id,
+                    "file_url": worker_url,
+                    "file_name": material.file_name,
+                },
+                ignore_result=True,
+            )
+            material.processing_job_id = task.id
+    except Exception:
+        logger.exception(
+            "Could not finalize processing for material %s; it will stay QUEUED", material.id
+        )
+    await db.flush()
+
+    await db.refresh(material, ["topic"])
+    out = _material_to_out(material)
+    out.already_existed = already_existed
+    out.points_awarded = points_awarded
+    return out
+
+
 @router.delete("/{material_id}")
 async def delete_material(
     material_id: str,
@@ -441,7 +663,7 @@ async def delete_material(
                 )
             ) or 0
         if other_refs == 0:
-            await storage.delete(settings.supabase_storage_bucket, material.file_path)
+            await storage.delete(settings.storage_bucket, material.file_path)
 
     await anyio.to_thread.run_sync(_vector_store.delete_document, material_id)
 
@@ -742,5 +964,5 @@ async def download_material(
         raise HTTPException(status_code=403, detail="Material is private")
 
     storage = get_storage()
-    url = await storage.get_signed_url(settings.supabase_storage_bucket, material.file_path)
+    url = await storage.get_signed_url(settings.storage_bucket, material.file_path)
     return {"download_url": url}
