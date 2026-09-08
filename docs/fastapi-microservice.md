@@ -11,7 +11,7 @@ features, including document intelligence, RAG, OCR, and analytics.
 - Extract text from scanned or image-based pages.
 - Build and query semantic indexes for student-facing retrieval.
 - Run long jobs asynchronously so the API remains responsive.
-- Compress PDFs before storage upload to keep Supabase usage efficient.
+- Compress PDFs before storage upload to keep uploads small and R2 downloads fast (R2 bills zero egress).
 
 ## Exposed endpoints
 
@@ -45,7 +45,8 @@ features, including document intelligence, RAG, OCR, and analytics.
 
 ### PDF compression
 
-- PyMuPDF for backend-side PDF compression before upload to Supabase.
+- Storage lives in Cloudflare R2 (S3-compatible object storage) via the pluggable `StorageProvider` (`app/services/storage.py`, selectable with `STORAGE_PROVIDER`). Vault PDFs and avatars are stored there; Postgres only holds metadata and pre-signed URLs.
+- PyMuPDF for backend-side PDF compression before upload to R2.
 - Compression is treated as a standard ingestion step so uploads stay smaller and downstream downloads remain fast.
 
 ## Processing flow

@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     upload_dir: Path = Field(default=Path("./storage/uploads"))
     temp_dir: Path = Field(default=Path("./tmp"))
 
-    # Storage Provider: "supabase" or "appwrite"
+    # Storage Provider: "supabase", "r2" or "appwrite"
     storage_provider: str = Field(default="supabase")
 
     # Supabase
@@ -45,6 +45,18 @@ class Settings(BaseSettings):
     supabase_storage_bucket: str = Field(default="materials")
     supabase_avatars_bucket: str = Field(default="avatars")
     supabase_jwt_secret: str = Field(default="")
+
+    # Cloudflare R2 (S3-compatible; zero egress). Buckets:
+    #   r2_storage_bucket  — main "materials" vault
+    #   r2_avatars_bucket  — profile avatars
+    # r2_public_base_url is an optional public custom domain; when unset the
+    # provider falls back to short-lived presigned GET URLs.
+    r2_account_id: str = Field(default="")
+    r2_access_key_id: str = Field(default="")
+    r2_secret_access_key: str = Field(default="")
+    r2_storage_bucket: str = Field(default="vylix-materials")
+    r2_avatars_bucket: str = Field(default="vylix-avatars")
+    r2_public_base_url: str = Field(default="")
 
     # Appwrite
     appwrite_endpoint: str = Field(default="")
@@ -138,6 +150,20 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def storage_bucket(self) -> str:
+        """Active main materials bucket for the configured provider."""
+        if self.storage_provider == "r2":
+            return self.r2_storage_bucket
+        return self.supabase_storage_bucket
+
+    @property
+    def avatars_bucket(self) -> str:
+        """Active avatar bucket for the configured provider."""
+        if self.storage_provider == "r2":
+            return self.r2_avatars_bucket
+        return self.supabase_avatars_bucket
 
 
 @lru_cache

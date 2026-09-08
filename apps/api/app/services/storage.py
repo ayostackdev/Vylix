@@ -26,6 +26,17 @@ class StorageProvider(abc.ABC):
     async def get_signed_url(self, bucket: str, path: str, expires_in: int = 3600) -> str:
         """Get a signed/download URL."""
 
+    async def create_presigned_upload_url(
+        self, bucket: str, path: str, content_type: str, expires_in: int = 900
+    ) -> str:
+        """Return a URL the client can PUT the object to directly.
+
+        Only implemented by providers with presigned-write support (R2).
+        The abstract default raises, so callers can fall back to the
+        server-side multipart upload path for other providers.
+        """
+        raise NotImplementedError(f"{type(self).__name__} does not support direct uploads")
+
 
 class SupabaseStorage(StorageProvider):
     def __init__(self):
@@ -86,6 +97,87 @@ class SupabaseStorage(StorageProvider):
             return signed_url
 
 
+class R2Storage(StorageProvider):
+    def __init__(self):
+        import boto3
+        if not settings.r2_account_id or not settings.r2_access_key_id or not settings.r2_secret_access_key:
+            raise RuntimeError(
+                "R2 storage is not configured. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID "
+                "and R2_SECRET_ACCESS_KEY in the API environment."
+            )
+        endpoint = f"https://{settings.r2_account_id}.r2.cloudflarestorage.com"
+        self.client = boto3.client(
+            "s3",
+            endpoint_url=endpoint,
+            aws_access_key_id=settings.r2_access_key_id,
+            aws_secret_access_key=settings.r2_secret_access_key,
+            region_name="auto",
+        )
+
+    def _public_url(self, bucket: str, path: str) -> str:
+        if settings.r2_public_base_url:
+            return f"{settings.r2_public_base_url.rstrip('/')}/{path}"
+        return self.client.generate_presigned_url(
+            "get_object", Params={"Bucket": bucket, "Key": path}, ExpiresIn=3600
+        )
+
+    async def upload(self, bucket: str, path: str, data: UploadData, content_type: str) -> str:
+        import anyio
+        from functools import partial
+        extra = {"ContentType": content_type} if content_type else {}
+        if hasattr(data, "read"):
+            await anyio.to_thread.run_sync(
+                partial(self.client.upload_fileobj, data, bucket, path, extra)
+            )
+        else:
+            await anyio.to_thread.run_sync(
+                partial(self.client.put_object, Bucket=bucket, Key=path, Body=data, **extra)
+            )
+        return self._public_url(bucket, path)
+
+    async def delete(self, bucket: str, path: str) -> None:
+        import anyio
+        from functools import partial
+        try:
+            await anyio.to_thread.run_sync(
+                partial(self.client.delete_object, Bucket=bucket, Key=path)
+            )
+        except Exception as ex:
+            if "404" in str(ex):
+                return
+            raise
+
+    async def get_signed_url(self, bucket: str, path: str, expires_in: int = 3600) -> str:
+        import anyio
+        from functools import partial
+        return await anyio.to_thread.run_sync(
+            partial(
+                self.client.generate_presigned_url,
+                "get_object",
+                Params={"Bucket": bucket, "Key": path},
+                ExpiresIn=expires_in,
+            )
+        )
+
+    async def create_presigned_upload_url(
+        self, bucket: str, path: str, content_type: str, expires_in: int = 900
+    ) -> str:
+        import anyio
+        from functools import partial
+        return await anyio.to_thread.run_sync(
+            partial(
+                self.client.generate_presigned_url,
+                "put_object",
+                Params={
+                    "Bucket": bucket,
+                    "Key": path,
+                    "ContentType": content_type,
+                },
+                ExpiresIn=expires_in,
+            )
+        )
+
+
 class AppwriteStorage(StorageProvider):
     def __init__(self):
         import httpx
@@ -137,4 +229,6 @@ class AppwriteStorage(StorageProvider):
 def get_storage() -> StorageProvider:
     if settings.storage_provider == "appwrite":
         return AppwriteStorage()
+    if settings.storage_provider == "r2":
+        return R2Storage()
     return SupabaseStorage()

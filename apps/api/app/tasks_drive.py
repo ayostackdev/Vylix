@@ -182,7 +182,7 @@ def _import_single(
     ext = file_meta.name.split(".")[-1] if "." in file_meta.name else "pdf"
     storage_path = f"materials/{material_id}.{ext}"
     url = _run_async(
-        storage.upload(settings.supabase_storage_bucket, storage_path, file_data, file_meta.mime_type)
+        storage.upload(settings.storage_bucket, storage_path, file_data, file_meta.mime_type)
     )
 
     with get_connection() as conn, conn.cursor() as cur:

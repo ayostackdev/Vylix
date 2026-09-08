@@ -170,7 +170,7 @@ async def upload_avatar(
 
     storage = get_storage()
     try:
-        url = await storage.upload(settings.supabase_avatars_bucket, path, data, content_type)
+        url = await storage.upload(settings.avatars_bucket, path, data, content_type)
     except Exception as exc:
         logger.warning("Avatar storage upload failed for %s: %s", user.id, exc)
         raise HTTPException(

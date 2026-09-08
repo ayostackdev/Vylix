@@ -10,7 +10,7 @@ Vylix is a monorepo with two main application surfaces:
 - Frontend: dashboard, profile, settings, vault, past-questions, and academic hub UI.
 - Backend: auth, materials, topics, courses, departments/colleges, maintenance, analytics, and user settings.
 - Database: PostgreSQL (SQLAlchemy models) for users, emails, privacy, badges, colleges, departments, courses, topics, and materials.
-- External services: Supabase Auth, Supabase Storage, Redis (Celery broker/result backend), and Gemini for document/AI features.
+- External services: Supabase Auth + Postgres, Cloudflare R2 (primary object storage for materials/avatars; zero egress), Redis (Celery broker/result backend), and Gemini for document/AI features.
 
 ## Current focus
 
