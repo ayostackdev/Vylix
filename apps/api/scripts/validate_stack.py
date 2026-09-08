@@ -195,8 +195,8 @@ def _seed_chain(course_id: str, university_id: str | None) -> str:
     with get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """
-            INSERT INTO users (id, full_name, university_id)
-            VALUES (%s, 'Stack Validation Runner', %s)
+            INSERT INTO users (id, full_name, university_id, created_at, updated_at)
+            VALUES (%s, 'Stack Validation Runner', %s, NOW(), NOW())
             ON CONFLICT (id) DO NOTHING
             """,
             (RUNNER_USER_ID, university_id),
@@ -214,7 +214,7 @@ def _seed_chain(course_id: str, university_id: str | None) -> str:
             INSERT INTO materials
                 (id, file_name, file_url, file_size, topic_id, uploader_id,
                  processing_status, is_seed, is_shared, content_hash)
-            VALUES (%s, %s, %s, %s, %s, %s, 'processed', TRUE, TRUE,
+            VALUES (%s, %s, %s, %s, %s, %s, 'QUEUED', TRUE, TRUE,
                     'stack-validator-v1')
             """,
             (

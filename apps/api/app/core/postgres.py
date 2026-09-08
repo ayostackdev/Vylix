@@ -54,6 +54,7 @@ def get_connection():
     url = sanitize_db_url(settings.direct_url or settings.database_url)
     connection = psycopg.connect(url, row_factory=dict_row)
     try:
-        yield connection
+        with connection:
+            yield connection
     finally:
         connection.close()
