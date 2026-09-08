@@ -36,6 +36,8 @@ interface Material {
   is_seed: boolean
   uploaded_at: string | null
   last_opened_at?: string | null
+  is_pool_item?: boolean
+  origin_institution?: string | null
 }
 
 interface MainContentPanelProps {
@@ -640,6 +642,17 @@ export function MainContentPanel({ selectedCourseId, selectedDoc, onSelectDoc, i
                                 <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
                                 <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-600">
                                   Demo
+                                </span>
+                              </>
+                            )}
+                            {doc.is_pool_item && (
+                              <>
+                                <span className="w-0.5 h-0.5 rounded-full bg-gray-300" />
+                                <span
+                                  className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-violet-50 text-violet-600"
+                                  title="Shared from another institution — use as practice, not syllabus truth"
+                                >
+                                  {doc.origin_institution ? `Shared · ${doc.origin_institution}` : 'Shared'}
                                 </span>
                               </>
                             )}

@@ -18,8 +18,8 @@ from app.database import get_db
 from app.deps import CurrentUser, get_current_user, get_optional_user
 from app.entitlements import storage_allowance, storage_used
 from app.models import (
-    Material, Topic, Course, User, Department, College, MaterialProcessingStatus,
-    MaterialUnlock, PointsTransaction,
+    Material, Topic, Course, User, Department, College, University,
+    MaterialProcessingStatus, MaterialUnlock, PointsTransaction,
 )
 from app.services.course_scope import course_visibility_filter, find_course
 from app.services import points as points_service
@@ -103,6 +103,9 @@ class MaterialOut(BaseModel):
     semester: str | None = None
     already_existed: bool = False
     points_awarded: int = 0
+    is_pool_item: bool = False
+    origin_institution: str | None = None
+    source_university_id: str | None = None
 
     model_config = {"from_attributes": True}
 
@@ -191,7 +194,12 @@ async def _award_pq_points(db: AsyncSession, user_id: str, material: Material) -
     return points_awarded
 
 
-def _material_to_out(m: Material) -> MaterialOut:
+def _material_to_out(
+    m: Material,
+    is_pool_item: bool = False,
+    origin_institution: str | None = None,
+    source_university_id: str | None = None,
+) -> MaterialOut:
     uploader = getattr(m, "uploader", None)
     topic = getattr(m, "topic", None)
     return MaterialOut(
@@ -208,7 +216,134 @@ def _material_to_out(m: Material) -> MaterialOut:
         is_seed=m.is_seed, is_shared=m.is_shared,
         is_past_question=m.is_past_question,
         exam_year=m.exam_year, semester=m.semester,
+        is_pool_item=is_pool_item,
+        origin_institution=origin_institution,
+        source_university_id=source_university_id,
     )
+
+
+# ── National content pool ──────────────────────────────────────────
+# When local (own-department / own-institution) course content is thin,
+# same-``code`` materials uploaded at other institutions are surfaced so a
+# brand-new signup never meets an empty vault. Matches are cross-institution
+# only; ``is_shared`` and a clean processing state gate everything.
+
+_POOL_FALLBACK_THRESHOLD = 3
+_POOL_FALLBACK_LIMIT = 10
+_POOL_PER_ORIGIN = 3
+_RECENT_FALLBACK_THRESHOLD = 6
+_RECENT_FALLBACK_LIMIT = 6
+_RECENT_FALLBACK_CODES = 6
+
+
+def _course_institution_expr():
+    return func.coalesce(Course.university_id, College.university_id)
+
+
+def _pool_statuses() -> list:
+    return [MaterialProcessingStatus.COMPLETED, MaterialProcessingStatus.QUEUED]
+
+
+def _pool_base(
+    codes: list[str],
+    exclude_university_id: str | None,
+    is_past_question: bool | None = None,
+    exam_year: int | None = None,
+):
+    """Select (Material, source university id, source university name) rows.
+
+    Department-scoped courses carry their institution implicitly (via
+    college), general courses carry it explicitly — coalesce unifies both.
+    """
+    expr = _course_institution_expr()
+    stmt = (
+        select(Material, University.id, University.name)
+        .join(Topic, Topic.id == Material.topic_id)
+        .join(Course, Course.id == Topic.course_id)
+        .outerjoin(Department, Department.id == Course.department_id)
+        .outerjoin(College, College.id == Department.college_id)
+        .outerjoin(University, expr == University.id)
+        .where(
+            Course.code.in_(codes),
+            Topic.is_active == True,  # noqa: E712
+            Material.is_shared == True,  # noqa: E712
+            Material.processing_status.in_(_pool_statuses()),
+        )
+    )
+    if exclude_university_id:
+        stmt = stmt.where((expr != exclude_university_id) | (expr.is_(None)))
+    if is_past_question is not None:
+        stmt = stmt.where(Material.is_past_question == is_past_question)
+    if exam_year is not None:
+        stmt = stmt.where(Material.exam_year == exam_year)
+    return stmt
+
+
+async def _fetch_pool(
+    db: AsyncSession,
+    codes: list[str],
+    exclude_university_id: str | None,
+    *,
+    is_past_question: bool | None = None,
+    exam_year: int | None = None,
+    offset: int = 0,
+    limit: int | None = None,
+) -> tuple[int, list]:
+    base = _pool_base(codes, exclude_university_id, is_past_question, exam_year)
+    total = (
+        await db.execute(
+            select(func.count()).select_from(
+                base.with_only_columns(Material.id).order_by(None)
+            )
+        )
+    ).scalar_one()
+    stmt = (
+        base
+        .order_by(func.coalesce(Material.last_opened_at, Material.uploaded_at).desc())
+        .options(selectinload(Material.uploader))
+        .offset(offset)
+    )
+    if limit is not None:
+        stmt = stmt.limit(limit)
+    rows = (await db.execute(stmt)).all()
+    return total, rows
+
+
+def _pool_row_to_out(row) -> MaterialOut:
+    m, uni_id, uni_name = row
+    return _material_to_out(
+        m,
+        is_pool_item=True,
+        origin_institution=uni_name,
+        source_university_id=uni_id,
+    )
+
+
+def _merge_pool_rows(
+    rows: list,
+    seen_ids: set,
+    seen_hashes: set,
+) -> list[MaterialOut]:
+    """Append pool rows, deduping against what the user already has.
+
+    One file (same ``content_hash``) is shown once, and each source
+    institution is capped at ``_POOL_PER_ORIGIN`` rows for variety.
+    """
+    merged, per_origin = [], {}
+    for row in rows:
+        m, uni_id, _ = row
+        if m.id in seen_ids or (m.content_hash and m.content_hash in seen_hashes):
+            continue
+        if uni_id:
+            count = per_origin.get(uni_id, 0)
+            if count >= _POOL_PER_ORIGIN:
+                continue
+            per_origin[uni_id] = count + 1
+        merged.append(_pool_row_to_out(row))
+        seen_ids.add(m.id)
+        if m.content_hash:
+            seen_hashes.add(m.content_hash)
+    return merged
 
 
 async def _resolve_topic(
@@ -742,12 +877,46 @@ async def list_course_materials(
         select(Material)
         .options(selectinload(Material.uploader), selectinload(Material.topic))
         .join(Topic, Topic.id == Material.topic_id)
-        .where(Topic.course_id == course_id, Topic.is_active == True, Material.is_shared == True)
+        .where(Topic.course_id == course_id, Topic.is_active == True, Material.is_shared == True)  # noqa: E712
         .order_by(Material.uploaded_at.desc())
         .offset(offset)
         .limit(limit)
     )
-    return [_material_to_out(m) for m in result.scalars().all()]
+    items = [_material_to_out(m) for m in result.scalars().all()]
+
+    if user and len(items) < _POOL_FALLBACK_THRESHOLD:
+        _, rows = await _fetch_pool(
+            db, [course.code], user.user.university_id, limit=_POOL_FALLBACK_LIMIT
+        )
+        seen_ids = {o.id for o in items}
+        seen_hashes = {o.content_hash for o in items if o.content_hash}
+        items = items + _merge_pool_rows(rows, seen_ids, seen_hashes)
+
+    return items
+
+
+@router.get("/pool/{course_code}", response_model=MaterialListOut)
+async def list_pool_materials(
+    course_code: str,
+    is_past_question: bool | None = Query(default=None),
+    exam_year: int | None = Query(default=None),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Browse materials for this course code shared from other institutions."""
+    total, rows = await _fetch_pool(
+        db,
+        [course_code],
+        user.user.university_id,
+        is_past_question=is_past_question,
+        exam_year=exam_year,
+        offset=offset,
+        limit=limit,
+    )
+    items = [_pool_row_to_out(row) for row in rows]
+    return MaterialListOut(items=items, total=total)
 
 
 @router.get("/recent", response_model=list[MaterialOut])
@@ -775,7 +944,31 @@ async def list_recent_materials(
     
     query = query.order_by(func.coalesce(Material.last_opened_at, Material.uploaded_at).desc()).limit(limit)
     result = await db.execute(query)
-    return [_material_to_out(m) for m in result.scalars().all()]
+    items = [_material_to_out(m) for m in result.scalars().all()]
+
+    if user and len(items) < _RECENT_FALLBACK_THRESHOLD:
+        codes_stmt = (
+            select(Course.code)
+            .distinct()
+            .where(
+                (Course.department_id == user.user.department_id)
+                | (
+                    (Course.is_general == True)  # noqa: E712
+                    & (Course.university_id == user.user.university_id)
+                )
+            )
+            .limit(_RECENT_FALLBACK_CODES)
+        )
+        codes = [row[0] for row in (await db.execute(codes_stmt)).all()]
+        if codes:
+            _, rows = await _fetch_pool(
+                db, codes, user.user.university_id, limit=_RECENT_FALLBACK_LIMIT
+            )
+            seen_ids = {o.id for o in items}
+            seen_hashes = {o.content_hash for o in items if o.content_hash}
+            items = items + _merge_pool_rows(rows, seen_ids, seen_hashes)
+
+    return items
 
 
 @router.post("/{material_id}/open")
