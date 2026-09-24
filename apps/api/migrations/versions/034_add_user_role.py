@@ -28,7 +28,7 @@ def upgrade() -> None:
     # Add role column with default
     exists = bind.exec_driver_sql(
         "SELECT column_name FROM information_schema.columns "
-        "WHERE table_name = 'users' AND column_name = 'role'"
+        "WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'role'"
     ).scalar()
     if not exists:
         op.add_column(
