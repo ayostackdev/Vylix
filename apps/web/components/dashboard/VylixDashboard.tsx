@@ -17,7 +17,7 @@ import { useAuth } from '@/context/auth-context';
 import { ReadOnlyBanner } from '@/components/auth/ReadOnlyMode';
 import { LevelUpdateBanner } from '@/components/dashboard/LevelUpdateBanner';
 import { ProfileModal } from '@/components/auth/ProfileModal';
-import { StreakBanner, PointsCounter, LeaderboardPanel, BadgeShowcase, RewardsPanel } from '@/components/gamification';
+import { StreakBanner, PointsCounter, BadgeShowcase, RewardsPanel } from '@/components/gamification';
 
 export function VylixDashboard() {
   const [activeLayer, setActiveLayer] = useState<'vault' | 'pulse' | 'questions' | 'chat' | 'qna'>('pulse');
@@ -197,7 +197,7 @@ export function VylixDashboard() {
             </div>
           )}
 
-          <div className={`grid gap-4 ${activeLayer === 'pulse' ? 'lg:grid-cols-1' : 'lg:grid-cols-[1fr_320px]'}`}>
+          <div className="grid gap-4 lg:grid-cols-1">
             <div className="min-w-0">
               <Tabs
             value={activeLayer}
@@ -378,12 +378,6 @@ export function VylixDashboard() {
             </section>
           </Tabs>
             </div>
-
-            {isAuthenticated && !isAlumni && activeLayer !== 'pulse' && (
-              <aside className="hidden lg:flex flex-col gap-4">
-                <LeaderboardPanel />
-              </aside>
-            )}
           </div>
         </div>
       </div>
