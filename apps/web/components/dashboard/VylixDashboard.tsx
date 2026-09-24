@@ -197,7 +197,7 @@ export function VylixDashboard() {
             </div>
           )}
 
-          <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+          <div className={`grid gap-4 ${activeLayer === 'pulse' ? 'lg:grid-cols-1' : 'lg:grid-cols-[1fr_320px]'}`}>
             <div className="min-w-0">
               <Tabs
             value={activeLayer}
@@ -379,7 +379,7 @@ export function VylixDashboard() {
           </Tabs>
             </div>
 
-            {isAuthenticated && !isAlumni && (
+            {isAuthenticated && !isAlumni && activeLayer !== 'pulse' && (
               <aside className="hidden lg:flex flex-col gap-4">
                 <LeaderboardPanel />
               </aside>
