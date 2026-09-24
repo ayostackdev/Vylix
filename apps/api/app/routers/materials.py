@@ -697,10 +697,7 @@ async def complete_upload(
             )
 
     storage_path = existing.file_path if already_existed and existing.file_path else req.storage_path
-    if settings.r2_public_base_url:
-        url = f"{settings.r2_public_base_url.rstrip('/')}/{storage_path}"
-    else:
-        url = await storage.get_signed_url(settings.storage_bucket, storage_path)
+    url = await storage.get_public_url(settings.storage_bucket, storage_path)
 
     material = Material(
         id=material_id,

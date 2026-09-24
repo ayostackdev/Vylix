@@ -56,6 +56,10 @@ class Settings(BaseSettings):
     r2_secret_access_key: str = Field(default="")
     r2_storage_bucket: str = Field(default="vylix-materials")
     r2_avatars_bucket: str = Field(default="vylix-avatars")
+    # Optional public base URLs, one per bucket (e.g. r2.dev host or custom
+    # domain). r2_public_base_url is retained as a legacy single-URL fallback.
+    r2_storage_public_base_url: str = Field(default="")
+    r2_avatars_public_base_url: str = Field(default="")
     r2_public_base_url: str = Field(default="")
 
     # Appwrite

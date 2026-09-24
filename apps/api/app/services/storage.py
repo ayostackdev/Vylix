@@ -26,6 +26,11 @@ class StorageProvider(abc.ABC):
     async def get_signed_url(self, bucket: str, path: str, expires_in: int = 3600) -> str:
         """Get a signed/download URL."""
 
+    async def get_public_url(self, bucket: str, path: str, expires_in: int = 3600) -> str:
+        """Get a stable public URL when the provider supports it, otherwise a
+        short-lived signed URL."""
+        return await self.get_signed_url(bucket, path, expires_in)
+
     async def create_presigned_upload_url(
         self, bucket: str, path: str, content_type: str, expires_in: int = 900
     ) -> str:
@@ -115,11 +120,21 @@ class R2Storage(StorageProvider):
         )
 
     def _public_url(self, bucket: str, path: str) -> str:
-        if settings.r2_public_base_url:
-            return f"{settings.r2_public_base_url.rstrip('/')}/{path}"
+        base = self._public_base(bucket)
+        if base:
+            return f"{base.rstrip('/')}/{path}"
         return self.client.generate_presigned_url(
             "get_object", Params={"Bucket": bucket, "Key": path}, ExpiresIn=3600
         )
+
+    def _public_base(self, bucket: str) -> str:
+        """Resolve the public base URL for a bucket, falling back to the
+        legacy single r2_public_base_url, then to no base (presigned only)."""
+        if bucket == settings.r2_storage_bucket and settings.r2_storage_public_base_url:
+            return settings.r2_storage_public_base_url
+        if bucket == settings.r2_avatars_bucket and settings.r2_avatars_public_base_url:
+            return settings.r2_avatars_public_base_url
+        return settings.r2_public_base_url
 
     async def upload(self, bucket: str, path: str, data: UploadData, content_type: str) -> str:
         import anyio
@@ -158,6 +173,12 @@ class R2Storage(StorageProvider):
                 ExpiresIn=expires_in,
             )
         )
+
+    async def get_public_url(self, bucket: str, path: str, expires_in: int = 3600) -> str:
+        base = self._public_base(bucket)
+        if base:
+            return f"{base.rstrip('/')}/{path}"
+        return await self.get_signed_url(bucket, path, expires_in)
 
     async def create_presigned_upload_url(
         self, bucket: str, path: str, content_type: str, expires_in: int = 900
