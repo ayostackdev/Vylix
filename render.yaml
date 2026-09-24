@@ -1,0 +1,69 @@
+# ─────────────────────────────────────────────────────────────
+# Vylix API — Render Blueprint
+#
+# Deploys the FastAPI backend that serves the Vercel web app.
+# Free-tier note: Render free does not include managed Redis, so this
+# blueprint ships the *lean* API only. Celery worker + beat (needed for
+# Docling/OCR background parsing) require Redis, which is a small paid
+# add-on — wire that here once you scale:
+#
+#   - Add a Redis service, or point BROKER_URL/RESULT_BACKEND at a free
+#     Upstash/ValKey-instance, then swap the worker's startCommand below
+#     from the placeholder to the real Celery command.
+#
+# Required env vars (secrets are NOT stored in this file — set them in
+# the Render dashboard once the service is created):
+#   DATABASE_URL, DIRECT_URL, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+#   SUPABASE_JWT_SECRET, GEMINI_API_KEY, FRONTEND_URL, CORS_ORIGINS,
+#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
+#   R2_STORAGE_BUCKET, R2_AVATARS_BUCKET,
+#   R2_STORAGE_PUBLIC_BASE_URL, R2_AVATARS_PUBLIC_BASE_URL
+#
+# Non-secret defaults live below and can be overridden in the dashboard.
+# ─────────────────────────────────────────────────────────────
+
+services:
+  - type: web
+    name: vylix-api
+    runtime: docker
+    plan: free
+    rootDir: apps/api
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    # api-lean skips torch/docling/transformers — R2 uploads, embeddings and
+    # search work with it; PDF parsing runs on the (Redis-backed) worker.
+    target: api-lean
+    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --workers 1
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: STORAGE_PROVIDER
+        value: r2
+        sync: false
+      - key: R2_STORAGE_BUCKET
+        value: vylix-materials
+        sync: false
+      - key: R2_AVATARS_BUCKET
+        value: vylix-avatars
+        sync: false
+      - key: EMBEDDING_PROVIDER
+        value: bge-m3
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+        sync: false
+  # ─── Optional Celery worker (background Docling/OCR parsing) ───
+  # Requires Redis. Uncomment + set BROKER_URL/RESULT_BACKEND when ready.
+  # - type: worker
+  #   name: vylix-worker
+  #   runtime: docker
+  #   plan: starter
+  #   rootDir: apps/api
+  #   dockerContext: .
+  #   dockerfilePath: Dockerfile
+  #   target: api
+  #   startCommand: celery -A app.core.celery_app.celery_app worker --loglevel=info --concurrency=2
+  #   envVars:
+  #     - key: STORAGE_PROVIDER
+  #       value: r2
+  #       sync: false
