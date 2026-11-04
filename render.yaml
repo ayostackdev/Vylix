@@ -46,8 +46,10 @@ services:
       - key: R2_AVATARS_BUCKET
         value: vylix-avatars
         sync: false
+      # api-lean has no torch/FlagEmbedding, so bge-m3 would silently fall
+      # back to Gemini here anyway. Set the provider explicitly to gemini.
       - key: EMBEDDING_PROVIDER
-        value: bge-m3
+        value: gemini
         sync: false
       - key: ENVIRONMENT
         value: production
@@ -61,7 +63,7 @@ services:
   #   rootDir: apps/api
   #   dockerContext: .
   #   dockerfilePath: Dockerfile
-  #   target: api
+  #   target: worker
   #   startCommand: celery -A app.core.celery_app.celery_app worker --loglevel=info --concurrency=2
   #   envVars:
   #     - key: STORAGE_PROVIDER

@@ -6,5 +6,6 @@ Key docs
 
 - Architecture: `architecture/overview.md`
 - Features: `features/` (see individual files)
-- Deployment: `deployment/heroku.md` (web on Vercel, API on Render)
+- Deployment: `architecture/deployment.md` (web on Vercel, API on Render)
+- Deployment: `architecture/contabo-deployment.md` (API on a Contabo VPS)
 - Services: `fastapi-microservice.md`

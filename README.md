@@ -5,7 +5,7 @@ Lightweight, multi-app workspace for the Vylix product.
 Folders of interest
 - `apps/web` — Next.js frontend (Vercel)
 - `apps/api` — FastAPI backend (Postgres + Redis + Celery, deployed on Render)
-- `docs/` — project documentation and deployment guides
+- `docs/` — project documentation and deployment guides (Vercel+Render, and Contabo VPS)
 
 Quick start (developer)
 1. Install root workspace deps: `npm install`

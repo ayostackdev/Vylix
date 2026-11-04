@@ -10,9 +10,15 @@ FROM base AS deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Full-weight API target (requirements.txt: torch, docling, FlagEmbedding).
+# Used by the Contabo overlay so BGE-M3 embeddings run in-process instead of
+# silently degrading to hashing. Carries the migration files too, so the
+# one-shot `alembic upgrade head` deploy step works against this image.
 FROM deps AS api-run
 COPY app/ app/
 COPY db/ db/
+COPY alembic.ini .
+COPY migrations/ migrations/
 EXPOSE 4000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "4000"]
 FROM base AS worker
@@ -21,6 +27,9 @@ FROM base AS worker
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ app/
+# NOTE: docker-compose.prod.yml overrides this command so the concurrency is
+# tunable without a rebuild (the JSON form cannot expand ${CELERY_CONCURRENCY}).
+# Keep the flags here in sync with that override.
 CMD ["celery", "-A", "app.core.celery_app.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
 
 # Lean production target (no torch, easyocr, docling, transformers)

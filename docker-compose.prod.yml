@@ -1,3 +1,12 @@
+# Log rotation: the default json-file driver never rotates, so a long-lived VPS
+# fills its disk with container logs (docling/OCR traces are chatty). 10 MB x 3
+# files per service is plenty for a 12 GB box.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   redis:
     image: redis:7-alpine
@@ -13,6 +22,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    # maxmemory is 256mb; the cgroup ceiling leaves headroom for the process
+    # overhead Redis adds on top of the dataset.
+    mem_limit: ${REDIS_MEM_LIMIT:-512m}
+    logging: *default-logging
     restart: unless-stopped
 
   # Dedicated Redis for Celery broker + results.
@@ -29,6 +42,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    mem_limit: ${REDIS_MEM_LIMIT:-512m}
+    logging: *default-logging
     restart: unless-stopped
 
   api:
@@ -57,12 +72,32 @@ services:
     volumes:
       - api_storage:/app/storage
       - api_tmp:/app/tmp
+    # Lean API is ~600 MB per uvicorn worker; 2 GB covers 1-2 workers plus a
+    # request burst. The BGE-M3 overlay raises this to 4g (see §8 of
+    # docs/architecture/contabo-deployment.md).
+    mem_limit: ${API_MEM_LIMIT:-2g}
+    mem_reservation: ${API_MEM_RESERVATION:-512m}
+    logging: *default-logging
     restart: unless-stopped
 
   worker:
     build:
       context: ./apps/api
       target: worker
+    # Override the image CMD so Celery concurrency is tunable without a
+    # rebuild. The image CMD is exec-form (JSON), so it cannot expand
+    # ${CELERY_CONCURRENCY} at runtime — a compose `command:` override is the
+    # only way to change it. Mirrors the flags in apps/api/Dockerfile; keep the
+    # two in sync if you change either.
+    # Concurrency 1 on a small VPS: each Celery process parsing a PDF through
+    # docling/OCR can peak near 2 GB, so two at once is how a 12 GB box OOMs.
+    command:
+      - celery
+      - -A
+      - app.core.celery_app.celery_app
+      - worker
+      - --loglevel=info
+      - --concurrency=${CELERY_CONCURRENCY:-1}
     env_file:
       - .env.production
     environment:
@@ -76,6 +111,11 @@ services:
     volumes:
       - api_storage:/app/storage
       - api_tmp:/app/tmp
+    # The worker is the real RAM hog — it parses PDFs (docling/OCR), not the
+    # API. 4 GB covers one heavy parse; the BGE-M3 overlay raises this to 5g.
+    mem_limit: ${WORKER_MEM_LIMIT:-4g}
+    mem_reservation: ${WORKER_MEM_RESERVATION:-1g}
+    logging: *default-logging
 
   beat:
     build:
@@ -90,6 +130,8 @@ services:
     depends_on:
       redis-celery:
         condition: service_healthy
+    mem_limit: ${BEAT_MEM_LIMIT:-1g}
+    logging: *default-logging
     restart: unless-stopped
 
   caddy:
@@ -103,6 +145,8 @@ services:
       - caddy_config:/config
     depends_on:
       - api
+    mem_limit: ${CADDY_MEM_LIMIT:-256m}
+    logging: *default-logging
     restart: unless-stopped
 
 volumes:

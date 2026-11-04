@@ -5,6 +5,10 @@ Vylix ships as two surfaces:
 - `apps/web` — Next.js PWA, deployed on **Vercel**
 - `apps/api` — FastAPI backend, deployed on **Render** (via `render.yaml` blueprint)
 
+> Looking to self-host the API on a VPS instead? See
+> `contabo-deployment.md` — same web/API split, with `docker-compose.prod.yml`
+> + Caddy on a Contabo box.
+
 ## 1. Web → Vercel
 
 1. Push to GitHub (`main`).

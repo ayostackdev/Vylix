@@ -1,0 +1,85 @@
+# ─────────────────────────────────────────────────────────────
+# Contabo VPS overlay — full-weight API with self-hosted BGE-M3
+#
+# Layer it on top of docker-compose.prod.yml:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.contabo.yml up -d
+#
+# Why an overlay instead of editing the prod file: docker-compose.prod.yml is
+# also the Render/lean path, where the API is built from the `api-lean` target
+# (no torch, no FlagEmbedding). With EMBEDDING_PROVIDER=bge-m3 that image
+# cannot load the model, so app/services/embeddings.py degrades to Gemini (or
+# hashing with no key) and semantic search quality collapses without any
+# error surfacing. This overlay swaps the API to the `api-run` target so
+# BGE-M3 runs in-process on the VPS: no per-call Gemini cost, no API egress.
+#
+# COST OF THE OVERLAY — budget RAM before enabling it:
+#   - Full image: ~8-10 GB (torch + docling + transformers + FlagEmbedding).
+#   - Each API worker loads the fp32 BGE-M3 weights into RAM (~2.3 GB) plus
+#     torch runtime overhead, so budget ~3.5 GB per worker.
+#   - The Celery worker loads the same model when it embeds chunks (~3.5 GB).
+#   - Cloud VPS 4 (8 GB):  do NOT use this overlay. Keep the lean API.
+#   - Cloud VPS 6 (12 GB): fits, but only with the retuned limits below
+#     (4g API + 5g worker + 1 API worker + Celery concurrency 1). The
+#     defaults in this file are already set for that layout.
+#   - Cloud VPS 8 (24 GB): recommended single-box layout — the same overlay
+#     with more headroom, so 2 API workers are safe.
+#
+# TUNING — compose interpolation reads these from the shell environment or
+# from a `.env` file sitting next to this file (NOT from .env.production,
+# which is the container environment file):
+#   API_WORKERS        uvicorn workers in the API container (default 1)
+#   API_MEM_LIMIT      memory ceiling for the API container (default 4g)
+#   WORKER_MEM_LIMIT   memory ceiling for the Celery worker (default 5g)
+#   CELERY_CONCURRENCY Celery worker processes (default 1, set in the base
+#                      docker-compose.prod.yml command override)
+# ─────────────────────────────────────────────────────────────
+
+services:
+  api:
+    build:
+      context: ./apps/api
+      target: api-run
+    # Explicit worker count: the api-run image CMD is exec-form and cannot
+    # expand ${WEB_CONCURRENCY}. One worker per ~4 GB of RAM — every extra
+    # worker loads its own copy of the BGE-M3 weights.
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "4000"
+      - --workers
+      - "${API_WORKERS:-1}"
+    environment:
+      EMBEDDING_PROVIDER: bge-m3
+      BGE_M3_DEVICE: cpu
+      # Model weights land in the mounted volume below instead of the
+      # container's ephemeral filesystem.
+      HF_HOME: /root/.cache/huggingface
+    volumes:
+      # Persist the HuggingFace cache. Without this, every container recreate
+      # re-downloads ~2.3 GB of BGE-M3 weights from the hub.
+      - hf_cache:/root/.cache/huggingface
+    # 4 GB: one BGE-M3 worker (~3.5 GB) plus a little headroom. Two workers
+    # would need ~7 GB — use a bigger box (or API_WORKERS=1 on 24 GB).
+    mem_limit: ${API_MEM_LIMIT:-4g}
+    mem_reservation: ${API_MEM_RESERVATION:-1g}
+
+  worker:
+    environment:
+      EMBEDDING_PROVIDER: bge-m3
+      BGE_M3_DEVICE: cpu
+      HF_HOME: /root/.cache/huggingface
+    volumes:
+      # Shared with the API: the worker embeds chunks during ingestion and
+      # would otherwise pull its own copy of the weights.
+      - hf_cache:/root/.cache/huggingface
+    # 5 GB: BGE-M3 weights (~3.5 GB) plus a docling parse of one PDF.
+    # Celery concurrency stays at 1 (see docker-compose.prod.yml) — two
+    # concurrent parses plus two model copies will not fit in 12 GB.
+    mem_limit: ${WORKER_MEM_LIMIT:-5g}
+    mem_reservation: ${WORKER_MEM_RESERVATION:-1g}
+
+volumes:
+  hf_cache:
