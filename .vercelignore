@@ -1,0 +1,9 @@
+apps/api
+docs
+scripts
+docker-compose*.yml
+Caddyfile
+deploy.sh
+*.md
+.env
+.env.*
