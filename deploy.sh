@@ -13,6 +13,9 @@ COMPOSE_ARGS=()
 for f in "${COMPOSE_FILE_LIST[@]}"; do
     COMPOSE_ARGS+=(-f "$f")
 done
+# Populated after .env.production is read: enables the coturn profile when a
+# TURN secret is configured.
+TURN_ARGS=()
 
 # Update system
 echo "[1/6] Updating system..."
@@ -44,7 +47,8 @@ if ! docker info &> /dev/null; then
     DOCKER=(sudo env)
     for var in API_WORKERS API_MEM_LIMIT API_MEM_RESERVATION \
                WORKER_MEM_LIMIT WORKER_MEM_RESERVATION REDIS_MEM_LIMIT \
-               BEAT_MEM_LIMIT CADDY_MEM_LIMIT CELERY_CONCURRENCY; do
+               BEAT_MEM_LIMIT CADDY_MEM_LIMIT CELERY_CONCURRENCY \
+               FLOWER_MEM_LIMIT TURN_MEM_LIMIT; do
         if [ -n "${!var:-}" ]; then
             DOCKER+=("$var=${!var}")
         fi
@@ -53,7 +57,7 @@ if ! docker info &> /dev/null; then
 fi
 
 compose() {
-    "${DOCKER[@]}" compose "${COMPOSE_ARGS[@]}" "$@"
+    "${DOCKER[@]}" compose "${COMPOSE_ARGS[@]}" "${TURN_ARGS[@]}" "$@"
 }
 
 # Clone repo
@@ -80,6 +84,16 @@ fi
 # Deploy
 echo "[6/6] Starting services..."
 echo "Compose files: ${COMPOSE_FILES}"
+
+# Start coturn only when TURN is configured. `WEBRTC_TURN_SECRET` is the
+# single source of truth for both the API's HMAC credentials and coturn.
+TURN_SECRET_VALUE="$(grep -E '^WEBRTC_TURN_SECRET=' .env.production | tail -n1 | cut -d= -f2- | tr -d '"' || true)"
+if [ -n "$TURN_SECRET_VALUE" ]; then
+    TURN_ARGS+=(--profile turn)
+    echo "TURN enabled (coturn profile)."
+    echo "Open 3478/udp, 3478/tcp, and 49160-49300/udp in the Contabo firewall."
+fi
+
 compose down
 # No --no-cache: Docker's layer cache already invalidates on changed COPY
 # layers, and forcing a rebuild re-pulls torch/docling (~20 min for the
@@ -98,5 +112,5 @@ echo "=== Deployment Complete ==="
 echo "API: https://api.vylix.app"
 echo "Docs: https://api.vylix.app/docs"
 echo ""
-echo "View logs: docker compose ${COMPOSE_ARGS[*]} logs -f"
+echo "View logs: docker compose ${COMPOSE_ARGS[*]} ${TURN_ARGS[*]} logs -f"
 echo "Restart: docker compose ${COMPOSE_ARGS[*]} restart"

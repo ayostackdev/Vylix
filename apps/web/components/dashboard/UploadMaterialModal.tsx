@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
 import { queryClient } from '@/lib/query-client';
 import { useAuth } from '@/context/auth-context';
+import { captureEvent } from '@/lib/posthog';
 import {
 	postFormDataApi,
 	postJsonApi,
@@ -217,6 +218,11 @@ export function UploadMaterialModal({ isOpen, onClose, onSuccess, defaultIsPastQ
         setCurrentFileIndex(i);
         await uploadSingle(files[i], i, files.length, session.access_token);
       }
+
+      captureEvent('materials_uploaded', {
+        count: files.length,
+        is_past_question: isPastQuestion,
+      });
 
       setProgress(100);
       queryClient.invalidateQueries({ queryKey: ['vault-materials'] });

@@ -28,7 +28,7 @@ api.vylix.app {
     }
 }
 
-# WebSocket endpoint (same replica pool; long-lived connections)
+# WebSocket endpoints (same replica pool; long-lived connections)
 api.vylix.app/pulse {
     reverse_proxy {
         dynamic a {
@@ -41,14 +41,36 @@ api.vylix.app/pulse {
         header_up Host {host}
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
+        transport http {
+            read_timeout 300s
+            write_timeout 300s
+        }
     }
 
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
     }
+}
 
-    transport http {
-        read_timeout 300s
-        write_timeout 300s
+api.vylix.app/study-room/* {
+    reverse_proxy {
+        dynamic a {
+            name api
+            port 4000
+            refresh 5s
+            versions ipv4
+        }
+        lb_policy least_conn
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        transport http {
+            read_timeout 300s
+            write_timeout 300s
+        }
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
     }
 }

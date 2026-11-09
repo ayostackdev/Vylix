@@ -13,6 +13,7 @@ from app.deps import CurrentUser, check_payment_rate_limit, get_current_user
 from app.models import Subscription, User
 from app import plans
 from app.services.paywall_log import record_paywall_event
+from app.services.product_analytics import capture_event
 from app.services.monnify import (
     initialize_transaction,
     verify_transaction,
@@ -87,6 +88,11 @@ async def _activate_subscription(
     )
     db.add(sub)
     await db.flush()
+    capture_event(
+        user_id,
+        "subscription_activated",
+        {"plan": plan, "reference": reference},
+    )
     return sub
 
 

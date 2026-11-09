@@ -46,14 +46,18 @@ const MAX_RECONNECT_DELAY_MS = 15_000;
  * - Client → server JSON frames: { event: 'pulse:join-room' | 'pulse:leave-room', roomType, roomKey }
  * - Server → client JSON frames: { event: '<name>', ...data }  (e.g. 'pulse:event')
  */
-class PulseSocket {
+export class VylixSocket {
   private ws: WebSocket | null = null;
   private handlers = new Map<string, Set<PulseEventHandler>>();
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectDelayMs = 1_000;
   private shouldStayConnected = false;
 
-  constructor(private readonly url: string) {}
+  /**
+   * `resolveUrl` runs on every (re)connect so a fresh Supabase token is
+   * fetched instead of reusing a token that may have expired.
+   */
+  constructor(private readonly resolveUrl: () => string | Promise<string>) {}
 
   get connected(): boolean {
     return this.ws?.readyState === WebSocket.OPEN;
@@ -72,7 +76,7 @@ class PulseSocket {
     }
 
     this.shouldStayConnected = true;
-    this.open();
+    void this.open();
   }
 
   disconnect(): void {
@@ -120,10 +124,23 @@ class PulseSocket {
     }
   }
 
-  private open(): void {
+  private async open(): Promise<void> {
+    let url: string;
+    try {
+      url = await this.resolveUrl();
+    } catch (err) {
+      console.error('[Vylix] WebSocket URL resolution failed:', err);
+      this.scheduleReconnect();
+      return;
+    }
+
+    if (!this.shouldStayConnected) {
+      return;
+    }
+
     let ws: WebSocket;
     try {
-      ws = new WebSocket(this.url);
+      ws = new WebSocket(url);
     } catch (err) {
       console.error('[Vylix] WebSocket creation failed:', err);
       this.scheduleReconnect();
@@ -180,7 +197,7 @@ class PulseSocket {
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       if (this.shouldStayConnected) {
-        this.open();
+        void this.open();
         this.reconnectDelayMs = Math.min(this.reconnectDelayMs * 2, MAX_RECONNECT_DELAY_MS);
       }
     }, this.reconnectDelayMs);
@@ -201,7 +218,8 @@ class PulseSocket {
   }
 }
 
-let realtimeSocket: PulseSocket | null = null;
+let realtimeSocket: VylixSocket | null = null;
+const studyRoomSockets = new Map<string, VylixSocket>();
 
 function getRealtimeBaseUrl() {
   const value = API_BASE;
@@ -235,7 +253,13 @@ async function fetchAuthToken(): Promise<string> {
   }
 }
 
-export async function getRealtimeSocket(): Promise<PulseSocket | null> {
+function buildSocketUrl(baseUrl: string, path: string, token: string): string {
+  const wsProtocol = baseUrl.startsWith('https:') ? 'wss:' : 'ws:';
+  const origin = baseUrl.replace(/^https?:/, wsProtocol);
+  return `${origin}${path}${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+}
+
+export async function getRealtimeSocket(): Promise<VylixSocket | null> {
   if (realtimeSocket) {
     return realtimeSocket;
   }
@@ -246,12 +270,42 @@ export async function getRealtimeSocket(): Promise<PulseSocket | null> {
     return null;
   }
 
-  const token = await fetchAuthToken();
-  const wsProtocol = baseUrl.startsWith('https:') ? 'wss:' : 'ws:';
-  const wsUrl = `${baseUrl.replace(/^https?:/, wsProtocol)}/pulse${token ? `?token=${encodeURIComponent(token)}` : ''}`;
-
-  realtimeSocket = new PulseSocket(wsUrl);
+  realtimeSocket = new VylixSocket(async () =>
+    buildSocketUrl(baseUrl, '/pulse', await fetchAuthToken())
+  );
   return realtimeSocket;
+}
+
+/**
+ * Signaling socket for one audio study room. Callers must call
+ * `releaseStudyRoomSocket` when they leave so the room subscription and
+ * reconnect timer are torn down.
+ */
+export function getStudyRoomSocket(conversationId: string): VylixSocket | null {
+  const baseUrl = getRealtimeBaseUrl();
+
+  if (!baseUrl) {
+    return null;
+  }
+
+  let socket = studyRoomSockets.get(conversationId);
+  if (!socket) {
+    const path = `/study-room/${encodeURIComponent(conversationId)}`;
+    socket = new VylixSocket(async () =>
+      buildSocketUrl(baseUrl, path, await fetchAuthToken())
+    );
+    studyRoomSockets.set(conversationId, socket);
+  }
+  return socket;
+}
+
+export function releaseStudyRoomSocket(conversationId: string): void {
+  const socket = studyRoomSockets.get(conversationId);
+  if (!socket) {
+    return;
+  }
+  socket.disconnect();
+  studyRoomSockets.delete(conversationId);
 }
 
 export function buildRealtimeEvent<TPayload = Record<string, unknown>>(

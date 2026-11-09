@@ -46,6 +46,42 @@ services:
     logging: *default-logging
     restart: unless-stopped
 
+  # TURN relay for WebRTC. Needed when peers sit behind symmetric NAT or
+  # restrictive campus Wi-Fi, where direct P2P media cannot connect.
+  # Host networking lets coturn advertise the VPS public IP and bind the whole
+  # UDP relay range without mapping 100+ ports. Open these in the Contabo
+  # firewall: 3478/udp, 3478/tcp, and 49160-49300/udp.
+  # Uses the same WEBRTC_TURN_SECRET as the API (`--use-auth-secret`), so the
+  # browser only ever receives short-lived HMAC credentials.
+  coturn:
+    image: coturn/coturn:4.6-alpine
+    # Opt-in: deploy.sh enables this profile automatically when
+    # WEBRTC_TURN_SECRET is set. Manual runs need `--profile turn`.
+    profiles: ["turn"]
+    network_mode: host
+    env_file:
+      - .env.production
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        exec turnserver
+        --use-auth-secret
+        --static-auth-secret="$${WEBRTC_TURN_SECRET:?WEBRTC_TURN_SECRET must be set}"
+        --realm="$${TURN_REALM:-vylix.app}"
+        $${TURN_EXTERNAL_IP:+--external-ip=$${TURN_EXTERNAL_IP}}
+        --listening-port="$${TURN_PORT:-3478}"
+        --min-port="$${TURN_MIN_PORT:-49160}"
+        --max-port="$${TURN_MAX_PORT:-49300}"
+        --no-cli
+        --no-tls
+        --no-dtls
+        --fingerprint
+        --no-multicast-peers
+        --log-file=stdout
+    mem_limit: ${TURN_MEM_LIMIT:-256m}
+    logging: *default-logging
+    restart: unless-stopped
+
   api:
     build:
       context: ./apps/api
@@ -131,6 +167,28 @@ services:
       redis-celery:
         condition: service_healthy
     mem_limit: ${BEAT_MEM_LIMIT:-1g}
+    logging: *default-logging
+    restart: unless-stopped
+
+  # Celery monitoring UI. Bound to localhost only — reach it with an SSH
+  # tunnel (`ssh -L 5555:127.0.0.1:5555 user@host`) instead of exposing it.
+  # Change FLOWER_BASIC_AUTH in .env.production before enabling this service.
+  flower:
+    build:
+      context: ./apps/api
+      target: worker
+    command: celery -A app.core.celery_app.celery_app flower --port=5555 --basic_auth=${FLOWER_BASIC_AUTH:-admin:change-me}
+    env_file:
+      - .env.production
+    environment:
+      CELERY_BROKER_URL: redis://redis-celery:6379/0
+      CELERY_RESULT_BACKEND: redis://redis-celery:6379/1
+    ports:
+      - "127.0.0.1:5555:5555"
+    depends_on:
+      redis-celery:
+        condition: service_healthy
+    mem_limit: ${FLOWER_MEM_LIMIT:-256m}
     logging: *default-logging
     restart: unless-stopped
 

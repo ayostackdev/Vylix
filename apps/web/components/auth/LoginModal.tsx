@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
+import { Turnstile, isTurnstileConfigured } from '@/components/auth/Turnstile';
+import { captureEvent } from '@/lib/posthog';
 
 export function LoginModal() {
   const { showLoginModal, setShowLoginModal, login, signInWithGoogle, isLoading } = useAuth();
@@ -11,6 +13,15 @@ export function LoginModal() {
   const [success, setSuccess] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileKey, setTurnstileKey] = useState(0);
+
+  const captchaRequired = isTurnstileConfigured();
+
+  const resetCaptcha = () => {
+    setTurnstileToken('');
+    setTurnstileKey((key) => key + 1);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,23 +33,42 @@ export function LoginModal() {
       return;
     }
 
+    if (captchaRequired && !turnstileToken) {
+      setError('Please complete the human verification check.');
+      return;
+    }
+
     try {
-      const result = await login(email, password, isSignUp);
+      const result = await login(email, password, isSignUp, turnstileToken || undefined);
       setSuccess(result.message);
+      captureEvent(isSignUp ? 'signup_completed' : 'login_completed', {
+        method: 'password',
+      });
+      resetCaptcha();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
+      resetCaptcha();
     }
   };
 
   const handleGoogleSignIn = async () => {
     setError('');
+
+    if (captchaRequired && !turnstileToken) {
+      setError('Please complete the human verification check.');
+      return;
+    }
+
     setGoogleLoading(true);
     try {
-      await signInWithGoogle();
+      captureEvent('login_started', { method: 'google' });
+      await signInWithGoogle(turnstileToken || undefined);
       setGoogleLoading(false);
+      resetCaptcha();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google sign-in failed');
       setGoogleLoading(false);
+      resetCaptcha();
     }
   };
 
@@ -61,7 +91,10 @@ export function LoginModal() {
               </p>
             </div>
             <button
-              onClick={() => setShowLoginModal(false)}
+              onClick={() => {
+                setShowLoginModal(false);
+                resetCaptcha();
+              }}
               className="text-2xl text-gray-500 hover:text-gray-700 transition-colors"
               title="Close modal"
             >
@@ -114,6 +147,13 @@ export function LoginModal() {
               disabled={isLoading}
             />
           </div>
+
+          {/* Cloudflare Turnstile — only renders when a site key is configured */}
+          <Turnstile
+            key={turnstileKey}
+            onVerify={setTurnstileToken}
+            onExpire={() => setTurnstileToken('')}
+          />
 
           {/* Submit Button */}
           <button
@@ -173,6 +213,7 @@ export function LoginModal() {
                   setIsSignUp(!isSignUp);
                   setError('');
                   setSuccess('');
+                  resetCaptcha();
                 }}
                 className="font-semibold text-transparent bg-gradient-to-r from-blue-600 via-sky-600 to-cyan-400 bg-clip-text hover:opacity-80 transition-opacity"
               >

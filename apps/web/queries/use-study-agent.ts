@@ -3,6 +3,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { authFetch } from '@/lib/auth-fetch';
 import { getQaCached, putQaCached, studyAgentCacheKey } from '@/lib/qa-cache';
+import { captureEvent } from '@/lib/posthog';
 
 export interface StudyAgentRequest {
   courseCode: string;
@@ -32,7 +33,13 @@ export function useStudyAgent() {
       const result = (await authFetch('/api/study-agent/run', {
         method: 'POST',
         body: JSON.stringify({ course_code, prompt, task_tier }),
-      })) as Promise<StudyAgentResponse>;
+      })) as StudyAgentResponse;
+
+      captureEvent('study_agent_requested', {
+        course_code: result.course_code,
+        task_tier,
+        tier: result.tier,
+      });
 
       await putQaCached(cacheKey, result);
       return result;

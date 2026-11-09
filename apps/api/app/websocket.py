@@ -60,6 +60,40 @@ class ConnectionManager:
             for d in dead:
                 self.user_connections[user_id].remove(d)
 
+    def users_in_room(self, room: str) -> list[str]:
+        """Distinct authenticated user IDs currently in a room."""
+        seen: set[str] = set()
+        for conn in self.active_connections.get(room, []):
+            user_id = getattr(conn.state, "user_id", None)
+            if user_id:
+                seen.add(user_id)
+        return sorted(seen)
+
+    def user_in_room(self, room: str, user_id: str) -> bool:
+        return any(
+            getattr(conn.state, "user_id", None) == user_id
+            for conn in self.active_connections.get(room, [])
+        )
+
+    async def send_to_user_in_room(
+        self, room: str, user_id: str, event: str, data: dict[str, Any]
+    ):
+        """Room-scoped direct message (used for WebRTC offer/answer/ICE)."""
+        connections = self.active_connections.get(room, [])
+        if not connections:
+            return
+        message = json.dumps({"event": event, **data})
+        dead = []
+        for conn in connections:
+            if getattr(conn.state, "user_id", None) != user_id:
+                continue
+            try:
+                await conn.send_text(message)
+            except Exception:
+                dead.append(conn)
+        for d in dead:
+            self.active_connections[room].remove(d)
+
     async def broadcast(self, event: str, data: dict[str, Any]):
         message = json.dumps({"event": event, **data})
         for room_conns in self.active_connections.values():

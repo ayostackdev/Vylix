@@ -84,6 +84,10 @@ class Settings(BaseSettings):
     # Optional webhook for critical alerts (Slack, Discord, etc.)
     alert_webhook_url: str | None = Field(default=None)
 
+    # Product analytics (PostHog). Empty key disables server-side events.
+    posthog_api_key: str = Field(default="")
+    posthog_host: str = Field(default="https://us.i.posthog.com")
+
     # Vector search
     # "auto" uses pgvector when an embedding provider is available, otherwise ChromaDB.
     # Explicit "pgvector" or "chromadb" forces the backend.
@@ -123,6 +127,26 @@ class Settings(BaseSettings):
     # semantic_cache.question_embedding column (VECTOR(1024)).
     semantic_cache_threshold: float = Field(default=0.95)
     semantic_cache_ttl_seconds: int = Field(default=2419200)
+
+    # ── Study rooms (WebRTC audio + video) ──────────────────────────────────
+    # STUN is enough for most home/mobile networks. A TURN relay is needed
+    # when both peers sit behind symmetric NAT / restrictive campus Wi-Fi;
+    # point these at a self-hosted coturn or a managed TURN provider.
+    webrtc_stun_urls: str = Field(default="stun:stun.l.google.com:19302")
+    webrtc_turn_urls: str = Field(default="")
+    # Preferred: coturn's `--use-auth-secret` shared secret. When set, the API
+    # mints short-lived HMAC credentials per connection instead of handing
+    # long-lived static credentials to every browser.
+    webrtc_turn_secret: str = Field(default="")
+    webrtc_turn_ttl_seconds: int = Field(default=3600, ge=60, le=86400)
+    # Legacy static credentials, only used when webrtc_turn_secret is empty.
+    webrtc_turn_username: str = Field(default="")
+    webrtc_turn_credential: str = Field(default="")
+    # Mesh calls (every peer connects to every other peer). Keep this small —
+    # bandwidth/CPU on the client grows quadratically with room size.
+    webrtc_max_participants: int = Field(default=6, ge=2, le=12)
+    # Video is much heavier than audio, so mesh video rooms get a lower cap.
+    webrtc_max_video_participants: int = Field(default=4, ge=2, le=12)
 
     # Maintenance
     maintenance_api_key: str = Field(default="")

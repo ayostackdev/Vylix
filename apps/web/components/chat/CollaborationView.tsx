@@ -76,6 +76,7 @@ export function CollaborationView() {
               conversationId={selectedConv.id}
               title={conversationTitle(selectedConv)}
               otherUser={otherParticipant(selectedConv)}
+              members={selectedConv.members.map((member) => member.user)}
               onBack={handleBack}
             />
           ) : (

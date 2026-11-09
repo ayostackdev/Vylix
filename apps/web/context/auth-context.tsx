@@ -32,8 +32,13 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, isSignUp?: boolean) => Promise<AuthActionResult>;
-  signInWithGoogle: () => Promise<void>;
+  login: (
+    email: string,
+    password: string,
+    isSignUp?: boolean,
+    captchaToken?: string
+  ) => Promise<AuthActionResult>;
+  signInWithGoogle: (captchaToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateAvatar: (url: string) => void;
@@ -165,7 +170,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [supabaseClient, buildBaseUser, fetchProfile]);
 
-  const login = useCallback(async (email: string, password: string, isSignUp = false): Promise<AuthActionResult> => {
+  const login = useCallback(async (
+    email: string,
+    password: string,
+    isSignUp = false,
+    captchaToken?: string
+  ): Promise<AuthActionResult> => {
     setIsLoading(true);
     try {
       if (isSignUp) {
@@ -176,6 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data: {
               full_name: email.split('@')[0],
             },
+            captchaToken,
           },
         });
 
@@ -209,6 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken },
       });
 
       if (error) {
@@ -256,12 +268,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) => prev ? { ...prev, avatarUrl: url } : prev);
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (captchaToken?: string) => {
+    // auth-js forwards `captchaToken` at runtime but its OAuth options type
+    // has not caught up yet, so build the object outside the literal.
+    const options = {
+      redirectTo: `${window.location.origin}/auth/callback`,
+      captchaToken,
+    };
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options,
     });
     if (error) throw error;
   }, [supabaseClient]);

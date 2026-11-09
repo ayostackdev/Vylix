@@ -12,6 +12,7 @@ from google.genai import errors, types
 from app.core.config import get_settings
 from app.core.postgres import get_connection
 from app.services.gemini import GeminiError, SERVICE_BUSY_MESSAGE, estimate_cost
+from app.services.product_analytics import capture_event
 from app.services.semantic_cache import get_semantic_cache, put_semantic_cache
 from app.services.vector_store import VectorStore
 
@@ -319,6 +320,16 @@ def run_vylix_academic_agent(
                 task_tier=tier,
                 dedup_hit=True,
             )
+            capture_event(
+                user_id,
+                "study_agent_completed",
+                {
+                    "course_code": course_code,
+                    "tier": tier,
+                    "model": model_id,
+                    "cached": "semantic",
+                },
+            )
             return cached_answer
 
     weakness = get_student_weakness_metrics(user_id)
@@ -362,6 +373,16 @@ def run_vylix_academic_agent(
             task_tier=tier,
             dedup_hit=True,
         )
+        capture_event(
+            user_id,
+            "study_agent_completed",
+            {
+                "course_code": course_code,
+                "tier": tier,
+                "model": model_id,
+                "cached": "prompt",
+            },
+        )
         return cached
 
     if tier == "complex":
@@ -395,6 +416,17 @@ def run_vylix_academic_agent(
     result = response.text
 
     _prompt_cache_set(cache_key, result)
+
+    capture_event(
+        user_id,
+        "study_agent_completed",
+        {
+            "course_code": course_code,
+            "tier": tier,
+            "model": model_id,
+            "cached": "miss",
+        },
+    )
 
     if course_id is not None:
         _try_semantic_cache_store(user_prompt, course_id, tier, result)

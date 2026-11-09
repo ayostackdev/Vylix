@@ -7,6 +7,7 @@
  */
 
 import { getSupabaseBrowserClient } from '@/lib/supabase-client';
+import { captureEvent } from '@/lib/posthog';
 
 export type PaywallEventType =
   | 'paywall_shown'
@@ -20,6 +21,8 @@ export function trackPaywallEvent(
   eventType: PaywallEventType,
   planKey?: string,
 ): void {
+  captureEvent(eventType, planKey ? { plan_key: planKey } : undefined);
+
   try {
     const supabase = getSupabaseBrowserClient();
     supabase.auth.getSession().then(({ data: { session } }) => {

@@ -15,12 +15,20 @@ import {
 import { useChatSocket } from '@/hooks/useChatSocket';
 import { useRealtimeMessages } from '@/hooks/useRealtimeMessages';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StudyRoomPanel } from '@/components/chat/StudyRoomPanel';
+
+interface StudyRoomMember {
+  id: string;
+  fullName: string;
+  avatarUrl: string | null;
+}
 
 interface ConversationViewProps {
   conversationId: string;
   title: string;
   onBack: () => void;
   otherUser?: { id: string; fullName: string; avatarUrl: string | null };
+  members?: StudyRoomMember[];
 }
 
 function MessageBubble({
@@ -142,8 +150,9 @@ function MessageBubble({
   );
 }
 
-export function ConversationView({ conversationId, title, onBack, otherUser }: ConversationViewProps) {
+export function ConversationView({ conversationId, title, onBack, otherUser, members }: ConversationViewProps) {
   const { user } = useAuth();
+  const [showStudyRoom, setShowStudyRoom] = useState(false);
   const {
     data: messagesData,
     isLoading,
@@ -246,6 +255,11 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
     .map((t) => messages.find((m) => m.senderId === t.userId)?.sender.fullName ?? 'Someone')
     .filter((v, i, a) => a.indexOf(v) === i);
 
+  const studyRoomMembers: StudyRoomMember[] = members ?? [
+    ...(user ? [{ id: user.id, fullName: user.fullName, avatarUrl: user.avatarUrl ?? null }] : []),
+    ...(otherUser ? [otherUser] : []),
+  ];
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-blue-100 px-4 py-3">
@@ -286,6 +300,16 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
             </div>
           )}
         </div>
+        <button
+          onClick={() => setShowStudyRoom(true)}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-blue-200 bg-white px-3 py-2 text-xs font-bold text-blue-700 transition-all hover:bg-blue-50"
+          title="Start or join the study room"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M6 10v4a1 1 0 001 1h1.586l3.707 3.707A1 1 0 0014 18V6a1 1 0 00-1.707-.707L8.586 9H7a1 1 0 00-1 1z" />
+          </svg>
+          <span className="hidden sm:inline">Voice</span>
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto" ref={scrollContainerRef} onScroll={handleScroll}>
@@ -379,6 +403,15 @@ export function ConversationView({ conversationId, title, onBack, otherUser }: C
           </form>
         </div>
       </div>
+
+      {showStudyRoom && (
+        <StudyRoomPanel
+          conversationId={conversationId}
+          title={title}
+          members={studyRoomMembers}
+          onClose={() => setShowStudyRoom(false)}
+        />
+      )}
     </div>
   );
 }
