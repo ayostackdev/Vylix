@@ -37,8 +37,8 @@ no torch/docling for the API process itself).
    - `GEMINI_API_KEY`
    - `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`
    - `R2_STORAGE_PUBLIC_BASE_URL`, `R2_AVATARS_PUBLIC_BASE_URL`
-   - `FRONTEND_URL=https://vylix-web.vercel.app`
-   - `CORS_ORIGINS=https://vylix-web.vercel.app`
+   - `FRONTEND_URL=https://vylix.vercel.app`
+   - `CORS_ORIGINS=https://vylix.vercel.app,https://vylix-web.vercel.app`
 
    Non-secret values baked into the blueprint (STORAGE_PROVIDER=r2, bucket
    names) can stay as-is.

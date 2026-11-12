@@ -55,6 +55,12 @@ services:
       - key: ENVIRONMENT
         value: production
         sync: false
+      - key: FRONTEND_URL
+        value: https://vylix.vercel.app
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://vylix.vercel.app,https://vylix-web.vercel.app
+        sync: false
       # Must exactly match a URI registered in Google Cloud OAuth credentials.
       - key: GOOGLE_REDIRECT_URI
         value: https://vylix.onrender.com/api/v1/google-drive/callback
