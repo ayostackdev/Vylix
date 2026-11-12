@@ -170,8 +170,8 @@ COMPOSE_FILES="docker-compose.prod.yml docker-compose.contabo.yml" bash deploy.s
 ## 7. Environment checklist (`.env.production`)
 
 ```bash
-CORS_ORIGINS="https://vylix.vercel.app"      # must not be empty
-FRONTEND_URL="https://vylix.vercel.app"
+CORS_ORIGINS="https://vylix.app"             # must not be empty
+FRONTEND_URL="https://vylix.app"
 STORAGE_PROVIDER=r2
 GOOGLE_REDIRECT_URI="https://api.vylix.app/api/google-drive/callback"
 MONNIFY_BASE_URL="https://api.monnify.com"    # sandbox while testing
@@ -210,6 +210,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 
 Without `NEXT_PUBLIC_API_BASE_URL` the web app silently falls back to
 `localhost:4000`.
+
+Set `DOCS_ENABLED=false` in production unless the interactive API
+documentation is needed for an authenticated or otherwise restricted
+environment. The liveness and readiness endpoints remain available.
 
 ---
 

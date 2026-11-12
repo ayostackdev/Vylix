@@ -1,6 +1,7 @@
 import time
 
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.core.config import get_settings
@@ -40,12 +41,22 @@ async def health_check():
     db = await _check_db()
     redis = await _check_redis()
     all_ok = db["status"] == "ok" and redis["status"] == "ok"
+    provider = settings.embedding_provider
+    model = (
+        settings.bge_m3_model
+        if provider == "bge-m3"
+        else settings.embedding_model
+    )
     return {
         "status": "ok" if all_ok else "degraded",
         "ai": {
-            "provider": "gemini",
-            "model": "gemini-flash-lite-latest",
-            "configured": bool(settings.gemini_api_key),
+            "provider": provider,
+            "model": model,
+            "configured": (
+                bool(settings.gemini_api_key)
+                if provider == "gemini"
+                else provider in {"bge-m3", "hashing"}
+            ),
         },
         "db": db,
         "redis": redis,
@@ -63,5 +74,8 @@ async def readiness():
     db = await _check_db()
     redis = await _check_redis()
     if db["status"] != "ok" or redis["status"] != "ok":
-        return {"status": "not_ready", "db": db, "redis": redis}
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "db": db, "redis": redis},
+        )
     return {"status": "ready"}

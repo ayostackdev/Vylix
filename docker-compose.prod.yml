@@ -172,12 +172,12 @@ services:
 
   # Celery monitoring UI. Bound to localhost only — reach it with an SSH
   # tunnel (`ssh -L 5555:127.0.0.1:5555 user@host`) instead of exposing it.
-  # Change FLOWER_BASIC_AUTH in .env.production before enabling this service.
+  # FLOWER_BASIC_AUTH must be set in .env.production before starting this service.
   flower:
     build:
       context: ./apps/api
       target: worker
-    command: celery -A app.core.celery_app.celery_app flower --port=5555 --basic_auth=${FLOWER_BASIC_AUTH:-admin:change-me}
+    command: celery -A app.core.celery_app.celery_app flower --port=5555 --basic_auth=${FLOWER_BASIC_AUTH:?FLOWER_BASIC_AUTH must be set}
     env_file:
       - .env.production
     environment:

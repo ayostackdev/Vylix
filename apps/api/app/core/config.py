@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     port: int = Field(default=4000)
     api_prefix: str = "/api/v1"
+    docs_enabled: bool = Field(default=True)
 
     # Database
     database_url: str = Field(
