@@ -34,7 +34,9 @@ services:
     # api-lean skips torch/docling/transformers — R2 uploads, embeddings and
     # search work with it; PDF parsing runs on the (Redis-backed) worker.
     target: api-lean
-    dockerCommand: uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --workers 1
+    # Free Render plans do not provide Shell or one-off jobs, so apply any
+    # pending migrations before starting the single API instance.
+    dockerCommand: sh -c 'alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --workers 1'
     healthCheckPath: /health
     autoDeploy: true
     envVars:
