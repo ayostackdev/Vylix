@@ -97,6 +97,11 @@ async def connect_google_drive(
     user: CurrentUser = Depends(get_current_user),
 ):
     """Start Google OAuth flow. Returns URL to redirect user to."""
+    if not settings.google_client_id or not settings.google_client_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Google Drive is not configured on the API. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.",
+        )
     state = google_drive.sign_state(user.id)
     auth_url = google_drive.get_auth_url(state)
     return ConnectResponse(auth_url=auth_url)

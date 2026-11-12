@@ -492,7 +492,10 @@ async def upload_material(
     ).scalar_one_or_none()
     already_existed = existing is not None
 
-    storage = get_storage()
+    try:
+        storage = get_storage()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     try:
         if existing and existing.file_path:
             url = existing.file_url

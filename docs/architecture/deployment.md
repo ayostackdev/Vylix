@@ -14,7 +14,7 @@ Vylix ships as two surfaces:
 1. Push to GitHub (`main`).
 2. Vercel will auto-deploy from the repo (project already linked in `.vercel/project.json`).
 3. Set env vars in Vercel → Project → Settings → Environment Variables:
-   - `NEXT_PUBLIC_API_BASE_URL=https://vylix-api.onrender.com` (the Render API URL — see below)
+   - `NEXT_PUBLIC_API_BASE_URL=https://vylix.onrender.com` (the Render API URL — see below)
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 Note: the web app falls back to `localhost:4000` when `NEXT_PUBLIC_API_BASE_URL` is
@@ -43,7 +43,7 @@ no torch/docling for the API process itself).
    Non-secret values baked into the blueprint (STORAGE_PROVIDER=r2, bucket
    names) can stay as-is.
 
-4. **Deploy**. Health check: `GET https://vylix-api.onrender.com/health`
+4. **Deploy**. Health check: `GET https://vylix.onrender.com/health`
    (mounted without the `/api/v1` prefix). Expected `"status": "ok"`.
 
 ## 3. Background workers (Celery — optional for uploads)

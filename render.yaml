@@ -57,7 +57,7 @@ services:
         sync: false
       # Must exactly match a URI registered in Google Cloud OAuth credentials.
       - key: GOOGLE_REDIRECT_URI
-        value: https://your-api-domain.com/api/v1/google-drive/callback
+        value: https://vylix.onrender.com/api/v1/google-drive/callback
         sync: false
   # ─── Optional Celery worker (background Docling/OCR parsing) ───
   # Requires Redis. Uncomment + set BROKER_URL/RESULT_BACKEND when ready.
