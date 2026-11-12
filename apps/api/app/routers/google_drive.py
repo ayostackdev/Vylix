@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import logging
+import socket
 from datetime import datetime, timezone
 import uuid
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -61,6 +64,30 @@ class ConnectionStatus(BaseModel):
     connected: bool
     email: str | None = None
     connected_at: str | None = None
+
+
+def _celery_broker_reachable(timeout: float = 1.5) -> bool:
+    """Return whether the configured Celery broker accepts TCP connections."""
+    parsed = urlparse(settings.celery_broker_url)
+    host = parsed.hostname or "localhost"
+    port = parsed.port or 6379
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
+async def _dispatch_drive_task(task, *args):
+    """Queue a Drive task, or run it in the API threadpool without a broker."""
+    if _celery_broker_reachable():
+        return {"task_id": task.delay(*args).id, "status": "queued"}
+
+    logger.warning(
+        "Celery broker unavailable; running Drive task synchronously in the API"
+    )
+    result = await run_in_threadpool(task.run, *args)
+    return {"task_id": None, "status": "completed", "result": result}
 
 
 # ── Connect Flow ───────────────────────────────────────────────────
@@ -246,8 +273,9 @@ async def import_files(
 
     token = await _get_valid_token(user.id, db)
 
-    task = import_drive_files.delay(user.id, payload.file_ids[:20], payload.topic_id)
-    return {"task_id": task.id, "status": "queued", "file_count": len(payload.file_ids[:20])}
+    file_ids = payload.file_ids[:20]
+    result = await _dispatch_drive_task(import_drive_files, user.id, file_ids, payload.topic_id)
+    return {**result, "file_count": len(file_ids)}
 
 
 @router.get("/imports", response_model=list[ImportedFileOut])
@@ -278,5 +306,4 @@ async def auto_import_drive_endpoint(
 ):
     """Scan Google Drive and import all PDFs. Runs in background."""
     token = await _get_valid_token(user.id, db)
-    task = auto_import_drive.delay(user.id)
-    return {"task_id": task.id, "status": "queued"}
+    return await _dispatch_drive_task(auto_import_drive, user.id)
