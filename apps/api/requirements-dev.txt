@@ -5,3 +5,6 @@ pytest-asyncio>=0.24.0
 # ChromaDB vector fallback: local/dev-only stand-in when pgvector is not wired up
 # (production always uses pgvector, so this stays out of requirements.txt)
 chromadb>=0.5.0
+# RAG evaluation for faithfulness, context relevance, and answer quality.
+# Keep this development-only; evaluations are not part of the API runtime.
+ragas>=0.2.0
